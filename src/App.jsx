@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Shifts from "./pages/Shifts";
 import Punishments from "./pages/Punishments";
-import PlayerLookup from "./pages/PlayerLookup";
 import LOA from "./pages/LOA";
 import Activity from "./pages/Activity";
 
@@ -25,7 +24,6 @@ function AppShell() {
       <Nav />
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/players" element={<PlayerLookup />} />
         <Route path="/loa" element={<LOA />} />
         <Route path="/shifts" element={<Shifts />} />
         <Route path="/punishments" element={<Punishments />} />

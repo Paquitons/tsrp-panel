@@ -114,7 +114,7 @@ export default function Shifts() {
               <span className="timer-value">{formatDuration(Math.max(0, liveDurationSeconds))}</span>
               {onBreak && <span className="badge" style={{ background: "#4a3f1a", color: "#f9a825" }}>On Break</span>}
             </div>
-            <p className="muted">Started {new Date(active.started_at).toLocaleString()}{active.shift_type ? ` — ${active.shift_type}` : ""}</p>
+            <p className="muted">Started {new Date(active.started_at).toLocaleString()}{active.shift_type ? ` (${active.shift_type})` : ""}</p>
             <div className="button-row">
               <button className="btn-orange" onClick={toggleBreak}>
                 {onBreak ? "Resume Shift" : "Take Break"}
@@ -161,7 +161,7 @@ export default function Shifts() {
                       <td>{new Date(s.started_at).toLocaleString()}</td>
                       <td>{formatDuration(durationSeconds)}</td>
                       <td className="muted">{formatDuration(s.break_seconds)}</td>
-                      <td className="muted">{s.shift_type || "—"}</td>
+                      <td className="muted">{s.shift_type || "N/A"}</td>
                       <td>
                         <button className="secondary small" onClick={() => toggleReport(s.id)}>
                           {isExpanded ? "Hide Report" : "View Report"}

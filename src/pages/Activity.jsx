@@ -20,7 +20,7 @@ function describeEvent(e) {
     case "kill": return `${e.killer} killed ${e.killed}`;
     case "command": return `${e.player} ran ${e.command}`;
     case "modcall": return `Mod call from ${e.caller}`;
-    case "emergency": return `${e.team} call from ${e.caller}${e.description ? ` — ${e.description}` : ""}`;
+    case "emergency": return `${e.team} call from ${e.caller}${e.description ? `: ${e.description}` : ""}`;
     default: return "Unknown event";
   }
 }

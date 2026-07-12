@@ -59,7 +59,7 @@ export default function UserPanel({ username, onClose }) {
             <div className="user-panel-stats">
               <div><span className="muted">Team</span><div>{data.player.Team}</div></div>
               <div><span className="muted">Permission</span><div>{data.player.Permission}</div></div>
-              <div><span className="muted">Wanted</span><div>{"★".repeat(data.player.WantedStars ?? 0) || "—"}</div></div>
+              <div><span className="muted">Wanted</span><div>{"★".repeat(data.player.WantedStars ?? 0) || "N/A"}</div></div>
             </div>
           )}
 

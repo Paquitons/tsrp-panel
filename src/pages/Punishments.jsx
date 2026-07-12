@@ -14,7 +14,7 @@ const TYPES = [
 ];
 
 export default function Punishments() {
-  const [form, setForm] = useState({ targetRobloxUsername: "", type: "warning", reason: "", description: "", unbanAt: "" });
+  const [form, setForm] = useState({ targetRobloxUsername: "", type: "warning", reason: "", unbanAt: "" });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
   const [createSuccess, setCreateSuccess] = useState(false);
@@ -27,7 +27,6 @@ export default function Punishments() {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [hidingId, setHidingId] = useState(null);
 
   function updateField(key, value) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -70,7 +69,6 @@ export default function Punishments() {
         targetRobloxUsername: form.targetRobloxUsername,
         type: form.type,
         reason: form.reason,
-        description: form.description || undefined,
       };
       if (form.type === "temp_ban") {
         if (!form.unbanAt) throw new Error("An unban date is required for temp bans.");
@@ -79,7 +77,7 @@ export default function Punishments() {
 
       await apiFetch("/punishments", { method: "POST", body });
       setCreateSuccess(true);
-      setForm({ targetRobloxUsername: "", type: "warning", reason: "", description: "", unbanAt: "" });
+      setForm({ targetRobloxUsername: "", type: "warning", reason: "", unbanAt: "" });
     } catch (err) {
       setCreateError(err.message);
     } finally {
@@ -103,18 +101,6 @@ export default function Punishments() {
 
   // Load the most recent logs on first mount, same as an empty search.
   useEffect(() => { search(); }, []);
-
-  async function toggleHide(id) {
-    setHidingId(id);
-    try {
-      await apiFetch(`/punishments/${id}/hide`, { method: "PATCH" });
-      setResults(prev => prev.map(log => log.id === id ? { ...log, hidden: log.hidden ? 0 : 1 } : log));
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setHidingId(null);
-    }
-  }
 
   return (
     <div className="content">
@@ -172,9 +158,6 @@ export default function Punishments() {
             <label>Reason</label>
             <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
 
-            <label>Description (optional)</label>
-            <textarea rows={3} value={form.description} onChange={e => updateField("description", e.target.value)} placeholder="Additional context or evidence notes" />
-
             <button className="primary" type="submit" disabled={creating}>
               {creating ? "Creating…" : "Create Log"}
             </button>
@@ -193,12 +176,7 @@ export default function Punishments() {
               <p className="muted">No logs found.</p>
             )}
             {results.map(log => (
-              <div key={log.id}>
-                <LogCard log={log} onChanged={search} />
-                <button className="secondary small log-card-hide-btn" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
-                  {log.hidden ? "Unhide" : "Hide"}
-                </button>
-              </div>
+              <LogCard key={log.id} log={log} onChanged={search} />
             ))}
           </div>
         </div>

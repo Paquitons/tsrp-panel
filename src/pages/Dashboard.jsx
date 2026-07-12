@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, TYPE_LABELS, formatDuration } from "../utils";
+import { timeAgo, formatDurationWithSeconds, discordAvatarUrl } from "../utils";
 import Avatar from "../components/Avatar";
 import UserPanel from "../components/UserPanel";
 import LogCard from "../components/LogCard";
@@ -16,7 +16,7 @@ const ALL_TYPES = [
   { value: "note", label: "Note" },
 ];
 
-const ACTIVITY_POLL_MS = 15_000;
+const POLL_MS = 15_000;
 
 const ACTIVITY_META = {
   join:      { icon: "→", color: "#69f0ae" },
@@ -34,14 +34,13 @@ function describeEvent(e) {
     case "kill": return `${e.killer} killed ${e.killed}`;
     case "command": return `${e.player} ran ${e.command}`;
     case "modcall": return `Mod call from ${e.caller}`;
-    case "emergency": return `${e.team} call from ${e.caller}${e.description ? ` — ${e.description}` : ""}`;
+    case "emergency": return `${e.team} call from ${e.caller}${e.description ? `: ${e.description}` : ""}`;
     default: return "Unknown event";
   }
 }
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [selectedUser, setSelectedUser] = useState(null);
 
   // ---------- Shift state ----------
   const [active, setActive] = useState(null);
@@ -49,12 +48,12 @@ export default function Dashboard() {
   const [shiftType, setShiftType] = useState("");
   const [shiftError, setShiftError] = useState(null);
   const [now, setNow] = useState(Date.now());
+  const [onDutyStaff, setOnDutyStaff] = useState([]);
 
   useEffect(() => {
-    if (!active) return;
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
-  }, [active]);
+  }, []);
 
   async function refreshShift() {
     try {
@@ -66,11 +65,19 @@ export default function Dashboard() {
     }
   }
 
+  async function refreshOnDuty() {
+    try {
+      const { staff } = await apiFetch("/shifts/on-duty");
+      setOnDutyStaff(staff);
+    } catch { /* ignore */ }
+  }
+
   async function startShift() {
     setShiftError(null);
     try {
       await apiFetch("/shifts/start", { method: "POST", body: { shiftType: shiftType || undefined } });
       await refreshShift();
+      await refreshOnDuty();
     } catch (err) { setShiftError(err.message); }
   }
   async function toggleBreak() {
@@ -78,6 +85,7 @@ export default function Dashboard() {
     try {
       await apiFetch("/shifts/break", { method: "POST" });
       await refreshShift();
+      await refreshOnDuty();
     } catch (err) { setShiftError(err.message); }
   }
   async function endShift() {
@@ -85,6 +93,7 @@ export default function Dashboard() {
     try {
       await apiFetch("/shifts/end", { method: "POST" });
       await refreshShift();
+      await refreshOnDuty();
     } catch (err) { setShiftError(err.message); }
   }
 
@@ -136,9 +145,21 @@ export default function Dashboard() {
     }
   }
 
+  // ---------- Toolbox: Player Lookup quick-search modal ----------
+  const [lookupModalOpen, setLookupModalOpen] = useState(false);
+  const [lookupValue, setLookupValue] = useState("");
+
+  function openLookup(e) {
+    e.preventDefault();
+    if (!lookupValue.trim()) return;
+    setSelectedUser(lookupValue.trim());
+    setLookupModalOpen(false);
+    setLookupValue("");
+  }
+
   // ---------- Create log ----------
   const allowedTypes = ALL_TYPES.filter(t => (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value));
-  const [form, setForm] = useState({ targetRobloxUsername: "", type: allowedTypes[0]?.value ?? "bolo", reason: "", description: "", unbanAt: "" });
+  const [form, setForm] = useState({ targetRobloxUsername: "", type: allowedTypes[0]?.value ?? "bolo", reason: "", unbanAt: "" });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
   const [createSuccess, setCreateSuccess] = useState(false);
@@ -167,6 +188,11 @@ export default function Dashboard() {
     }, 250);
   }
 
+  function openUser(username) {
+    updateField("targetRobloxUsername", username);
+    setSelectedUser(username);
+  }
+
   async function createLog(e) {
     e.preventDefault();
     setCreateError(null);
@@ -177,7 +203,6 @@ export default function Dashboard() {
         targetRobloxUsername: form.targetRobloxUsername,
         type: form.type,
         reason: form.reason,
-        description: form.description || undefined,
       };
       if (form.type === "temp_ban") {
         if (!form.unbanAt) throw new Error("An unban date is required for temp bans.");
@@ -185,7 +210,7 @@ export default function Dashboard() {
       }
       await apiFetch("/punishments", { method: "POST", body });
       setCreateSuccess(true);
-      setForm(prev => ({ ...prev, targetRobloxUsername: "", reason: "", description: "", unbanAt: "" }));
+      setForm(prev => ({ ...prev, targetRobloxUsername: "", reason: "", unbanAt: "" }));
       refreshLogs();
     } catch (err) {
       setCreateError(err.message);
@@ -194,14 +219,12 @@ export default function Dashboard() {
     }
   }
 
-  // ---------- Punishment logs list ----------
+  // ---------- Punishment logs list (always live, never swapped out) ----------
   const [logSearch, setLogSearch] = useState("");
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(true);
-  const [hidingId, setHidingId] = useState(null);
 
   async function refreshLogs() {
-    setLogsLoading(true);
     try {
       const { logs } = await apiFetch(`/punishments?username=${encodeURIComponent(logSearch)}`);
       setLogs(logs);
@@ -209,18 +232,8 @@ export default function Dashboard() {
     finally { setLogsLoading(false); }
   }
 
-  async function toggleHide(id) {
-    setHidingId(id);
-    try {
-      await apiFetch(`/punishments/${id}/hide`, { method: "PATCH" });
-      setLogs(prev => prev.map(l => l.id === id ? { ...l, hidden: l.hidden ? 0 : 1 } : l));
-    } catch (err) { alert(err.message); }
-    finally { setHidingId(null); }
-  }
-
-  // ---------- Live activity ----------
+  // ---------- Live activity (always polling, no pause) ----------
   const [events, setEvents] = useState([]);
-  const [activityPaused, setActivityPaused] = useState(false);
 
   async function fetchActivity() {
     try {
@@ -233,6 +246,7 @@ export default function Dashboard() {
   const [livePlayers, setLivePlayers] = useState([]);
   const [queueCount, setQueueCount] = useState(0);
   const [playerSearch, setPlayerSearch] = useState("");
+  const [teamFilter, setTeamFilter] = useState("all");
 
   async function fetchLivePlayers() {
     try {
@@ -242,21 +256,33 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }
 
+  const teamCounts = livePlayers.reduce((acc, p) => {
+    const team = p.team || "Unknown";
+    acc[team] = (acc[team] ?? 0) + 1;
+    return acc;
+  }, {});
+
   const playersCount = livePlayers.length;
-  const filteredPlayers = playerSearch
-    ? livePlayers.filter(p => p.username?.toLowerCase().includes(playerSearch.toLowerCase()))
-    : livePlayers;
+  const filteredPlayers = livePlayers
+    .filter(p => teamFilter === "all" || p.team === teamFilter)
+    .filter(p => !playerSearch || p.username?.toLowerCase().includes(playerSearch.toLowerCase()));
+
+  // ---------- Selected user (opens as a floating modal, not embedded) ----------
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // ---------- Initial load + polling ----------
   useEffect(() => {
     refreshShift();
+    refreshOnDuty();
     refreshLogs();
     fetchActivity();
     fetchLivePlayers();
     const interval = setInterval(() => {
-      if (!activityPaused) fetchActivity();
+      refreshOnDuty();
+      refreshLogs();
+      fetchActivity();
       fetchLivePlayers();
-    }, ACTIVITY_POLL_MS);
+    }, POLL_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -266,11 +292,11 @@ export default function Dashboard() {
     <div className="content dashboard-content">
       <div className="page-header">
         <h1>Dashboard</h1>
-        <p className="muted">Everything you need in one place — shifts, logs, activity, and quick actions.</p>
+        <p className="muted">Everything you need in one place: shifts, logs, activity, and quick actions.</p>
       </div>
 
       <div className="dashboard-grid">
-        {/* ---------- LEFT: Shift + Toolbox ---------- */}
+        {/* ---------- LEFT: Shift + Toolbox + On Duty + Players ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Current Shift</h2>
@@ -279,7 +305,7 @@ export default function Dashboard() {
               <>
                 <div className="shift-timer">
                   <span className={`status-dot ${onBreak ? "status-break" : "status-active"}`} />
-                  <span className="timer-value">{formatDuration(Math.max(0, liveDurationSeconds))}</span>
+                  <span className="timer-value">{formatDurationWithSeconds(Math.max(0, liveDurationSeconds))}</span>
                 </div>
                 {onBreak && <span className="badge" style={{ background: "#4a3f1a", color: "#f9a825", marginBottom: 10, display: "inline-block" }}>On Break</span>}
                 <div className="button-row">
@@ -293,6 +319,17 @@ export default function Dashboard() {
                 <button className="btn-green" onClick={startShift} style={{ width: "100%" }}>Start Shift</button>
               </>
             )}
+
+            {onDutyStaff.length > 0 && (
+              <div className="on-duty-row">
+                {onDutyStaff.map(s => (
+                  <div className="on-duty-avatar" key={s.discordId} title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}>
+                    <img className="avatar-img" style={{ width: 30, height: 30 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                    <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="card">
@@ -303,27 +340,26 @@ export default function Dashboard() {
               )}
               <button className="toolbox-btn toolbox-orange" onClick={() => setStaffModalOpen(true)}>Request Staff</button>
               <Link to="/loa" className="toolbox-btn toolbox-green">Manage LOA</Link>
-              <Link to="/players" className="toolbox-btn toolbox-blue">Player Lookup</Link>
+              <button className="toolbox-btn toolbox-blue" onClick={() => setLookupModalOpen(true)}>Player Lookup</button>
             </div>
           </div>
 
           <div className="card">
             <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
             {queueCount > 0 && <p className="muted" style={{ marginTop: -8 }}>{queueCount} in queue</p>}
+            <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
+              <option value="all">All Teams ({playersCount})</option>
+              {Object.entries(teamCounts).map(([team, count]) => (
+                <option key={team} value={team}>{team} ({count})</option>
+              ))}
+            </select>
             <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} />
             <div className="players-list">
               {filteredPlayers.length === 0 ? (
-                <p className="muted">No players online.</p>
+                <p className="muted">No players match.</p>
               ) : (
                 filteredPlayers.map(p => (
-                  <div
-                    key={p.username}
-                    className="players-list-row"
-                    onClick={() => {
-                      updateField("targetRobloxUsername", p.username);
-                      setSelectedUser(p.username);
-                    }}
-                  >
+                  <div key={p.username} className="players-list-row" onClick={() => openUser(p.username)}>
                     <Avatar username={p.username} robloxId={p.robloxId} size={24} />
                     <span>{p.username}</span>
                   </div>
@@ -357,11 +393,7 @@ export default function Dashboard() {
                       <div
                         key={s.username}
                         className="autocomplete-item"
-                        onMouseDown={() => {
-                          updateField("targetRobloxUsername", s.username);
-                          setShowSuggestions(false);
-                          setSelectedUser(s.username);
-                        }}
+                        onMouseDown={() => { updateField("targetRobloxUsername", s.username); setShowSuggestions(false); }}
                       >
                         <Avatar username={s.username} robloxId={s.robloxId} size={26} />
                         <span className="autocomplete-name">{s.username}</span>
@@ -390,18 +422,12 @@ export default function Dashboard() {
               <label>Reason</label>
               <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
 
-              <label>Description (optional)</label>
-              <textarea rows={2} value={form.description} onChange={e => updateField("description", e.target.value)} />
-
               <button className="primary" type="submit" disabled={creating}>{creating ? "Creating…" : "Create Log"}</button>
             </form>
           </div>
 
           <div className="card">
-            <div className="activity-toolbar">
-              <h2 style={{ margin: 0 }}>What's Happening In-Game?</h2>
-              <button className="secondary small" onClick={() => setActivityPaused(p => !p)}>{activityPaused ? "Resume" : "Pause"}</button>
-            </div>
+            <h2>What's Happening In-Game?</h2>
             {events.length === 0 ? (
               <p className="muted">No recent activity.</p>
             ) : (
@@ -414,11 +440,7 @@ export default function Dashboard() {
                       <span className="activity-icon-bubble" style={{ background: `${meta.color}22`, color: meta.color }}>{meta.icon}</span>
                       <span
                         className={clickableName ? "activity-text activity-text-clickable" : "activity-text"}
-                        onClick={() => {
-                          if (!clickableName) return;
-                          updateField("targetRobloxUsername", clickableName);
-                          setSelectedUser(clickableName);
-                        }}
+                        onClick={() => clickableName && openUser(clickableName)}
                       >
                         {describeEvent(e)}
                       </span>
@@ -431,37 +453,19 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ---------- RIGHT: Punishment logs, or a User Panel when someone's selected ---------- */}
+        {/* ---------- RIGHT: Punishment logs, always visible/live ---------- */}
         <div className="dashboard-col">
-          {selectedUser ? (
-            <UserPanel username={selectedUser} onClose={() => setSelectedUser(null)} />
-          ) : (
-            <div className="card">
-              <h2>Punishment Logs</h2>
-              <input placeholder="Search by username" value={logSearch} onChange={e => setLogSearch(e.target.value)} />
-              <div className="log-card-list">
-                {logsLoading && <p className="muted">Loading…</p>}
-                {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
-                {logs.map(log => (
-                  <div key={log.id}>
-                    <LogCard
-                      log={log}
-                      onChanged={refreshLogs}
-                      onUsernameClick={(username) => {
-                        updateField("targetRobloxUsername", username);
-                        setSelectedUser(username);
-                      }}
-                    />
-                    {user?.canHideLogs && (
-                      <button className="secondary small log-card-hide-btn" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
-                        {log.hidden ? "Unhide" : "Hide"}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+          <div className="card">
+            <h2>Punishment Logs</h2>
+            <input placeholder="Search by username" value={logSearch} onChange={e => setLogSearch(e.target.value)} />
+            <div className="log-card-list">
+              {logsLoading && <p className="muted">Loading…</p>}
+              {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
+              {logs.map(log => (
+                <LogCard key={log.id} log={log} onChanged={refreshLogs} onUsernameClick={openUser} />
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -470,9 +474,7 @@ export default function Dashboard() {
         <div className="modal-backdrop" onClick={() => setCommandModalOpen(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2>Run Command</h2>
-            {commandStatus && (
-              <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>
-            )}
+            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
             <form onSubmit={sendCommand}>
               <label>ER:LC Command</label>
               <input required autoFocus value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
@@ -490,9 +492,7 @@ export default function Dashboard() {
         <div className="modal-backdrop" onClick={() => setStaffModalOpen(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2>Request Staff</h2>
-            {staffStatus && (
-              <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>
-            )}
+            {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
             <form onSubmit={sendStaffRequest}>
               <label>Reason</label>
               <textarea required autoFocus rows={3} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
@@ -504,7 +504,32 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ---------- Player Lookup quick-search modal ---------- */}
+      {lookupModalOpen && (
+        <div className="modal-backdrop" onClick={() => setLookupModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Player Lookup</h2>
+            <form onSubmit={openLookup}>
+              <label>Roblox Username</label>
+              <input required autoFocus value={lookupValue} onChange={e => setLookupValue(e.target.value)} placeholder="Enter a username" />
+              <div className="button-row">
+                <button className="primary" type="submit">Look Up</button>
+                <button className="secondary" type="button" onClick={() => setLookupModalOpen(false)}>Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- User profile popup (floating card, not a page) ---------- */}
+      {selectedUser && (
+        <div className="modal-backdrop" onClick={() => setSelectedUser(null)}>
+          <div className="modal user-panel-modal" onClick={e => e.stopPropagation()}>
+            <UserPanel username={selectedUser} onClose={() => setSelectedUser(null)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 
 const primaryLinks = [
   { to: "/", label: "Dashboard", end: true },
-  { to: "/players", label: "Player Lookup" },
   { to: "/loa", label: "Leave of Absence" },
 ];
 
