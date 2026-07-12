@@ -4,7 +4,33 @@ import { timeAgo } from "../utils";
 import Avatar from "./Avatar";
 import LogCard from "./LogCard";
 
-export default function UserPanel({ username, onClose }) {
+function describeActivity(a) {
+  switch (a.type) {
+    case "join": return "Joined the game";
+    case "leave": return "Left the game";
+    case "kill": return `Killed ${a.detail}`;
+    case "death": return `Killed by ${a.detail}`;
+    case "command": return `Ran the command ${a.detail}`;
+    case "modcall": return "Called for a moderator";
+    case "emergency": return `Emergency call: ${a.detail}`;
+    default: return "Activity";
+  }
+}
+
+function Section({ title, defaultOpen, children }) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <div className="up-section">
+      <button className="up-section-header" onClick={() => setOpen(o => !o)}>
+        <span>{title}</span>
+        <span className={`up-chevron ${open ? "up-chevron-open" : ""}`}>⌄</span>
+      </button>
+      {open && <div className="up-section-body">{children}</div>}
+    </div>
+  );
+}
+
+export default function UserPanel({ username, discordId, onClose }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +39,8 @@ export default function UserPanel({ username, onClose }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await apiFetch(`/players/${encodeURIComponent(username)}`);
+      const path = discordId ? `/players/by-discord/${discordId}` : `/players/${encodeURIComponent(username)}`;
+      const result = await apiFetch(path);
       setData(result);
     } catch (err) {
       setError(err.message);
@@ -22,7 +49,7 @@ export default function UserPanel({ username, onClose }) {
     }
   }
 
-  useEffect(() => { load(); }, [username]);
+  useEffect(() => { load(); }, [username, discordId]);
 
   return (
     <div className="user-panel">
@@ -63,29 +90,66 @@ export default function UserPanel({ username, onClose }) {
             </div>
           )}
 
-          {data.discordIds?.length > 0 && (
-            <div className="user-panel-field">
-              <span className="muted">Discord Account:</span>{" "}
-              {data.discordIds.map(id => <code key={id}>{id}</code>)}
-            </div>
-          )}
+          <Section title={`Punishment Logs (${data.punishmentLogs.length})`} defaultOpen>
+            {data.punishmentLogs.length === 0 ? (
+              <p className="muted">No logs found.</p>
+            ) : (
+              <div className="log-card-list">
+                {data.punishmentLogs.map(log => (
+                  <LogCard key={log.id} log={log} onChanged={load} />
+                ))}
+              </div>
+            )}
+          </Section>
 
-          {data.vehicles?.length > 0 && (
-            <div className="user-panel-field">
-              <span className="muted">Vehicle:</span> {data.vehicles[0].Name}
-            </div>
-          )}
+          <Section title={data.vehicles?.length ? `Vehicles (${data.vehicles.length})` : "No Vehicle"}>
+            {data.vehicles?.length > 0 ? (
+              data.vehicles.map((v, i) => <div key={i} className="up-field">{v.Name}{v.Texture && v.Texture !== "Standard" ? ` (${v.Texture})` : ""}</div>)
+            ) : (
+              <p className="muted">This player has no vehicle spawned.</p>
+            )}
+          </Section>
 
-          <h2 style={{ fontSize: 14, marginTop: 18 }}>{data.username}'s Logs ({data.punishmentLogs.length})</h2>
-          {data.punishmentLogs.length === 0 ? (
-            <p className="muted">No logs found.</p>
-          ) : (
-            <div className="log-card-list">
-              {data.punishmentLogs.map(log => (
-                <LogCard key={log.id} log={log} onChanged={load} />
-              ))}
-            </div>
-          )}
+          <Section title="Last Known Location">
+            {data.location ? (
+              <div className="up-field">{data.location.StreetName ?? "Unknown street"}{data.location.PostalCode ? ` (Postal ${data.location.PostalCode})` : ""}</div>
+            ) : (
+              <p className="muted">No location data available.</p>
+            )}
+          </Section>
+
+          <Section title="Discord Account">
+            {data.discordIds?.length > 0 ? (
+              data.discordIds.map(id => <div key={id} className="up-field"><code>{id}</code></div>)
+            ) : (
+              <p className="muted">No linked Discord account found.</p>
+            )}
+          </Section>
+
+          <Section title="Discord Roles">
+            {data.discordRoles?.length > 0 ? (
+              <div className="up-role-list">
+                {data.discordRoles.map(role => <span key={role} className="badge" style={{ background: "#1e212b", color: "#d0d3d9" }}>{role}</span>)}
+              </div>
+            ) : (
+              <p className="muted">No roles found (or account isn't linked).</p>
+            )}
+          </Section>
+
+          <Section title="Recent Activity">
+            {data.activity?.length > 0 ? (
+              <div className="activity-feed">
+                {data.activity.map((a, i) => (
+                  <div className="activity-row" key={i}>
+                    <span className="activity-text">{describeActivity(a)}</span>
+                    <span className="activity-time muted">{timeAgo(a.timestamp * 1000)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted">No recent activity found.</p>
+            )}
+          </Section>
         </>
       )}
     </div>

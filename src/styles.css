@@ -710,6 +710,14 @@ code {
   font-weight: 600;
 }
 
+.log-card-clickable-name {
+  transition: color 0.12s;
+}
+.log-card-clickable-name:hover {
+  color: #8f9bff;
+  text-decoration: underline;
+}
+
 .log-card-timestamp {
   margin-top: 6px;
   font-size: 12px;
@@ -738,11 +746,11 @@ code {
   filter: brightness(1.08);
 }
 
-.btn-green { background: linear-gradient(180deg, #2ee6a0, #1cc98a); }
-.btn-orange { background: linear-gradient(180deg, #ffb648, #f9a825); }
-.btn-red { background: linear-gradient(180deg, #ff6b6b, #e53935); }
-.btn-blue { background: linear-gradient(180deg, #6f7bff, #5865f2); }
-.btn-pink { background: linear-gradient(180deg, #ff6fa8, #e0468a); }
+.btn-green { background: linear-gradient(180deg, #4caf82, #3a8f68); }
+.btn-orange { background: linear-gradient(180deg, #d99a52, #c17f3a); }
+.btn-red { background: linear-gradient(180deg, #c96a64, #b3524c); }
+.btn-blue { background: linear-gradient(180deg, #6670d6, #545dbd); }
+.btn-pink { background: linear-gradient(180deg, #c07394, #a75c7c); }
 
 .toolbox-grid {
   display: grid;
@@ -765,10 +773,10 @@ code {
 .toolbox-btn:active { transform: scale(0.97); }
 .toolbox-btn:hover { filter: brightness(1.1); }
 
-.toolbox-green { background: linear-gradient(180deg, #2ee6a0, #1cc98a); }
-.toolbox-pink { background: linear-gradient(180deg, #ff6fa8, #e0468a); }
-.toolbox-blue { background: linear-gradient(180deg, #6f7bff, #5865f2); }
-.toolbox-orange { background: linear-gradient(180deg, #ffb648, #f9a825); }
+.toolbox-green { background: linear-gradient(180deg, #4caf82, #3a8f68); }
+.toolbox-pink { background: linear-gradient(180deg, #c07394, #a75c7c); }
+.toolbox-blue { background: linear-gradient(180deg, #6670d6, #545dbd); }
+.toolbox-orange { background: linear-gradient(180deg, #d99a52, #c17f3a); }
 
 /* ---------- Activity icon bubbles ---------- */
 
@@ -935,6 +943,55 @@ code {
 
 .user-panel-field code {
   margin-right: 4px;
+}
+
+/* ---------- User Panel collapsible sections ---------- */
+
+.up-section {
+  border: 1px solid #1e212b;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.up-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  color: #d0d3d9;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.up-section-header:hover { background: #161822; }
+
+.up-chevron {
+  transition: transform 0.15s;
+  color: #7d828f;
+}
+.up-chevron-open { transform: rotate(180deg); }
+
+.up-section-body {
+  padding: 0 14px 14px;
+  animation: fadeIn 0.15s ease;
+}
+
+.up-field {
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 1px solid #161822;
+}
+.up-field:last-child { border-bottom: none; }
+
+.up-role-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* ---------- Clickable activity text ---------- */

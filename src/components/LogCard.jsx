@@ -12,7 +12,7 @@ import Avatar from "./Avatar";
  * always-visible action buttons. Shared across the Dashboard, standalone
  * Punishment Search page, and User Panel.
  */
-export default function LogCard({ log, onChanged, onUsernameClick }) {
+export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick }) {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -80,7 +80,13 @@ export default function LogCard({ log, onChanged, onUsernameClick }) {
           src={discordAvatarUrl(log.issuer_discord_id, log.issuer_avatar_hash)}
           alt=""
         />
-        <span className="log-card-issuer-name">{log.issuer_username ?? log.issuer_discord_id}</span>
+        <span
+          className="log-card-issuer-name log-card-clickable-name"
+          style={onIssuerClick ? { cursor: "pointer" } : undefined}
+          onClick={() => onIssuerClick?.(log.issuer_discord_id)}
+        >
+          {log.issuer_username ?? log.issuer_discord_id}
+        </span>
 
         <div className="log-card-menu" ref={menuRef}>
           <button className="log-card-menu-trigger" onClick={() => setMenuOpen(o => !o)} disabled={busy}>⋮</button>
@@ -116,7 +122,7 @@ export default function LogCard({ log, onChanged, onUsernameClick }) {
           <div className="log-card-field">
             <span className="muted">User:</span>{" "}
             <span
-              className="log-card-target"
+              className="log-card-target log-card-clickable-name"
               style={onUsernameClick ? { cursor: "pointer" } : undefined}
               onClick={() => onUsernameClick?.(log.target_roblox_username)}
             >

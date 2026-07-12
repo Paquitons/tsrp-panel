@@ -3,6 +3,7 @@ import { apiFetch } from "../api";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
 import LogCard from "../components/LogCard";
+import UserPanel from "../components/UserPanel";
 
 const TYPES = [
   { value: "warning", label: "Warning" },
@@ -27,6 +28,7 @@ export default function Punishments() {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   function updateField(key, value) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -176,11 +178,29 @@ export default function Punishments() {
               <p className="muted">No logs found.</p>
             )}
             {results.map(log => (
-              <LogCard key={log.id} log={log} onChanged={search} />
+              <LogCard
+                key={log.id}
+                log={log}
+                onChanged={search}
+                onUsernameClick={(username) => setSelectedUser({ type: "username", value: username })}
+                onIssuerClick={(discordId) => setSelectedUser({ type: "discord", value: discordId })}
+              />
             ))}
           </div>
         </div>
       </div>
+
+      {selectedUser && (
+        <div className="modal-backdrop" onClick={() => setSelectedUser(null)}>
+          <div className="modal user-panel-modal" onClick={e => e.stopPropagation()}>
+            {selectedUser.type === "discord" ? (
+              <UserPanel discordId={selectedUser.value} onClose={() => setSelectedUser(null)} />
+            ) : (
+              <UserPanel username={selectedUser.value} onClose={() => setSelectedUser(null)} />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

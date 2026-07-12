@@ -152,7 +152,7 @@ export default function Dashboard() {
   function openLookup(e) {
     e.preventDefault();
     if (!lookupValue.trim()) return;
-    setSelectedUser(lookupValue.trim());
+    setSelectedUser({ type: "username", value: lookupValue.trim() });
     setLookupModalOpen(false);
     setLookupValue("");
   }
@@ -190,7 +190,11 @@ export default function Dashboard() {
 
   function openUser(username) {
     updateField("targetRobloxUsername", username);
-    setSelectedUser(username);
+    setSelectedUser({ type: "username", value: username });
+  }
+
+  function openUserByDiscord(discordId) {
+    setSelectedUser({ type: "discord", value: discordId });
   }
 
   async function createLog(e) {
@@ -323,7 +327,13 @@ export default function Dashboard() {
             {onDutyStaff.length > 0 && (
               <div className="on-duty-row">
                 {onDutyStaff.map(s => (
-                  <div className="on-duty-avatar" key={s.discordId} title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}>
+                  <div
+                    className="on-duty-avatar"
+                    key={s.discordId}
+                    title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}
+                    onClick={() => openUserByDiscord(s.discordId)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <img className="avatar-img" style={{ width: 30, height: 30 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
                     <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
                   </div>
@@ -462,7 +472,7 @@ export default function Dashboard() {
               {logsLoading && <p className="muted">Loading…</p>}
               {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
               {logs.map(log => (
-                <LogCard key={log.id} log={log} onChanged={refreshLogs} onUsernameClick={openUser} />
+                <LogCard key={log.id} log={log} onChanged={refreshLogs} onUsernameClick={openUser} onIssuerClick={openUserByDiscord} />
               ))}
             </div>
           </div>
@@ -526,7 +536,11 @@ export default function Dashboard() {
       {selectedUser && (
         <div className="modal-backdrop" onClick={() => setSelectedUser(null)}>
           <div className="modal user-panel-modal" onClick={e => e.stopPropagation()}>
-            <UserPanel username={selectedUser} onClose={() => setSelectedUser(null)} />
+            {selectedUser.type === "discord" ? (
+              <UserPanel discordId={selectedUser.value} onClose={() => setSelectedUser(null)} />
+            ) : (
+              <UserPanel username={selectedUser.value} onClose={() => setSelectedUser(null)} />
+            )}
           </div>
         </div>
       )}
