@@ -19,6 +19,7 @@ export default function Punishments() {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [hidingId, setHidingId] = useState(null);
 
   function updateField(key, value) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -53,7 +54,7 @@ export default function Punishments() {
   }
 
   async function search(e) {
-    e.preventDefault();
+    e?.preventDefault();
     setSearching(true);
     try {
       const { logs } = await apiFetch(`/punishments?username=${encodeURIComponent(searchTerm)}`);
@@ -65,22 +66,42 @@ export default function Punishments() {
     }
   }
 
+  async function toggleHide(id) {
+    setHidingId(id);
+    try {
+      await apiFetch(`/punishments/${id}/hide`, { method: "PATCH" });
+      setResults(prev => prev.map(log => log.id === id ? { ...log, hidden: log.hidden ? 0 : 1 } : log));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setHidingId(null);
+    }
+  }
+
   return (
     <div className="content">
-      <h1>Punishment Logs</h1>
+      <div className="page-header">
+        <h1>Punishment Logs</h1>
+        <p className="muted">Issue and review moderation actions against players.</p>
+      </div>
 
       <div className="card">
         <h2>New Log</h2>
         {createError && <div className="error-banner">{createError}</div>}
-        {createSuccess && <div className="error-banner" style={{ background: "#1f3a24", borderColor: "#00c853", color: "#69f0ae" }}>Log created.</div>}
+        {createSuccess && <div className="success-banner">Log created successfully.</div>}
         <form onSubmit={createLog}>
-          <label>Roblox Username</label>
-          <input required value={form.targetRobloxUsername} onChange={e => updateField("targetRobloxUsername", e.target.value)} />
-
-          <label>Type</label>
-          <select value={form.type} onChange={e => updateField("type", e.target.value)}>
-            {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
+          <div className="form-row">
+            <div>
+              <label>Roblox Username</label>
+              <input required value={form.targetRobloxUsername} onChange={e => updateField("targetRobloxUsername", e.target.value)} placeholder="e.g. flat_bird" />
+            </div>
+            <div>
+              <label>Type</label>
+              <select value={form.type} onChange={e => updateField("type", e.target.value)}>
+                {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+          </div>
 
           {form.type === "temp_ban" && (
             <>
@@ -90,40 +111,51 @@ export default function Punishments() {
           )}
 
           <label>Reason</label>
-          <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} />
+          <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
 
           <label>Description (optional)</label>
-          <textarea rows={3} value={form.description} onChange={e => updateField("description", e.target.value)} />
+          <textarea rows={3} value={form.description} onChange={e => updateField("description", e.target.value)} placeholder="Additional context or evidence notes" />
 
           <button className="primary" type="submit" disabled={creating}>
-            {creating ? "Creating..." : "Create Log"}
+            {creating ? "Creating…" : "Create Log"}
           </button>
         </form>
       </div>
 
       <div className="card">
         <h2>Search Punishment History</h2>
-        <form onSubmit={search} style={{ display: "flex", gap: 8 }}>
-          <input placeholder="Roblox username" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ marginBottom: 0 }} />
-          <button className="primary" type="submit" disabled={searching}>Search</button>
+        <form onSubmit={search} className="inline-form">
+          <input placeholder="Roblox username" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <button className="primary" type="submit" disabled={searching}>{searching ? "Searching…" : "Search"}</button>
         </form>
 
-        {results.length > 0 && (
-          <table style={{ marginTop: 16 }}>
+        {results.length > 0 ? (
+          <table className="data-table">
             <thead>
-              <tr><th>Type</th><th>Reason</th><th>Issued By</th><th>Date</th></tr>
+              <tr><th>Type</th><th>Reason</th><th>Issued By</th><th>Date</th><th></th></tr>
             </thead>
             <tbody>
               {results.map(log => (
-                <tr key={log.id}>
+                <tr key={log.id} className={log.hidden ? "row-hidden" : ""}>
                   <td><span className={`badge ${log.type}`}>{log.type.replace("_", " ")}</span></td>
                   <td>{log.reason}</td>
-                  <td>{log.issuer_discord_id}</td>
-                  <td>{new Date(log.created_at).toLocaleDateString()}</td>
+                  <td className="muted">{log.issuer_discord_id}</td>
+                  <td className="muted">{new Date(log.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <button
+                      className="secondary small"
+                      disabled={hidingId === log.id}
+                      onClick={() => toggleHide(log.id)}
+                    >
+                      {log.hidden ? "Unhide" : "Hide"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        ) : (
+          searchTerm && !searching && <p className="muted">No results yet — try searching above.</p>
         )}
       </div>
     </div>

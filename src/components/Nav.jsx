@@ -1,6 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const links = [
+  { to: "/", label: "Shifts", end: true },
+  { to: "/activity", label: "Live Activity" },
+  { to: "/punishments", label: "Punishment Logs" },
+  { to: "/players", label: "Player Lookup" },
+  { to: "/loa", label: "Leave of Absence" },
+];
+
 export default function Nav() {
   const { user, logout } = useAuth();
 
@@ -8,12 +16,19 @@ export default function Nav() {
     <div className="sidebar">
       <h1>TSRP Panel</h1>
       <nav>
-        <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>Shifts</NavLink>
-        <NavLink to="/punishments" className={({ isActive }) => (isActive ? "active" : "")}>Punishment Logs</NavLink>
-        <NavLink to="/players" className={({ isActive }) => (isActive ? "active" : "")}>Player Lookup</NavLink>
-        <NavLink to="/loa" className={({ isActive }) => (isActive ? "active" : "")}>Leave of Absence</NavLink>
-        <button onClick={logout} style={{ marginTop: 20 }}>Log out ({user?.username})</button>
+        {links.map(link => (
+          <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => (isActive ? "active" : "")}>
+            {link.label}
+          </NavLink>
+        ))}
       </nav>
+      <div className="sidebar-footer">
+        <div className="sidebar-user">
+          <span className="user-dot" />
+          <span>{user?.username}</span>
+        </div>
+        <button className="secondary small" onClick={logout}>Log out</button>
+      </div>
     </div>
   );
 }

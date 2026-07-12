@@ -6,6 +6,7 @@ import Shifts from "./pages/Shifts";
 import Punishments from "./pages/Punishments";
 import PlayerLookup from "./pages/PlayerLookup";
 import LOA from "./pages/LOA";
+import Activity from "./pages/Activity";
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -26,6 +27,7 @@ function AppShell() {
         <Route path="/punishments" element={<Punishments />} />
         <Route path="/players" element={<PlayerLookup />} />
         <Route path="/loa" element={<LOA />} />
+        <Route path="/activity" element={<Activity />} />
       </Routes>
     </div>
   );
