@@ -1,15 +1,16 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
+import ThemeSwitcher from "./components/ThemeSwitcher";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Shifts from "./pages/Shifts";
-import Punishments from "./pages/Punishments";
-import LOA from "./pages/LOA";
-import Activity from "./pages/Activity";
+import { loadSavedTheme } from "./themes";
 
 function AppShell() {
   const { user, loading } = useAuth();
+
+  useEffect(() => { loadSavedTheme(); }, []);
 
   if (loading) {
     return <div className="login-screen">Loading...</div>;
@@ -24,11 +25,8 @@ function AppShell() {
       <Nav />
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/loa" element={<LOA />} />
-        <Route path="/shifts" element={<Shifts />} />
-        <Route path="/punishments" element={<Punishments />} />
-        <Route path="/activity" element={<Activity />} />
       </Routes>
+      <ThemeSwitcher />
     </div>
   );
 }

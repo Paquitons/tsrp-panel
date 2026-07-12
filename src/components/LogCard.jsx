@@ -3,6 +3,16 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS, discordAvatarUrl } from "../utils";
 import Avatar from "./Avatar";
+import CustomSelect from "./CustomSelect";
+
+const ALL_TYPES = [
+  { value: "warning", label: "Warning" },
+  { value: "kick", label: "Kick" },
+  { value: "ban", label: "Ban" },
+  { value: "temp_ban", label: "Temp Ban" },
+  { value: "bolo", label: "Ban BOLO" },
+  { value: "note", label: "Note" },
+];
 
 /**
  * Renders a single punishment log matching the reference layout: the
@@ -17,6 +27,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editReason, setEditReason] = useState(log.reason);
+  const [editType, setEditType] = useState(log.type);
   const [busy, setBusy] = useState(false);
   const menuRef = useRef(null);
 
@@ -29,6 +40,9 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   }, []);
 
   const canModify = log.issuer_discord_id === user?.discordId || user?.tier === "management" || user?.tier === "director";
+  const editableTypes = ALL_TYPES.filter(t =>
+    (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value) || t.value === log.type
+  );
   const isActiveBolo = log.type === "bolo" && !log.completed_at;
 
   async function handleDelete() {
@@ -48,7 +62,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   async function handleSaveEdit() {
     setBusy(true);
     try {
-      await apiFetch(`/punishments/${log.id}`, { method: "PATCH", body: { reason: editReason } });
+      await apiFetch(`/punishments/${log.id}`, { method: "PATCH", body: { reason: editReason, type: editType } });
       setEditing(false);
       onChanged?.();
     } catch (err) {
@@ -111,7 +125,8 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
 
       {editing ? (
         <div className="log-card-body">
-          <input value={editReason} onChange={e => setEditReason(e.target.value)} placeholder="Reason" />
+          <CustomSelect value={editType} onChange={setEditType} options={editableTypes} />
+          <input value={editReason} onChange={e => setEditReason(e.target.value)} placeholder="Reason" style={{ marginTop: 8 }} />
           <div className="button-row">
             <button className="primary small" disabled={busy} onClick={handleSaveEdit}>Save</button>
             <button className="secondary small" onClick={() => setEditing(false)}>Cancel</button>

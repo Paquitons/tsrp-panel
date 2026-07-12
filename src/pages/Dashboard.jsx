@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, formatDurationWithSeconds, discordAvatarUrl } from "../utils";
 import Avatar from "../components/Avatar";
 import UserPanel from "../components/UserPanel";
 import LogCard from "../components/LogCard";
+import CustomSelect from "../components/CustomSelect";
+import ShiftHistoryModal from "../components/ShiftHistoryModal";
+import LOAModal from "../components/LOAModal";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [shiftError, setShiftError] = useState(null);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -157,6 +160,9 @@ export default function Dashboard() {
     setLookupValue("");
   }
 
+  // ---------- Toolbox: LOA modal ----------
+  const [loaModalOpen, setLoaModalOpen] = useState(false);
+
   // ---------- Create log ----------
   const allowedTypes = ALL_TYPES.filter(t => (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value));
   const [form, setForm] = useState({ targetRobloxUsername: "", type: allowedTypes[0]?.value ?? "bolo", reason: "", unbanAt: "" });
@@ -236,7 +242,7 @@ export default function Dashboard() {
     finally { setLogsLoading(false); }
   }
 
-  // ---------- Live activity (always polling, no pause) ----------
+  // ---------- Live activity (always polling) ----------
   const [events, setEvents] = useState([]);
 
   async function fetchActivity() {
@@ -265,6 +271,11 @@ export default function Dashboard() {
     acc[team] = (acc[team] ?? 0) + 1;
     return acc;
   }, {});
+
+  const teamOptions = [
+    { value: "all", label: `All Teams (${livePlayers.length})` },
+    ...Object.entries(teamCounts).map(([team, count]) => ({ value: team, label: `${team} (${count})` })),
+  ];
 
   const playersCount = livePlayers.length;
   const filteredPlayers = livePlayers
@@ -300,8 +311,13 @@ export default function Dashboard() {
       </div>
 
       <div className="dashboard-grid">
-        {/* ---------- LEFT: Shift + Toolbox + On Duty + Players ---------- */}
+        {/* ---------- LEFT: Greeting + Shift + Toolbox + On Duty + Players ---------- */}
         <div className="dashboard-col">
+          <div className="card dashboard-greeting-card">
+            <img className="avatar-img" style={{ width: 40, height: 40 }} src={discordAvatarUrl(user?.discordId, user?.avatar)} alt="" />
+            <h2 style={{ margin: 0 }}>Hey, {user?.username}!</h2>
+          </div>
+
           <div className="card">
             <h2>Current Shift</h2>
             {shiftError && <div className="error-banner">{shiftError}</div>}
@@ -340,6 +356,10 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+
+            <button className="secondary small" style={{ marginTop: 12, width: "100%" }} onClick={() => setHistoryModalOpen(true)}>
+              View Shift History
+            </button>
           </div>
 
           <div className="card">
@@ -349,7 +369,7 @@ export default function Dashboard() {
                 <button className="toolbox-btn toolbox-pink" onClick={() => setCommandModalOpen(true)}>Run Command</button>
               )}
               <button className="toolbox-btn toolbox-orange" onClick={() => setStaffModalOpen(true)}>Request Staff</button>
-              <Link to="/loa" className="toolbox-btn toolbox-green">Manage LOA</Link>
+              <button className="toolbox-btn toolbox-green" onClick={() => setLoaModalOpen(true)}>Manage LOA</button>
               <button className="toolbox-btn toolbox-blue" onClick={() => setLookupModalOpen(true)}>Player Lookup</button>
             </div>
           </div>
@@ -357,13 +377,8 @@ export default function Dashboard() {
           <div className="card">
             <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
             {queueCount > 0 && <p className="muted" style={{ marginTop: -8 }}>{queueCount} in queue</p>}
-            <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
-              <option value="all">All Teams ({playersCount})</option>
-              {Object.entries(teamCounts).map(([team, count]) => (
-                <option key={team} value={team}>{team} ({count})</option>
-              ))}
-            </select>
-            <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} />
+            <CustomSelect value={teamFilter} onChange={setTeamFilter} options={teamOptions} />
+            <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} style={{ marginTop: 10 }} />
             <div className="players-list">
               {filteredPlayers.length === 0 ? (
                 <p className="muted">No players match.</p>
@@ -415,21 +430,19 @@ export default function Dashboard() {
               </div>
 
               <label>Type</label>
-              <select value={form.type} onChange={e => updateField("type", e.target.value)}>
-                {allowedTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
+              <CustomSelect value={form.type} onChange={(v) => updateField("type", v)} options={allowedTypes} />
               {user?.tier === "moderator" && (
-                <p className="muted" style={{ marginTop: -6, marginBottom: 12 }}>Moderators can only issue Ban BOLOs.</p>
+                <p className="muted" style={{ marginTop: 6, marginBottom: 0 }}>Moderators can only issue Ban BOLOs.</p>
               )}
 
               {form.type === "temp_ban" && (
                 <>
-                  <label>Unban Date</label>
+                  <label style={{ marginTop: 12 }}>Unban Date</label>
                   <input type="datetime-local" required value={form.unbanAt} onChange={e => updateField("unbanAt", e.target.value)} />
                 </>
               )}
 
-              <label>Reason</label>
+              <label style={{ marginTop: 12 }}>Reason</label>
               <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
 
               <button className="primary" type="submit" disabled={creating}>{creating ? "Creating…" : "Create Log"}</button>
@@ -532,7 +545,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ---------- User profile popup (floating card, not a page) ---------- */}
+      {/* ---------- User profile popup ---------- */}
       {selectedUser && (
         <div className="modal-backdrop" onClick={() => setSelectedUser(null)}>
           <div className="modal user-panel-modal" onClick={e => e.stopPropagation()}>
@@ -544,6 +557,12 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ---------- Shift History modal ---------- */}
+      {historyModalOpen && <ShiftHistoryModal onClose={() => setHistoryModalOpen(false)} />}
+
+      {/* ---------- LOA modal ---------- */}
+      {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
     </div>
   );
 }
