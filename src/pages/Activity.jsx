@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
+import { timeAgo } from "../utils";
 
 const POLL_MS = 15_000;
 
@@ -90,9 +91,9 @@ export default function Activity() {
               const meta = TYPE_META[e.type] ?? { icon: "•", label: e.type, color: "#8a8f99" };
               return (
                 <div className="activity-row" key={i}>
-                  <span className="activity-icon" style={{ color: meta.color }}>{meta.icon}</span>
+                  <span className="activity-icon-bubble" style={{ background: `${meta.color}22`, color: meta.color }}>{meta.icon}</span>
                   <span className="activity-text">{describeEvent(e)}</span>
-                  <span className="activity-time muted">{new Date(e.timestamp * 1000).toLocaleTimeString()}</span>
+                  <span className="activity-time muted">{timeAgo(e.timestamp * 1000)}</span>
                 </div>
               );
             })}

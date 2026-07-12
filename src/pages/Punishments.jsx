@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
+import { timeAgo, TYPE_LABELS } from "../utils";
+import Avatar from "../components/Avatar";
 
 const TYPES = [
   { value: "warning", label: "Warning" },
@@ -16,13 +18,44 @@ export default function Punishments() {
   const [createError, setCreateError] = useState(null);
   const [createSuccess, setCreateSuccess] = useState(false);
 
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [hidingId, setHidingId] = useState(null);
 
   function updateField(key, value) {
     setForm(prev => ({ ...prev, [key]: value }));
+  }
+
+  function onUsernameChange(value) {
+    updateField("targetRobloxUsername", value);
+    clearTimeout(debounceRef.current);
+
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
+        setSuggestions(suggestions);
+        setShowSuggestions(suggestions.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 250);
+  }
+
+  function pickSuggestion(username) {
+    updateField("targetRobloxUsername", username);
+    setShowSuggestions(false);
   }
 
   async function createLog(e) {
@@ -56,6 +89,7 @@ export default function Punishments() {
   async function search(e) {
     e?.preventDefault();
     setSearching(true);
+    setHasSearched(true);
     try {
       const { logs } = await apiFetch(`/punishments?username=${encodeURIComponent(searchTerm)}`);
       setResults(logs);
@@ -65,6 +99,9 @@ export default function Punishments() {
       setSearching(false);
     }
   }
+
+  // Load the most recent logs on first mount, same as an empty search.
+  useEffect(() => { search(); }, []);
 
   async function toggleHide(id) {
     setHidingId(id);
@@ -85,79 +122,117 @@ export default function Punishments() {
         <p className="muted">Issue and review moderation actions against players.</p>
       </div>
 
-      <div className="card">
-        <h2>New Log</h2>
-        {createError && <div className="error-banner">{createError}</div>}
-        {createSuccess && <div className="success-banner">Log created successfully.</div>}
-        <form onSubmit={createLog}>
-          <div className="form-row">
-            <div>
-              <label>Roblox Username</label>
-              <input required value={form.targetRobloxUsername} onChange={e => updateField("targetRobloxUsername", e.target.value)} placeholder="e.g. flat_bird" />
-            </div>
-            <div>
-              <label>Type</label>
-              <select value={form.type} onChange={e => updateField("type", e.target.value)}>
-                {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {form.type === "temp_ban" && (
-            <>
-              <label>Unban Date</label>
-              <input type="datetime-local" required value={form.unbanAt} onChange={e => updateField("unbanAt", e.target.value)} />
-            </>
-          )}
-
-          <label>Reason</label>
-          <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
-
-          <label>Description (optional)</label>
-          <textarea rows={3} value={form.description} onChange={e => updateField("description", e.target.value)} placeholder="Additional context or evidence notes" />
-
-          <button className="primary" type="submit" disabled={creating}>
-            {creating ? "Creating…" : "Create Log"}
-          </button>
-        </form>
-      </div>
-
-      <div className="card">
-        <h2>Search Punishment History</h2>
-        <form onSubmit={search} className="inline-form">
-          <input placeholder="Roblox username" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          <button className="primary" type="submit" disabled={searching}>{searching ? "Searching…" : "Search"}</button>
-        </form>
-
-        {results.length > 0 ? (
-          <table className="data-table">
-            <thead>
-              <tr><th>Type</th><th>Reason</th><th>Issued By</th><th>Date</th><th></th></tr>
-            </thead>
-            <tbody>
-              {results.map(log => (
-                <tr key={log.id} className={log.hidden ? "row-hidden" : ""}>
-                  <td><span className={`badge ${log.type}`}>{log.type.replace("_", " ")}</span></td>
-                  <td>{log.reason}</td>
-                  <td className="muted">{log.issuer_discord_id}</td>
-                  <td className="muted">{new Date(log.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <button
-                      className="secondary small"
-                      disabled={hidingId === log.id}
-                      onClick={() => toggleHide(log.id)}
+      <div className="two-col">
+        <div className="card">
+          <h2>Create New Log</h2>
+          {createError && <div className="error-banner">{createError}</div>}
+          {createSuccess && <div className="success-banner">Log created successfully.</div>}
+          <form onSubmit={createLog}>
+            <label>User</label>
+            <div className="autocomplete-wrap">
+              <input
+                required
+                autoComplete="off"
+                value={form.targetRobloxUsername}
+                onChange={e => onUsernameChange(e.target.value)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="Enter Roblox username"
+              />
+              {showSuggestions && (
+                <div className="autocomplete-list">
+                  {suggestions.map(s => (
+                    <div
+                      key={s.target_roblox_username}
+                      className="autocomplete-item"
+                      onMouseDown={() => pickSuggestion(s.target_roblox_username)}
                     >
-                      {log.hidden ? "Unhide" : "Hide"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          searchTerm && !searching && <p className="muted">No results yet — try searching above.</p>
-        )}
+                      <Avatar username={s.target_roblox_username} size={26} />
+                      <span className="autocomplete-name">{s.target_roblox_username}</span>
+                      <span className="autocomplete-hint">Recently {hintVerb(s.type)} · {timeAgo(s.created_at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <label>Type</label>
+            <select value={form.type} onChange={e => updateField("type", e.target.value)}>
+              {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+
+            {form.type === "temp_ban" && (
+              <>
+                <label>Unban Date</label>
+                <input type="datetime-local" required value={form.unbanAt} onChange={e => updateField("unbanAt", e.target.value)} />
+              </>
+            )}
+
+            <label>Reason</label>
+            <input required value={form.reason} onChange={e => updateField("reason", e.target.value)} placeholder="Short reason for the action" />
+
+            <label>Description (optional)</label>
+            <textarea rows={3} value={form.description} onChange={e => updateField("description", e.target.value)} placeholder="Additional context or evidence notes" />
+
+            <button className="primary" type="submit" disabled={creating}>
+              {creating ? "Creating…" : "Create Log"}
+            </button>
+          </form>
+        </div>
+
+        <div className="card">
+          <h2>Punishment Logs</h2>
+          <form onSubmit={search} className="inline-form" style={{ marginBottom: 16 }}>
+            <input placeholder="Search by username" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <button className="primary" type="submit" disabled={searching}>{searching ? "…" : "Search"}</button>
+          </form>
+
+          <div className="log-card-list">
+            {results.length === 0 && hasSearched && !searching && (
+              <p className="muted">No logs found.</p>
+            )}
+            {results.map(log => (
+              <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
+                <div className="log-card-top">
+                  <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={36} />
+                  <div className="log-card-identity">
+                    <div className="log-card-username">{log.target_roblox_username}</div>
+                    <div className="muted">{timeAgo(log.created_at)}</div>
+                  </div>
+                  <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
+                </div>
+                <div className="log-card-body">
+                  <div className="log-card-field"><span className="muted">Reason:</span> {log.reason}</div>
+                  {log.description && <div className="log-card-field"><span className="muted">Notes:</span> {log.description}</div>}
+                  {log.target_roblox_id && <div className="log-card-field"><span className="muted">Roblox ID:</span> {log.target_roblox_id}</div>}
+                  <div className="log-card-field"><span className="muted">Previous Punishments:</span> {log.previous_count}</div>
+                </div>
+                <div className="log-card-footer">
+                  <button
+                    className="secondary small"
+                    disabled={hidingId === log.id}
+                    onClick={() => toggleHide(log.id)}
+                  >
+                    {log.hidden ? "Unhide" : "Hide"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function hintVerb(type) {
+  switch (type) {
+    case "ban": return "banned";
+    case "temp_ban": return "temp banned";
+    case "kick": return "kicked";
+    case "warning": return "warned";
+    case "bolo": return "BOLO'd";
+    case "note": return "noted";
+    default: return "actioned";
+  }
 }

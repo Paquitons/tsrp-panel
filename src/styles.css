@@ -400,3 +400,199 @@ code {
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #262a36; border-radius: 4px; }
+
+/* ---------- Two-column layout ---------- */
+
+.two-col {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+/* ---------- Avatars ---------- */
+
+.avatar-img {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #1a1d26;
+}
+
+.avatar-fallback {
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5865f2, #3a41a8);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ---------- Autocomplete ---------- */
+
+.autocomplete-wrap {
+  position: relative;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: calc(100% - 8px);
+  left: 0;
+  right: 0;
+  background: #181b24;
+  border: 1px solid #2a2e3a;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 20;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.autocomplete-item:hover { background: #21242f; }
+
+.autocomplete-name {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.autocomplete-hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: #7d828f;
+  white-space: nowrap;
+}
+
+/* ---------- Log cards ---------- */
+
+.log-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 640px;
+  overflow-y: auto;
+}
+
+.log-card {
+  background: #14161e;
+  border: 1px solid #1e212b;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.log-card-hidden { opacity: 0.4; }
+
+.log-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.log-card-identity { flex: 1; }
+
+.log-card-username {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+
+.log-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.log-card-field .muted { margin-right: 4px; }
+
+.log-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Colorful chunky buttons ---------- */
+
+.btn-green, .btn-orange, .btn-red, .btn-blue, .btn-pink {
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  transition: filter 0.12s, transform 0.05s;
+}
+.btn-green:active, .btn-orange:active, .btn-red:active, .btn-blue:active, .btn-pink:active {
+  transform: scale(0.98);
+}
+.btn-green:hover, .btn-orange:hover, .btn-red:hover, .btn-blue:hover, .btn-pink:hover {
+  filter: brightness(1.08);
+}
+
+.btn-green { background: linear-gradient(180deg, #2ee6a0, #1cc98a); }
+.btn-orange { background: linear-gradient(180deg, #ffb648, #f9a825); }
+.btn-red { background: linear-gradient(180deg, #ff6b6b, #e53935); }
+.btn-blue { background: linear-gradient(180deg, #6f7bff, #5865f2); }
+.btn-pink { background: linear-gradient(180deg, #ff6fa8, #e0468a); }
+
+.toolbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toolbox-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: filter 0.12s;
+}
+.toolbox-btn:hover { filter: brightness(1.1); }
+
+.toolbox-green { background: linear-gradient(180deg, #2ee6a0, #1cc98a); }
+.toolbox-pink { background: linear-gradient(180deg, #ff6fa8, #e0468a); }
+.toolbox-blue { background: linear-gradient(180deg, #6f7bff, #5865f2); }
+.toolbox-orange { background: linear-gradient(180deg, #ffb648, #f9a825); }
+
+/* ---------- Activity icon bubbles ---------- */
+
+.activity-icon-bubble {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* ---------- Player lookup header ---------- */
+
+.lookup-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}

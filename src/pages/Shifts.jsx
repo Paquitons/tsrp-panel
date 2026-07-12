@@ -1,4 +1,5 @@
 import { useEffect, useState, Fragment } from "react";
+import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 
 function formatDuration(seconds) {
@@ -120,19 +121,29 @@ export default function Shifts() {
             </div>
             <p className="muted">Started {new Date(active.started_at).toLocaleString()}{active.shift_type ? ` — ${active.shift_type}` : ""}</p>
             <div className="button-row">
-              <button className="secondary" onClick={toggleBreak}>
+              <button className="btn-orange" onClick={toggleBreak}>
                 {onBreak ? "Resume Shift" : "Take Break"}
               </button>
-              <button className="danger" onClick={endShift}>End Shift</button>
+              <button className="btn-red" onClick={endShift}>End Shift</button>
             </div>
           </>
         ) : (
           <>
             <label>Shift Type (optional)</label>
             <input value={shiftType} onChange={e => setShiftType(e.target.value)} placeholder="e.g. 50/50, Admin, Support" />
-            <button className="primary" onClick={startShift}>Start Shift</button>
+            <button className="btn-green" onClick={startShift}>Start Shift</button>
           </>
         )}
+      </div>
+
+      <div className="card">
+        <h2>Toolbox</h2>
+        <div className="toolbox-grid">
+          <Link to="/activity" className="toolbox-btn toolbox-green">Live Activity</Link>
+          <Link to="/punishments" className="toolbox-btn toolbox-pink">Punishment Logs</Link>
+          <Link to="/players" className="toolbox-btn toolbox-blue">Player Lookup</Link>
+          <Link to="/loa" className="toolbox-btn toolbox-orange">Manage LOA</Link>
+        </div>
       </div>
 
       <div className="card">

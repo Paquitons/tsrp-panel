@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
+import Avatar from "../components/Avatar";
 
 export default function PlayerLookup() {
   const [username, setUsername] = useState("");
@@ -38,7 +39,10 @@ export default function PlayerLookup() {
       {data && (
         <>
           <div className="card">
-            <h2>{data.username}</h2>
+            <div className="lookup-header">
+              <Avatar username={data.username} robloxId={data.robloxId} size={56} />
+              <h2 style={{ margin: 0 }}>{data.username}</h2>
+            </div>
             <p className="muted">Roblox ID: {data.robloxId ?? "Unknown"}</p>
             <p>
               {data.inServer ? <span className="badge" style={{ background: "#1f3a24", color: "#69f0ae" }}>In Server</span> : <span className="badge" style={{ background: "#2a2e39", color: "#9aa0ac" }}>Not In Server</span>}
