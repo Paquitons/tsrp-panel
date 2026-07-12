@@ -1,12 +1,16 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const links = [
-  { to: "/", label: "Shifts", end: true },
-  { to: "/activity", label: "Live Activity" },
-  { to: "/punishments", label: "Punishment Logs" },
+const primaryLinks = [
+  { to: "/", label: "Dashboard", end: true },
   { to: "/players", label: "Player Lookup" },
   { to: "/loa", label: "Leave of Absence" },
+];
+
+const secondaryLinks = [
+  { to: "/shifts", label: "Shift History" },
+  { to: "/punishments", label: "Punishment Search" },
+  { to: "/activity", label: "Activity Feed" },
 ];
 
 export default function Nav() {
@@ -16,8 +20,14 @@ export default function Nav() {
     <div className="sidebar">
       <h1>TSRP Panel</h1>
       <nav>
-        {links.map(link => (
+        {primaryLinks.map(link => (
           <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => (isActive ? "active" : "")}>
+            {link.label}
+          </NavLink>
+        ))}
+        <div className="nav-divider" />
+        {secondaryLinks.map(link => (
+          <NavLink key={link.to} to={link.to} className={({ isActive }) => (isActive ? "active" : "") + " nav-secondary"}>
             {link.label}
           </NavLink>
         ))}
@@ -26,6 +36,7 @@ export default function Nav() {
         <div className="sidebar-user">
           <span className="user-dot" />
           <span>{user?.username}</span>
+          {user?.tier && <span className="tier-badge">{user.tier}</span>}
         </div>
         <button className="secondary small" onClick={logout}>Log out</button>
       </div>

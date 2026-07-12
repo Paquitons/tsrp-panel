@@ -1,22 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../api";
+
+// Module-level cache shared across every Avatar instance for the lifetime of
+// the page -- avoids re-fetching the same avatar repeatedly when it shows up
+// in multiple lists (autocomplete, log cards, activity feed, etc).
+const cache = new Map();
 
 /**
- * Shows a Roblox avatar headshot when a robloxId is available, falling back
- * to a colored initial-letter circle if there's no ID or the image fails to
- * load. Using an <img> tag (not a fetch+JSON call) avoids any CORS concerns
- * since image rendering isn't subject to the same-origin restrictions that
- * script-based fetches are.
+ * Shows a Roblox avatar headshot resolved through our own backend (which
+ * calls Roblox's thumbnail API server-side -- Roblox blocks direct browser
+ * fetches with CORS, so this can't be done client-side). Falls back to a
+ * colored initial-letter circle while loading, if there's no username, or
+ * if resolution fails for any reason.
  */
 export default function Avatar({ robloxId, username, size = 32 }) {
+  const [imageUrl, setImageUrl] = useState(null);
   const [failed, setFailed] = useState(false);
 
-  if (!robloxId || failed) {
+  useEffect(() => {
+    if (!robloxId && !username) {
+      setFailed(true);
+      return;
+    }
+
+    const cacheKey = robloxId ? `id:${robloxId}` : `name:${username.toLowerCase()}`;
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (cached) setImageUrl(cached);
+      else setFailed(true);
+      return;
+    }
+
+    let cancelled = false;
+    const query = robloxId ? `robloxId=${robloxId}` : `username=${encodeURIComponent(username)}`;
+
+    apiFetch(`/avatar?${query}`)
+      .then(({ imageUrl }) => {
+        cache.set(cacheKey, imageUrl);
+        if (!cancelled) setImageUrl(imageUrl);
+      })
+      .catch(() => {
+        cache.set(cacheKey, null);
+        if (!cancelled) setFailed(true);
+      });
+
+    return () => { cancelled = true; };
+  }, [robloxId, username]);
+
+  if (failed || !imageUrl) {
     const initial = (username || "?").charAt(0).toUpperCase();
     return (
-      <div
-        className="avatar-fallback"
-        style={{ width: size, height: size, fontSize: size * 0.45 }}
-      >
+      <div className="avatar-fallback" style={{ width: size, height: size, fontSize: size * 0.45 }}>
         {initial}
       </div>
     );
@@ -26,7 +60,7 @@ export default function Avatar({ robloxId, username, size = 32 }) {
     <img
       className="avatar-img"
       style={{ width: size, height: size }}
-      src={`https://www.roblox.com/headshot-thumbnail/image?userId=${robloxId}&width=150&height=150&format=png`}
+      src={imageUrl}
       alt={username || "avatar"}
       onError={() => setFailed(true)}
     />
