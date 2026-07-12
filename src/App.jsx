@@ -33,7 +33,7 @@ function AppShell() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/tsrp-panel">
+    <BrowserRouter>
       <AuthProvider>
         <AppShell />
       </AuthProvider>
