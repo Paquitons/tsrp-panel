@@ -310,7 +310,6 @@ export default function Dashboard() {
                         key={s.username}
                         className="autocomplete-item"
                         onMouseDown={() => {
-                          updateField("targetRobloxUsername", s.username);
                           setShowSuggestions(false);
                           setSelectedUser(s.username);
                         }}
