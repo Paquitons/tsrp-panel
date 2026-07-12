@@ -4,6 +4,7 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
+import UserPanel from "../components/UserPanel";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -45,6 +46,7 @@ function formatDuration(seconds) {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // ---------- Shift state ----------
   const [active, setActive] = useState(null);
@@ -308,10 +310,18 @@ export default function Dashboard() {
                 {showSuggestions && (
                   <div className="autocomplete-list">
                     {suggestions.map(s => (
-                      <div key={s.target_roblox_username} className="autocomplete-item" onMouseDown={() => { updateField("targetRobloxUsername", s.target_roblox_username); setShowSuggestions(false); }}>
-                        <Avatar username={s.target_roblox_username} robloxId={s.target_roblox_id} size={26} />
-                        <span className="autocomplete-name">{s.target_roblox_username}</span>
-                        <span className="autocomplete-hint">Recently {hintVerb(s.type)} · {timeAgo(s.created_at)}</span>
+                      <div
+                        key={s.username}
+                        className="autocomplete-item"
+                        onMouseDown={() => {
+                          updateField("targetRobloxUsername", s.username);
+                          setShowSuggestions(false);
+                          setSelectedUser(s.username);
+                        }}
+                      >
+                        <Avatar username={s.username} robloxId={s.robloxId} size={26} />
+                        <span className="autocomplete-name">{s.username}</span>
+                        <span className="autocomplete-hint">{s.hint}</span>
                       </div>
                     ))}
                   </div>
@@ -354,10 +364,16 @@ export default function Dashboard() {
               <div className="activity-feed">
                 {events.slice(0, 30).map((e, i) => {
                   const meta = ACTIVITY_META[e.type] ?? { icon: "•", color: "#8a8f99" };
+                  const clickableName = e.player || e.killer || e.caller || null;
                   return (
                     <div className="activity-row" key={i}>
                       <span className="activity-icon-bubble" style={{ background: `${meta.color}22`, color: meta.color }}>{meta.icon}</span>
-                      <span className="activity-text">{describeEvent(e)}</span>
+                      <span
+                        className={clickableName ? "activity-text activity-text-clickable" : "activity-text"}
+                        onClick={() => clickableName && setSelectedUser(clickableName)}
+                      >
+                        {describeEvent(e)}
+                      </span>
                       <span className="activity-time muted">{timeAgo(e.timestamp * 1000)}</span>
                     </div>
                   );
@@ -367,39 +383,43 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ---------- RIGHT: Punishment logs ---------- */}
+        {/* ---------- RIGHT: Punishment logs, or a User Panel when someone's selected ---------- */}
         <div className="dashboard-col">
-          <div className="card">
-            <h2>Punishment Logs</h2>
-            <input placeholder="Search by username" value={logSearch} onChange={e => setLogSearch(e.target.value)} />
-            <div className="log-card-list">
-              {logsLoading && <p className="muted">Loading…</p>}
-              {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
-              {logs.map(log => (
-                <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
-                  <div className="log-card-top">
-                    <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={32} />
-                    <div className="log-card-identity">
-                      <div className="log-card-username">{log.target_roblox_username}</div>
-                      <div className="muted">{timeAgo(log.created_at)}</div>
+          {selectedUser ? (
+            <UserPanel username={selectedUser} onClose={() => setSelectedUser(null)} />
+          ) : (
+            <div className="card">
+              <h2>Punishment Logs</h2>
+              <input placeholder="Search by username" value={logSearch} onChange={e => setLogSearch(e.target.value)} />
+              <div className="log-card-list">
+                {logsLoading && <p className="muted">Loading…</p>}
+                {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
+                {logs.map(log => (
+                  <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
+                    <div className="log-card-top" onClick={() => setSelectedUser(log.target_roblox_username)} style={{ cursor: "pointer" }}>
+                      <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={32} />
+                      <div className="log-card-identity">
+                        <div className="log-card-username">{log.target_roblox_username}</div>
+                        <div className="muted">{timeAgo(log.created_at)}</div>
+                      </div>
+                      <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
                     </div>
-                    <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
-                  </div>
-                  <div className="log-card-body">
-                    <div className="log-card-field"><span className="muted">Reason:</span> {log.reason}</div>
-                    <div className="log-card-field"><span className="muted">Previous:</span> {log.previous_count}</div>
-                  </div>
-                  {user?.canHideLogs && (
-                    <div className="log-card-footer">
-                      <button className="secondary small" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
-                        {log.hidden ? "Unhide" : "Hide"}
-                      </button>
+                    <div className="log-card-body">
+                      <div className="log-card-field"><span className="muted">Reason:</span> {log.reason}</div>
+                      <div className="log-card-field"><span className="muted">Previous:</span> {log.previous_count}</div>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {user?.canHideLogs && (
+                      <div className="log-card-footer">
+                        <button className="secondary small" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
+                          {log.hidden ? "Unhide" : "Hide"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -446,14 +466,3 @@ export default function Dashboard() {
   );
 }
 
-function hintVerb(type) {
-  switch (type) {
-    case "ban": return "banned";
-    case "temp_ban": return "temp banned";
-    case "kick": return "kicked";
-    case "warning": return "warned";
-    case "bolo": return "BOLO'd";
-    case "note": return "noted";
-    default: return "actioned";
-  }
-}

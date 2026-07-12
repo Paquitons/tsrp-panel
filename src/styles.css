@@ -670,3 +670,67 @@ code {
   font-weight: 700;
   letter-spacing: 0.03em;
 }
+
+/* ---------- User panel ---------- */
+
+.user-panel {
+  background: #12141b;
+  border: 1px solid #1e212b;
+  border-radius: 10px;
+  padding: 18px;
+  max-height: 760px;
+  overflow-y: auto;
+}
+
+.user-panel-header {
+  margin-bottom: 14px;
+}
+
+.user-panel-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-panel-badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.user-panel-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.user-panel-stats > div {
+  background: #0e1016;
+  border: 1px solid #1e212b;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.user-panel-field {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.user-panel-field code {
+  margin-right: 4px;
+}
+
+/* ---------- Clickable activity text ---------- */
+
+.activity-text-clickable {
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.activity-text-clickable:hover {
+  color: #5865f2;
+  text-decoration: underline;
+}

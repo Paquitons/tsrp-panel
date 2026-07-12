@@ -143,13 +143,13 @@ export default function Punishments() {
                 <div className="autocomplete-list">
                   {suggestions.map(s => (
                     <div
-                      key={s.target_roblox_username}
+                      key={s.username}
                       className="autocomplete-item"
-                      onMouseDown={() => pickSuggestion(s.target_roblox_username)}
+                      onMouseDown={() => pickSuggestion(s.username)}
                     >
-                      <Avatar username={s.target_roblox_username} size={26} />
-                      <span className="autocomplete-name">{s.target_roblox_username}</span>
-                      <span className="autocomplete-hint">Recently {hintVerb(s.type)} · {timeAgo(s.created_at)}</span>
+                      <Avatar username={s.username} robloxId={s.robloxId} size={26} />
+                      <span className="autocomplete-name">{s.username}</span>
+                      <span className="autocomplete-hint">{s.hint}</span>
                     </div>
                   ))}
                 </div>
@@ -223,16 +223,4 @@ export default function Punishments() {
       </div>
     </div>
   );
-}
-
-function hintVerb(type) {
-  switch (type) {
-    case "ban": return "banned";
-    case "temp_ban": return "temp banned";
-    case "kick": return "kicked";
-    case "warning": return "warned";
-    case "bolo": return "BOLO'd";
-    case "note": return "noted";
-    default: return "actioned";
-  }
 }
