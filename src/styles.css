@@ -787,3 +787,28 @@ code {
   color: #5865f2;
   text-decoration: underline;
 }
+
+/* ---------- Players in-game widget ---------- */
+
+.players-list {
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.players-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.12s;
+}
+
+.players-list-row:hover {
+  background: #191c25;
+}

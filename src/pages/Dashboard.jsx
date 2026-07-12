@@ -228,12 +228,34 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }
 
+  // ---------- Live in-game players ----------
+  const [livePlayers, setLivePlayers] = useState([]);
+  const [queueCount, setQueueCount] = useState(0);
+  const [playerSearch, setPlayerSearch] = useState("");
+
+  async function fetchLivePlayers() {
+    try {
+      const { players, queueCount } = await apiFetch("/activity/players");
+      setLivePlayers(players);
+      setQueueCount(queueCount);
+    } catch { /* ignore */ }
+  }
+
+  const playersCount = livePlayers.length;
+  const filteredPlayers = playerSearch
+    ? livePlayers.filter(p => p.username?.toLowerCase().includes(playerSearch.toLowerCase()))
+    : livePlayers;
+
   // ---------- Initial load + polling ----------
   useEffect(() => {
     refreshShift();
     refreshLogs();
     fetchActivity();
-    const interval = setInterval(() => { if (!activityPaused) fetchActivity(); }, ACTIVITY_POLL_MS);
+    fetchLivePlayers();
+    const interval = setInterval(() => {
+      if (!activityPaused) fetchActivity();
+      fetchLivePlayers();
+    }, ACTIVITY_POLL_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -283,6 +305,31 @@ export default function Dashboard() {
               <Link to="/players" className="toolbox-btn toolbox-blue">Player Lookup</Link>
             </div>
           </div>
+
+          <div className="card">
+            <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
+            {queueCount > 0 && <p className="muted" style={{ marginTop: -8 }}>{queueCount} in queue</p>}
+            <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} />
+            <div className="players-list">
+              {filteredPlayers.length === 0 ? (
+                <p className="muted">No players online.</p>
+              ) : (
+                filteredPlayers.map(p => (
+                  <div
+                    key={p.username}
+                    className="players-list-row"
+                    onClick={() => {
+                      updateField("targetRobloxUsername", p.username);
+                      setSelectedUser(p.username);
+                    }}
+                  >
+                    <Avatar username={p.username} robloxId={p.robloxId} size={24} />
+                    <span>{p.username}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
         {/* ---------- CENTER: Create log + live activity ---------- */}
@@ -310,6 +357,7 @@ export default function Dashboard() {
                         key={s.username}
                         className="autocomplete-item"
                         onMouseDown={() => {
+                          updateField("targetRobloxUsername", s.username);
                           setShowSuggestions(false);
                           setSelectedUser(s.username);
                         }}
@@ -365,7 +413,11 @@ export default function Dashboard() {
                       <span className="activity-icon-bubble" style={{ background: `${meta.color}22`, color: meta.color }}>{meta.icon}</span>
                       <span
                         className={clickableName ? "activity-text activity-text-clickable" : "activity-text"}
-                        onClick={() => clickableName && setSelectedUser(clickableName)}
+                        onClick={() => {
+                          if (!clickableName) return;
+                          updateField("targetRobloxUsername", clickableName);
+                          setSelectedUser(clickableName);
+                        }}
                       >
                         {describeEvent(e)}
                       </span>
@@ -391,7 +443,14 @@ export default function Dashboard() {
                 {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
                 {logs.map(log => (
                   <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
-                    <div className="log-card-top" onClick={() => setSelectedUser(log.target_roblox_username)} style={{ cursor: "pointer" }}>
+                    <div
+                      className="log-card-top"
+                      onClick={() => {
+                        updateField("targetRobloxUsername", log.target_roblox_username);
+                        setSelectedUser(log.target_roblox_username);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
                       <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={32} />
                       <div className="log-card-identity">
                         <div className="log-card-username">{log.target_roblox_username}</div>

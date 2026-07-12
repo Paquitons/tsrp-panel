@@ -4,27 +4,15 @@ import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "./Avatar";
 
-const ALL_TYPES = [
-  { value: "warning", label: "Warning" },
-  { value: "kick", label: "Kick" },
-  { value: "ban", label: "Ban" },
-  { value: "temp_ban", label: "Temp Ban" },
-  { value: "bolo", label: "Ban BOLO" },
-  { value: "note", label: "Note" },
-];
-
 export default function UserPanel({ username, onClose }) {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const allowedTypes = ALL_TYPES.filter(t => (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value));
-  const [type, setType] = useState(allowedTypes[0]?.value ?? "bolo");
-  const [reason, setReason] = useState("");
-  const [unbanAt, setUnbanAt] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [createStatus, setCreateStatus] = useState(null);
+  const [busyLogId, setBusyLogId] = useState(null);
+  const [editingLogId, setEditingLogId] = useState(null);
+  const [editReason, setEditReason] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   async function load() {
     setLoading(true);
@@ -41,24 +29,51 @@ export default function UserPanel({ username, onClose }) {
 
   useEffect(() => { load(); }, [username]);
 
-  async function createLog(e) {
-    e.preventDefault();
-    setCreating(true);
-    setCreateStatus(null);
+  function canModify(log) {
+    return log.issuer_discord_id === user?.discordId || user?.tier === "management" || user?.tier === "director";
+  }
+
+  async function deleteLog(id) {
+    if (!confirm("Delete this log permanently? This cannot be undone.")) return;
+    setBusyLogId(id);
     try {
-      const body = { targetRobloxUsername: username, type, reason, targetRobloxId: data?.robloxId ?? undefined };
-      if (type === "temp_ban") {
-        if (!unbanAt) throw new Error("An unban date is required for temp bans.");
-        body.unbanAt = new Date(unbanAt).getTime();
-      }
-      await apiFetch("/punishments", { method: "POST", body });
-      setCreateStatus({ ok: true, message: "Log created." });
-      setReason("");
+      await apiFetch(`/punishments/${id}`, { method: "DELETE" });
       load();
     } catch (err) {
-      setCreateStatus({ ok: false, message: err.message });
+      alert(err.message);
     } finally {
-      setCreating(false);
+      setBusyLogId(null);
+    }
+  }
+
+  function startEdit(log) {
+    setEditingLogId(log.id);
+    setEditReason(log.reason);
+    setEditDescription(log.description ?? "");
+  }
+
+  async function saveEdit(id) {
+    setBusyLogId(id);
+    try {
+      await apiFetch(`/punishments/${id}`, { method: "PATCH", body: { reason: editReason, description: editDescription || undefined } });
+      setEditingLogId(null);
+      load();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusyLogId(null);
+    }
+  }
+
+  async function completeBolo(id) {
+    setBusyLogId(id);
+    try {
+      await apiFetch(`/punishments/${id}/complete`, { method: "PATCH" });
+      load();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusyLogId(null);
     }
   }
 
@@ -89,6 +104,10 @@ export default function UserPanel({ username, onClose }) {
             {data.inQueue && <span className="badge" style={{ background: "#2e2712", color: "#f9a825" }}>In Queue</span>}
           </div>
 
+          {data.joinedAt && (
+            <p className="muted" style={{ marginTop: -6 }}>Joined server {timeAgo(data.joinedAt * 1000)}.</p>
+          )}
+
           {data.player && (
             <div className="user-panel-stats">
               <div><span className="muted">Team</span><div>{data.player.Team}</div></div>
@@ -110,22 +129,7 @@ export default function UserPanel({ username, onClose }) {
             </div>
           )}
 
-          <div className="card" style={{ margin: "16px 0" }}>
-            <h2>Log This User</h2>
-            {createStatus && <div className={createStatus.ok ? "success-banner" : "error-banner"}>{createStatus.message}</div>}
-            <form onSubmit={createLog}>
-              <select value={type} onChange={e => setType(e.target.value)}>
-                {allowedTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-              {type === "temp_ban" && (
-                <input type="datetime-local" required value={unbanAt} onChange={e => setUnbanAt(e.target.value)} />
-              )}
-              <input required value={reason} onChange={e => setReason(e.target.value)} placeholder="Reason" />
-              <button className="primary" type="submit" disabled={creating}>{creating ? "…" : "Create"}</button>
-            </form>
-          </div>
-
-          <h2 style={{ fontSize: 14 }}>{data.username}'s Logs</h2>
+          <h2 style={{ fontSize: 14, marginTop: 18 }}>{data.username}'s Logs ({data.punishmentLogs.length})</h2>
           {data.punishmentLogs.length === 0 ? (
             <p className="muted">No logs found.</p>
           ) : (
@@ -136,9 +140,34 @@ export default function UserPanel({ username, onClose }) {
                     <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
                     <span className="muted" style={{ marginLeft: "auto" }}>{timeAgo(log.created_at)}</span>
                   </div>
-                  <div className="log-card-body">
-                    <div className="log-card-field">{log.reason}</div>
-                  </div>
+
+                  {editingLogId === log.id ? (
+                    <div className="log-card-body">
+                      <input value={editReason} onChange={e => setEditReason(e.target.value)} placeholder="Reason" style={{ marginBottom: 8 }} />
+                      <textarea rows={2} value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="Description (optional)" />
+                      <div className="button-row">
+                        <button className="primary small" disabled={busyLogId === log.id} onClick={() => saveEdit(log.id)}>Save</button>
+                        <button className="secondary small" onClick={() => setEditingLogId(null)}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="log-card-body">
+                      <div className="log-card-field">{log.reason}</div>
+                      {log.description && <div className="log-card-field muted">{log.description}</div>}
+                      {log.type === "bolo" && (
+                        log.completed_at
+                          ? <div className="log-card-field" style={{ color: "#69f0ae" }}>✓ Completed {timeAgo(log.completed_at)}</div>
+                          : <button className="secondary small" disabled={busyLogId === log.id} onClick={() => completeBolo(log.id)} style={{ marginTop: 4 }}>Mark BOLO Completed</button>
+                      )}
+                    </div>
+                  )}
+
+                  {canModify(log) && editingLogId !== log.id && (
+                    <div className="log-card-footer" style={{ gap: 6 }}>
+                      <button className="secondary small" onClick={() => startEdit(log)}>Edit</button>
+                      <button className="danger small" disabled={busyLogId === log.id} onClick={() => deleteLog(log.id)}>Delete</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
