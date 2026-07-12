@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS, formatDuration } from "../utils";
 import Avatar from "../components/Avatar";
 import UserPanel from "../components/UserPanel";
+import LogCard from "../components/LogCard";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -442,32 +443,19 @@ export default function Dashboard() {
                 {logsLoading && <p className="muted">Loading…</p>}
                 {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
                 {logs.map(log => (
-                  <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
-                    <div
-                      className="log-card-top"
-                      onClick={() => {
-                        updateField("targetRobloxUsername", log.target_roblox_username);
-                        setSelectedUser(log.target_roblox_username);
+                  <div key={log.id}>
+                    <LogCard
+                      log={log}
+                      onChanged={refreshLogs}
+                      onUsernameClick={(username) => {
+                        updateField("targetRobloxUsername", username);
+                        setSelectedUser(username);
                       }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={32} />
-                      <div className="log-card-identity">
-                        <div className="log-card-username">{log.target_roblox_username}</div>
-                        <div className="muted">{timeAgo(log.created_at)}</div>
-                      </div>
-                      <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
-                    </div>
-                    <div className="log-card-body">
-                      <div className="log-card-field"><span className="muted">Reason:</span> {log.reason}</div>
-                      <div className="log-card-field"><span className="muted">Previous:</span> {log.previous_count}</div>
-                    </div>
+                    />
                     {user?.canHideLogs && (
-                      <div className="log-card-footer">
-                        <button className="secondary small" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
-                          {log.hidden ? "Unhide" : "Hide"}
-                        </button>
-                      </div>
+                      <button className="secondary small log-card-hide-btn" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
+                        {log.hidden ? "Unhide" : "Hide"}
+                      </button>
                     )}
                   </div>
                 ))}

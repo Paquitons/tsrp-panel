@@ -534,6 +534,94 @@ code {
 
 .log-card-hidden { opacity: 0.4; }
 
+/* ---------- Active Ban BOLO highlight (matches the yellow "pinned" treatment) ---------- */
+
+.log-card-active-bolo {
+  border-color: #f9a825;
+  box-shadow: 0 0 0 1px #f9a82533, 0 8px 20px rgba(249,168,37,0.08);
+}
+
+.active-bolo-label {
+  color: #f9a825;
+  font-weight: 700;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.log-card-completed {
+  font-size: 13px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #1e212b;
+}
+
+.log-card-hide-btn {
+  margin-top: 6px;
+  width: 100%;
+}
+
+/* ---------- Log card three-dot dropdown menu ---------- */
+
+.log-card-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.log-card-menu-trigger {
+  background: none;
+  border: none;
+  color: #7d828f;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.log-card-menu-trigger:hover {
+  background: #1e212b;
+  color: #fff;
+}
+
+.log-card-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #181b24;
+  border: 1px solid #2a2e3a;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 30;
+  min-width: 180px;
+  overflow: hidden;
+  animation: scaleIn 0.12s ease;
+}
+
+.log-card-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: #e8e8e8;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.log-card-dropdown button:hover {
+  background: #21242f;
+}
+
+.log-card-dropdown .dropdown-item-accent { color: #f9a825; }
+.log-card-dropdown .dropdown-item-danger { color: #ff6f60; }
+
+.log-card-dropdown .dropdown-empty {
+  display: block;
+  padding: 10px 14px;
+  color: #7d828f;
+  font-size: 12.5px;
+}
+
 .log-card-top {
   display: flex;
   align-items: center;

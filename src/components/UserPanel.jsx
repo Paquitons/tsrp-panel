@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
-import { useAuth } from "../context/AuthContext";
-import { timeAgo, TYPE_LABELS } from "../utils";
+import { timeAgo } from "../utils";
 import Avatar from "./Avatar";
+import LogCard from "./LogCard";
 
 export default function UserPanel({ username, onClose }) {
-  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [busyLogId, setBusyLogId] = useState(null);
-  const [editingLogId, setEditingLogId] = useState(null);
-  const [editReason, setEditReason] = useState("");
-  const [editDescription, setEditDescription] = useState("");
 
   async function load() {
     setLoading(true);
@@ -28,54 +23,6 @@ export default function UserPanel({ username, onClose }) {
   }
 
   useEffect(() => { load(); }, [username]);
-
-  function canModify(log) {
-    return log.issuer_discord_id === user?.discordId || user?.tier === "management" || user?.tier === "director";
-  }
-
-  async function deleteLog(id) {
-    if (!confirm("Delete this log permanently? This cannot be undone.")) return;
-    setBusyLogId(id);
-    try {
-      await apiFetch(`/punishments/${id}`, { method: "DELETE" });
-      load();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setBusyLogId(null);
-    }
-  }
-
-  function startEdit(log) {
-    setEditingLogId(log.id);
-    setEditReason(log.reason);
-    setEditDescription(log.description ?? "");
-  }
-
-  async function saveEdit(id) {
-    setBusyLogId(id);
-    try {
-      await apiFetch(`/punishments/${id}`, { method: "PATCH", body: { reason: editReason, description: editDescription || undefined } });
-      setEditingLogId(null);
-      load();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setBusyLogId(null);
-    }
-  }
-
-  async function completeBolo(id) {
-    setBusyLogId(id);
-    try {
-      await apiFetch(`/punishments/${id}/complete`, { method: "PATCH" });
-      load();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setBusyLogId(null);
-    }
-  }
 
   return (
     <div className="user-panel">
@@ -135,40 +82,7 @@ export default function UserPanel({ username, onClose }) {
           ) : (
             <div className="log-card-list">
               {data.punishmentLogs.map(log => (
-                <div className="log-card" key={log.id}>
-                  <div className="log-card-top">
-                    <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
-                    <span className="muted" style={{ marginLeft: "auto" }}>{timeAgo(log.created_at)}</span>
-                  </div>
-
-                  {editingLogId === log.id ? (
-                    <div className="log-card-body">
-                      <input value={editReason} onChange={e => setEditReason(e.target.value)} placeholder="Reason" style={{ marginBottom: 8 }} />
-                      <textarea rows={2} value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="Description (optional)" />
-                      <div className="button-row">
-                        <button className="primary small" disabled={busyLogId === log.id} onClick={() => saveEdit(log.id)}>Save</button>
-                        <button className="secondary small" onClick={() => setEditingLogId(null)}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="log-card-body">
-                      <div className="log-card-field">{log.reason}</div>
-                      {log.description && <div className="log-card-field muted">{log.description}</div>}
-                      {log.type === "bolo" && (
-                        log.completed_at
-                          ? <div className="log-card-field" style={{ color: "#69f0ae" }}>✓ Completed {timeAgo(log.completed_at)}</div>
-                          : <button className="secondary small" disabled={busyLogId === log.id} onClick={() => completeBolo(log.id)} style={{ marginTop: 4 }}>Mark BOLO Completed</button>
-                      )}
-                    </div>
-                  )}
-
-                  {canModify(log) && editingLogId !== log.id && (
-                    <div className="log-card-footer" style={{ gap: 6 }}>
-                      <button className="secondary small" onClick={() => startEdit(log)}>Edit</button>
-                      <button className="danger small" disabled={busyLogId === log.id} onClick={() => deleteLog(log.id)}>Delete</button>
-                    </div>
-                  )}
-                </div>
+                <LogCard key={log.id} log={log} onChanged={load} />
               ))}
             </div>
           )}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
+import LogCard from "../components/LogCard";
 
 const TYPES = [
   { value: "warning", label: "Warning" },
@@ -192,30 +193,11 @@ export default function Punishments() {
               <p className="muted">No logs found.</p>
             )}
             {results.map(log => (
-              <div className={`log-card ${log.hidden ? "log-card-hidden" : ""}`} key={log.id}>
-                <div className="log-card-top">
-                  <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={36} />
-                  <div className="log-card-identity">
-                    <div className="log-card-username">{log.target_roblox_username}</div>
-                    <div className="muted">{timeAgo(log.created_at)}</div>
-                  </div>
-                  <span className={`badge ${log.type}`}>{TYPE_LABELS[log.type]}</span>
-                </div>
-                <div className="log-card-body">
-                  <div className="log-card-field"><span className="muted">Reason:</span> {log.reason}</div>
-                  {log.description && <div className="log-card-field"><span className="muted">Notes:</span> {log.description}</div>}
-                  {log.target_roblox_id && <div className="log-card-field"><span className="muted">Roblox ID:</span> {log.target_roblox_id}</div>}
-                  <div className="log-card-field"><span className="muted">Previous Punishments:</span> {log.previous_count}</div>
-                </div>
-                <div className="log-card-footer">
-                  <button
-                    className="secondary small"
-                    disabled={hidingId === log.id}
-                    onClick={() => toggleHide(log.id)}
-                  >
-                    {log.hidden ? "Unhide" : "Hide"}
-                  </button>
-                </div>
+              <div key={log.id}>
+                <LogCard log={log} onChanged={search} />
+                <button className="secondary small log-card-hide-btn" disabled={hidingId === log.id} onClick={() => toggleHide(log.id)}>
+                  {log.hidden ? "Unhide" : "Hide"}
+                </button>
               </div>
             ))}
           </div>
