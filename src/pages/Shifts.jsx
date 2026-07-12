@@ -1,12 +1,7 @@
 import { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
-
-function formatDuration(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
-}
+import { formatDuration } from "../utils";
 
 export default function Shifts() {
   const [active, setActive] = useState(null);

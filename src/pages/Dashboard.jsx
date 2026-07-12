@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, TYPE_LABELS } from "../utils";
+import { timeAgo, TYPE_LABELS, formatDuration } from "../utils";
 import Avatar from "../components/Avatar";
 import UserPanel from "../components/UserPanel";
 
@@ -36,12 +36,6 @@ function describeEvent(e) {
     case "emergency": return `${e.team} call from ${e.caller}${e.description ? ` — ${e.description}` : ""}`;
     default: return "Unknown event";
   }
-}
-
-function formatDuration(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
 }
 
 export default function Dashboard() {
@@ -93,8 +87,10 @@ export default function Dashboard() {
     } catch (err) { setShiftError(err.message); }
   }
 
-  const liveDurationSeconds = active
-    ? Math.floor((now - active.started_at) / 1000) - active.break_seconds - (onBreak && active.break_started_at ? Math.floor((now - active.break_started_at) / 1000) : 0)
+  const liveDurationSeconds = active && Number.isFinite(active.started_at)
+    ? Math.floor((now - active.started_at) / 1000)
+      - (active.break_seconds ?? 0)
+      - (onBreak && Number.isFinite(active.break_started_at) ? Math.floor((now - active.break_started_at) / 1000) : 0)
     : 0;
 
   // ---------- Toolbox: Run Command modal ----------

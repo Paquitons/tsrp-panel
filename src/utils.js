@@ -10,6 +10,14 @@ export function timeAgo(timestamp) {
   return new Date(timestamp).toLocaleDateString();
 }
 
+export function formatDuration(seconds) {
+  if (!Number.isFinite(seconds)) return "0h 0m";
+  const safeSeconds = Math.max(0, seconds);
+  const h = Math.floor(safeSeconds / 3600);
+  const m = Math.floor((safeSeconds % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
 export const TYPE_LABELS = {
   warning: "Warning",
   kick: "Kick",
