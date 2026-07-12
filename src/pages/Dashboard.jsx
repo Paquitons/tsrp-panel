@@ -8,6 +8,7 @@ import LogCard from "../components/LogCard";
 import CustomSelect from "../components/CustomSelect";
 import ShiftHistoryModal from "../components/ShiftHistoryModal";
 import LOAModal from "../components/LOAModal";
+import ActivityModal from "../components/ActivityModal";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -162,6 +163,7 @@ export default function Dashboard() {
 
   // ---------- Toolbox: LOA modal ----------
   const [loaModalOpen, setLoaModalOpen] = useState(false);
+  const [activityModalOpen, setActivityModalOpen] = useState(false);
 
   // ---------- Create log ----------
   const allowedTypes = ALL_TYPES.filter(t => (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value));
@@ -450,7 +452,10 @@ export default function Dashboard() {
           </div>
 
           <div className="card">
-            <h2>What's Happening In-Game?</h2>
+            <div className="modal-title-row" style={{ marginBottom: 12 }}>
+              <h2 style={{ margin: 0 }}>What's Happening In-Game?</h2>
+              <button className="secondary small" onClick={() => setActivityModalOpen(true)}>Expand</button>
+            </div>
             {events.length === 0 ? (
               <p className="muted">No recent activity.</p>
             ) : (
@@ -563,6 +568,9 @@ export default function Dashboard() {
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
+
+      {/* ---------- Activity modal ---------- */}
+      {activityModalOpen && <ActivityModal onClose={() => setActivityModalOpen(false)} onUserClick={openUser} />}
     </div>
   );
 }

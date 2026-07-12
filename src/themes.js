@@ -90,6 +90,32 @@ export const THEMES = {
       "--btn-pink-1": "#5c8fa5", "--btn-pink-2": "#4a748a",
     },
   },
+  monochrome: {
+    label: "Monochrome",
+    vars: {
+      "--bg-gradient-start": "#161616", "--bg-gradient-end": "#0c0c0c",
+      "--card-bg": "#141414", "--sidebar-bg": "#141414",
+      "--accent": "#8a8a8a", "--accent-hover": "#707070",
+      "--btn-green-1": "#5c5c5c", "--btn-green-2": "#484848",
+      "--btn-orange-1": "#6b6b6b", "--btn-orange-2": "#575757",
+      "--btn-red-1": "#7a5555", "--btn-red-2": "#634444",
+      "--btn-blue-1": "#5c5c5c", "--btn-blue-2": "#484848",
+      "--btn-pink-1": "#6b6b6b", "--btn-pink-2": "#575757",
+    },
+  },
+  charcoal: {
+    label: "Charcoal Neutral",
+    vars: {
+      "--bg-gradient-start": "#17181a", "--bg-gradient-end": "#0d0e0f",
+      "--card-bg": "#161718", "--sidebar-bg": "#161718",
+      "--accent": "#7a8a99", "--accent-hover": "#647380",
+      "--btn-green-1": "#5a7a68", "--btn-green-2": "#486356",
+      "--btn-orange-1": "#8a7455", "--btn-orange-2": "#725f47",
+      "--btn-red-1": "#87605c", "--btn-red-2": "#6f4d4a",
+      "--btn-blue-1": "#5c7080", "--btn-blue-2": "#4a5c6b",
+      "--btn-pink-1": "#75677a", "--btn-pink-2": "#605365",
+    },
+  },
 };
 
 export function applyTheme(key) {

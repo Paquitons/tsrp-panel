@@ -535,6 +535,8 @@ code {
   gap: 12px;
   max-height: 640px;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 4px;
 }
 
 .log-card {
@@ -557,7 +559,8 @@ code {
 
 .log-card-active-bolo {
   border-color: #f9a825;
-  box-shadow: 0 0 0 1px #f9a82533, 0 8px 20px rgba(249,168,37,0.08);
+  border-width: 2px;
+  background: linear-gradient(180deg, rgba(249,168,37,0.06), rgba(249,168,37,0.02));
 }
 
 .active-bolo-label {
@@ -1262,3 +1265,80 @@ code {
 .loa-status-pending { background: #2e2712; color: #f9a825; }
 .loa-status-approved { background: #14251a; color: #69f0ae; }
 .loa-status-denied { background: #2a1517; color: #ff6f60; }
+
+/* ---------- Activity Modal (popup with search + filters) ---------- */
+
+.activity-modal {
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.activity-modal-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.activity-modal-toolbar input { margin-bottom: 0; }
+
+.activity-filter-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.activity-filter-trigger {
+  width: 42px;
+  height: 100%;
+  background: #1a1d26;
+  border: 1px solid #262a36;
+  border-radius: 6px;
+  color: #d0d3d9;
+  font-size: 16px;
+  cursor: pointer;
+}
+.activity-filter-trigger:hover { background: #21242f; }
+
+.activity-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #181b24;
+  border: 1px solid #2a2e3a;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 40;
+  min-width: 220px;
+  padding: 8px;
+  animation: scaleIn 0.12s ease;
+}
+
+.activity-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 13.5px;
+  color: #d0d3d9;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.activity-filter-option:hover { background: #21242f; }
+
+.activity-modal-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activity-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #14161e;
+  border: 1px solid #1e212b;
+  border-radius: 10px;
+  font-size: 14px;
+  animation: fadeInUp 0.2s ease both;
+}
