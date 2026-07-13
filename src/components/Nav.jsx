@@ -9,6 +9,9 @@ export default function Nav() {
       <h1>TSRP Panel</h1>
       <nav>
         <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>Dashboard</NavLink>
+        {(user?.tier === "management" || user?.tier === "director") && (
+          <NavLink to="/hr" className={({ isActive }) => (isActive ? "active" : "")}>HR Panel</NavLink>
+        )}
       </nav>
       <div className="sidebar-footer">
         <div className="sidebar-user">
