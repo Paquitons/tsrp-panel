@@ -46,6 +46,45 @@ export function discordAvatarUrl(discordId, avatarHash, size = 64) {
   return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
 }
 
+/**
+ * Converts a date-input value ("YYYY-MM-DD", from an <input type="date">)
+ * into an epoch-ms timestamp representing LOCAL midnight of that date.
+ *
+ * This is NOT the same as `new Date(dateStr).getTime()` -- a date-only ISO
+ * string with no time component is parsed by JS as UTC midnight, not local
+ * midnight. In any timezone behind UTC (every US timezone), that shifts
+ * the effective date back by one day the moment it's displayed or compared
+ * against local time -- which is exactly the "always picks the day before"
+ * bug this fixes.
+ */
+export function parseLocalDateInput(dateStr) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day).getTime();
+}
+
+/**
+ * Converts an epoch-ms timestamp into a date-input value ("YYYY-MM-DD")
+ * using LOCAL date components -- NOT `.toISOString().slice(0, 10)`, which
+ * reports the UTC date and has the same off-by-one risk in reverse.
+ */
+export function toDateInputValue(epochMs) {
+  const d = new Date(epochMs);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Today's date as a date-input value, in the LOCAL timezone -- NOT
+ * `new Date().toISOString().slice(0, 10)`, which reports the UTC date and
+ * can show tomorrow's date as "today" late in the evening in timezones
+ * behind UTC.
+ */
+export function todayLocalISO() {
+  return toDateInputValue(Date.now());
+}
+
 export const TYPE_LABELS = {
   warning: "Warning",
   kick: "Kick",

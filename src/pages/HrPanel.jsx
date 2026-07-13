@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, discordAvatarUrl } from "../utils";
+import { timeAgo, discordAvatarUrl, parseLocalDateInput, toDateInputValue, todayLocalISO } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
 
 function groupByDiscordId(strikes) {
@@ -20,10 +20,6 @@ function expiresLabel(expiresAt) {
   const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
   if (days > 0) return `expires in ${days}d ${hours}h`;
   return `expires in ${hours}h`;
-}
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export default function HrPanel() {
@@ -151,7 +147,7 @@ export default function HrPanel() {
 
   function openExtend(discordId, currentEndDate) {
     setExtendingDiscordId(discordId);
-    setExtendDate(new Date(currentEndDate).toISOString().slice(0, 10));
+    setExtendDate(toDateInputValue(currentEndDate));
     setExtendError(null);
   }
 
@@ -159,7 +155,7 @@ export default function HrPanel() {
     e.preventDefault();
     setExtendError(null);
     try {
-      await apiFetch(`/loa/extend/${extendingDiscordId}`, { method: "PATCH", body: { newEndDate: new Date(extendDate).getTime() } });
+      await apiFetch(`/loa/extend/${extendingDiscordId}`, { method: "PATCH", body: { newEndDate: parseLocalDateInput(extendDate) } });
       setExtendingDiscordId(null);
       await refresh();
     } catch (err) {
@@ -302,7 +298,7 @@ export default function HrPanel() {
             {extendError && <div className="error-banner">{extendError}</div>}
             <form onSubmit={submitExtend}>
               <label>New Return Date</label>
-              <input type="date" required min={todayISO()} value={extendDate} onChange={e => setExtendDate(e.target.value)} />
+              <input type="date" required min={todayLocalISO()} value={extendDate} onChange={e => setExtendDate(e.target.value)} />
               <div className="button-row">
                 <button className="primary" type="submit">Save</button>
                 <button className="secondary" type="button" onClick={() => setExtendingDiscordId(null)}>Cancel</button>

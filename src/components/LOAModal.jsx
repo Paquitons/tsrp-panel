@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { discordAvatarUrl } from "../utils";
-
-function todayISO() {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
-}
+import { discordAvatarUrl, parseLocalDateInput, todayLocalISO } from "../utils";
 
 export default function LOAModal({ onClose }) {
   const { user } = useAuth();
@@ -52,8 +47,8 @@ export default function LOAModal({ onClose }) {
       await apiFetch("/loa", {
         method: "POST",
         body: {
-          startDate: new Date(startDate).getTime(),
-          endDate: new Date(endDate).getTime(),
+          startDate: parseLocalDateInput(startDate),
+          endDate: parseLocalDateInput(endDate),
           reason,
         },
       });
@@ -110,11 +105,11 @@ export default function LOAModal({ onClose }) {
               <div className="loa-date-row">
                 <div>
                   <label>Start Date</label>
-                  <input type="date" required min={todayISO()} value={startDate} onChange={e => setStartDate(e.target.value)} />
+                  <input type="date" required min={todayLocalISO()} value={startDate} onChange={e => setStartDate(e.target.value)} />
                 </div>
                 <div>
                   <label>End Date</label>
-                  <input type="date" required min={startDate || todayISO()} value={endDate} onChange={e => setEndDate(e.target.value)} />
+                  <input type="date" required min={startDate || todayLocalISO()} value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </div>
               </div>
               <label>Reason</label>
