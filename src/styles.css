@@ -1297,6 +1297,7 @@ code {
 .loa-status-pending { background: #2e2712; color: #f9a825; }
 .loa-status-approved { background: #14251a; color: #69f0ae; }
 .loa-status-denied { background: #2a1517; color: #ff6f60; }
+.loa-status-ended { background: #1e212b; color: #8a8f99; }
 
 /* ---------- Activity Modal (popup with search + filters) ---------- */
 

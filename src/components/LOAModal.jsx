@@ -16,20 +16,24 @@ export default function LOAModal({ onClose }) {
   const [submitError, setSubmitError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [mine, setMine] = useState([]);
-  const [pending, setPending] = useState([]);
+  const [myPending, setMyPending] = useState(null);
+  const [myActive, setMyActive] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [allPending, setAllPending] = useState([]);
   const [canReview, setCanReview] = useState(false);
 
   async function refresh() {
     try {
-      const { requests } = await apiFetch("/loa/mine");
-      setMine(requests);
+      const { pending, active, history } = await apiFetch("/loa/mine");
+      setMyPending(pending);
+      setMyActive(active);
+      setHistory(history);
     } catch { /* ignore */ }
 
     if (user?.canReviewLOA) {
       try {
         const { requests } = await apiFetch("/loa/pending");
-        setPending(requests);
+        setAllPending(requests);
         setCanReview(true);
       } catch {
         setCanReview(false);
@@ -63,9 +67,9 @@ export default function LOAModal({ onClose }) {
     }
   }
 
-  async function review(id, status) {
+  async function review(requestId, status) {
     try {
-      await apiFetch(`/loa/${id}`, { method: "PATCH", body: { status } });
+      await apiFetch(`/loa/${requestId}`, { method: "PATCH", body: { status } });
       await refresh();
     } catch (err) {
       alert(err.message);
@@ -80,28 +84,50 @@ export default function LOAModal({ onClose }) {
           <button className="secondary small" onClick={onClose}>Close</button>
         </div>
 
-        {submitError && <div className="error-banner">{submitError}</div>}
-        <form onSubmit={submit} className="loa-form">
-          <div className="loa-date-row">
-            <div>
-              <label>Start Date</label>
-              <input type="date" required min={todayISO()} value={startDate} onChange={e => setStartDate(e.target.value)} />
+        {myActive ? (
+          <div className="loa-card" style={{ marginBottom: 16 }}>
+            <div className="loa-card-top">
+              <span className="log-card-username">Currently on LOA</span>
+              <span className="badge loa-status-approved">active</span>
             </div>
-            <div>
-              <label>End Date</label>
-              <input type="date" required min={startDate || todayISO()} value={endDate} onChange={e => setEndDate(e.target.value)} />
-            </div>
+            <div className="muted">{new Date(myActive.start_date).toLocaleDateString()} to {new Date(myActive.end_date).toLocaleDateString()}</div>
+            <div className="muted">{myActive.reason}</div>
           </div>
-          <label>Reason</label>
-          <textarea rows={2} required value={reason} onChange={e => setReason(e.target.value)} />
-          <button className="primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : "Submit Request"}</button>
-        </form>
+        ) : myPending ? (
+          <div className="loa-card" style={{ marginBottom: 16 }}>
+            <div className="loa-card-top">
+              <span className="log-card-username">Request pending approval</span>
+              <span className="badge loa-status-pending">pending</span>
+            </div>
+            <div className="muted">{new Date(myPending.start_date).toLocaleDateString()} to {new Date(myPending.end_date).toLocaleDateString()}</div>
+            <div className="muted">{myPending.reason}</div>
+          </div>
+        ) : (
+          <>
+            {submitError && <div className="error-banner">{submitError}</div>}
+            <form onSubmit={submit} className="loa-form">
+              <div className="loa-date-row">
+                <div>
+                  <label>Start Date</label>
+                  <input type="date" required min={todayISO()} value={startDate} onChange={e => setStartDate(e.target.value)} />
+                </div>
+                <div>
+                  <label>End Date</label>
+                  <input type="date" required min={startDate || todayISO()} value={endDate} onChange={e => setEndDate(e.target.value)} />
+                </div>
+              </div>
+              <label>Reason</label>
+              <textarea rows={2} required value={reason} onChange={e => setReason(e.target.value)} />
+              <button className="primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : "Submit Request"}</button>
+            </form>
+          </>
+        )}
 
-        {canReview && pending.length > 0 && (
+        {canReview && allPending.length > 0 && (
           <>
             <h3 className="modal-subheading">Pending Requests</h3>
             <div className="loa-list">
-              {pending.map(r => (
+              {allPending.map(r => (
                 <div className="loa-card" key={r.id}>
                   <div className="loa-card-top">
                     <span className="log-card-username">{r.discord_id}</span>
@@ -118,12 +144,12 @@ export default function LOAModal({ onClose }) {
           </>
         )}
 
-        <h3 className="modal-subheading">My Requests</h3>
-        {mine.length === 0 ? (
+        <h3 className="modal-subheading">My History</h3>
+        {history.length === 0 ? (
           <p className="muted">No LOA requests yet.</p>
         ) : (
           <div className="loa-list">
-            {mine.map(r => (
+            {history.map(r => (
               <div className="loa-card" key={r.id}>
                 <div className="loa-card-top">
                   <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
