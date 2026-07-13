@@ -53,6 +53,7 @@ html, body, #root {
 .layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
 }
 
 /* ---------- Sidebar ---------- */
@@ -849,14 +850,26 @@ code {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 320px 1fr 400px;
+  grid-template-columns: minmax(260px, 320px) minmax(320px, 1fr) minmax(280px, 400px);
   gap: 16px;
   align-items: start;
   flex: 1;
   min-height: 0;
 }
 
-@media (max-width: 1150px) {
+/* Intermediate tier: shrinks the side columns instead of jumping straight
+   from full-width fixed columns to a fully stacked layout -- without this,
+   tablet-landscape widths (e.g. iPad 11" landscape) looked cramped because
+   the grid still tried to reserve full desktop-width side columns in a
+   much narrower space. */
+@media (max-width: 1300px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(220px, 260px) minmax(260px, 1fr) minmax(240px, 320px);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 1000px) {
   .dashboard-content { overflow: visible; height: auto; }
   .dashboard-grid { grid-template-columns: 1fr; flex: none; }
   .dashboard-col { max-height: none !important; overflow: visible !important; }
@@ -1114,6 +1127,14 @@ code {
   max-height: min(240px, 40vh);
   overflow-y: auto;
   animation: scaleIn 0.12s ease;
+}
+
+/* Portal variant: positioned with fixed viewport coordinates (set inline
+   via JS), so it's never subject to any ancestor's overflow clipping. */
+.custom-select-dropdown-portal {
+  position: fixed;
+  max-height: min(280px, calc(100vh - 24px));
+  z-index: 500;
 }
 
 .custom-select-option {
@@ -1406,4 +1427,110 @@ code {
   .modal { padding: 16px; }
   .card { padding: 16px; }
   .toolbox-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Portal dropdown base + remaining variants ---------- */
+
+.portal-dropdown {
+  position: fixed;
+  background: #181b24;
+  border: 1px solid #2a2e3a;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 500;
+  max-height: min(320px, calc(100vh - 24px));
+  overflow-y: auto;
+  animation: scaleIn 0.12s ease;
+  padding: 6px;
+}
+
+.log-card-dropdown-portal {
+  min-width: 180px;
+  padding: 0;
+}
+.log-card-dropdown-portal button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: #e8e8e8;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.log-card-dropdown-portal button:hover { background: #21242f; }
+.log-card-dropdown-portal .dropdown-item-accent { color: #f9a825; }
+.log-card-dropdown-portal .dropdown-item-danger { color: #ff6f60; }
+.log-card-dropdown-portal .dropdown-empty {
+  display: block;
+  padding: 10px 14px;
+  color: #7d828f;
+  font-size: 12.5px;
+}
+
+.autocomplete-list-portal {
+  padding: 0;
+}
+
+.activity-filter-dropdown-portal {
+  width: max-content;
+  min-width: 220px;
+  max-width: min(280px, calc(100vw - 40px));
+  padding: 8px;
+}
+
+/* ---------- Compact page header with toggleable info ---------- */
+
+.page-header-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.page-header-compact h1 {
+  margin: 0;
+}
+
+.page-header-info-wrap {
+  position: relative;
+}
+
+.page-header-info-btn {
+  background: none;
+  border: 1px solid #262a36;
+  border-radius: 6px;
+  color: #7d828f;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.page-header-info-btn:hover { background: #1a1d26; color: #fff; }
+
+.page-header-info-portal {
+  padding: 12px 14px;
+  max-width: 280px;
+  font-size: 13px;
+  color: #d0d3d9;
+}
+
+/* ---------- Activity dot (replaces icon-bubble glyphs) ---------- */
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---------- Theme switcher toggle dot (replaces emoji) ---------- */
+
+.theme-switcher-toggle-dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #4caf82, #d99a52, #c96a64, #6670d6, #c07394, #4caf82);
 }

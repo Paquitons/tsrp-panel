@@ -6,6 +6,7 @@ import Avatar from "../components/Avatar";
 import UserPanel from "../components/UserPanel";
 import LogCard from "../components/LogCard";
 import CustomSelect from "../components/CustomSelect";
+import PortalDropdown from "../components/PortalDropdown";
 import ShiftHistoryModal from "../components/ShiftHistoryModal";
 import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
@@ -22,22 +23,32 @@ const ALL_TYPES = [
 const POLL_MS = 15_000;
 
 const ACTIVITY_META = {
-  join:      { icon: "→", color: "#69f0ae" },
-  leave:     { icon: "←", color: "#8a8f99" },
-  kill:      { icon: "✕", color: "#e53935" },
-  command:   { icon: "›", color: "#64b5f6" },
-  modcall:   { icon: "!", color: "#f9a825" },
-  emergency: { icon: "!", color: "#ff6f60" },
+  join:      { color: "#69f0ae" },
+  leave:     { color: "#8a8f99" },
+  kill:      { color: "#e53935" },
+  command:   { color: "#64b5f6" },
+  modcall:   { color: "#f9a825" },
+  emergency: { color: "#ff6f60" },
 };
+
+// System/automated accounts and unset callers should never be clickable,
+// and a missing caller should read as "Server" rather than the literal
+// string "null".
+function displayName(name) {
+  return name ?? "Server";
+}
+function isClickable(name) {
+  return !!name && name !== "Remote Server";
+}
 
 function describeEvent(e) {
   switch (e.type) {
-    case "join": return `${e.player} joined the server`;
-    case "leave": return `${e.player} left the server`;
-    case "kill": return `${e.killer} killed ${e.killed}`;
-    case "command": return `${e.player} ran ${e.command}`;
-    case "modcall": return `Mod call from ${e.caller}`;
-    case "emergency": return `${e.team} call from ${e.caller}${e.description ? `: ${e.description}` : ""}`;
+    case "join": return `${displayName(e.player)} joined the server`;
+    case "leave": return `${displayName(e.player)} left the server`;
+    case "kill": return `${displayName(e.killer)} killed ${displayName(e.killed)}`;
+    case "command": return `${displayName(e.player)} ran ${e.command}`;
+    case "modcall": return `Mod call from ${displayName(e.caller)}`;
+    case "emergency": return `${e.team} call from ${displayName(e.caller)}${e.description ? `: ${e.description}` : ""}`;
     default: return "Unknown event";
   }
 }
@@ -174,6 +185,7 @@ export default function Dashboard() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef(null);
+  const usernameInputRef = useRef(null);
 
   function updateField(key, value) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -305,11 +317,19 @@ export default function Dashboard() {
 
   useEffect(() => { refreshLogs(); }, [logSearch]);
 
+  const [headerInfoOpen, setHeaderInfoOpen] = useState(false);
+  const headerInfoRef = useRef(null);
+
   return (
     <div className="content dashboard-content">
-      <div className="page-header">
+      <div className="page-header page-header-compact">
         <h1>Dashboard</h1>
-        <p className="muted">Everything you need in one place: shifts, logs, activity, and quick actions.</p>
+        <div className="page-header-info-wrap">
+          <button ref={headerInfoRef} className="page-header-info-btn" onClick={() => setHeaderInfoOpen(o => !o)}>⋯</button>
+          <PortalDropdown anchorRef={headerInfoRef} open={headerInfoOpen} onClose={() => setHeaderInfoOpen(false)} className="page-header-info-portal">
+            <p style={{ margin: 0 }}>Everything you need in one place: shifts, logs, activity, and quick actions.</p>
+          </PortalDropdown>
+        </div>
       </div>
 
       <div className="dashboard-grid">
@@ -406,29 +426,27 @@ export default function Dashboard() {
               <label>User</label>
               <div className="autocomplete-wrap">
                 <input
+                  ref={usernameInputRef}
                   required
                   autoComplete="off"
                   value={form.targetRobloxUsername}
                   onChange={e => onUsernameChange(e.target.value)}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                   placeholder="Enter Roblox username"
                 />
-                {showSuggestions && (
-                  <div className="autocomplete-list">
-                    {suggestions.map(s => (
-                      <div
-                        key={s.username}
-                        className="autocomplete-item"
-                        onMouseDown={() => { updateField("targetRobloxUsername", s.username); setShowSuggestions(false); }}
-                      >
-                        <Avatar username={s.username} robloxId={s.robloxId} size={26} />
-                        <span className="autocomplete-name">{s.username}</span>
-                        <span className="autocomplete-hint">{s.hint}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <PortalDropdown anchorRef={usernameInputRef} open={showSuggestions} onClose={() => setShowSuggestions(false)} className="autocomplete-list-portal">
+                  {suggestions.map(s => (
+                    <div
+                      key={s.username}
+                      className="autocomplete-item"
+                      onClick={() => { updateField("targetRobloxUsername", s.username); setShowSuggestions(false); }}
+                    >
+                      <Avatar username={s.username} robloxId={s.robloxId} size={26} />
+                      <span className="autocomplete-name">{s.username}</span>
+                      <span className="autocomplete-hint">{s.hint}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
               </div>
 
               <label>Type</label>
@@ -461,14 +479,15 @@ export default function Dashboard() {
             ) : (
               <div className="activity-feed">
                 {events.slice(0, 30).map((e, i) => {
-                  const meta = ACTIVITY_META[e.type] ?? { icon: "•", color: "#8a8f99" };
-                  const clickableName = e.player || e.killer || e.caller || null;
+                  const meta = ACTIVITY_META[e.type] ?? { color: "#8a8f99" };
+                  const rawName = e.player || e.killer || e.caller || null;
+                  const clickable = isClickable(rawName);
                   return (
                     <div className="activity-row" key={i}>
-                      <span className="activity-icon-bubble" style={{ background: `${meta.color}22`, color: meta.color }}>{meta.icon}</span>
+                      <span className="activity-dot" style={{ background: meta.color }} />
                       <span
-                        className={clickableName ? "activity-text activity-text-clickable" : "activity-text"}
-                        onClick={() => clickableName && openUser(clickableName)}
+                        className={clickable ? "activity-text activity-text-clickable" : "activity-text"}
+                        onClick={() => clickable && openUser(rawName)}
                       >
                         {describeEvent(e)}
                       </span>

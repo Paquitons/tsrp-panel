@@ -12,7 +12,9 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="theme-switcher">
-      <button className="theme-switcher-toggle" onClick={() => setOpen(o => !o)}>🎨</button>
+      <button className="theme-switcher-toggle" onClick={() => setOpen(o => !o)} title="Theme (dev only)">
+        <span className="theme-switcher-toggle-dot" />
+      </button>
       {open && (
         <div className="theme-switcher-panel">
           <div className="theme-switcher-title">Theme (dev only)</div>

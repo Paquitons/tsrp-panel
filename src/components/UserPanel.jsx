@@ -54,7 +54,7 @@ export default function UserPanel({ username, discordId, onClose }) {
   return (
     <div className="user-panel">
       <div className="user-panel-header">
-        <button className="secondary small" onClick={onClose}>← Back</button>
+        <button className="secondary small" onClick={onClose}>Back</button>
       </div>
 
       {loading && <p className="muted">Loading…</p>}

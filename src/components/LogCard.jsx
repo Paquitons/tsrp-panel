@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS, discordAvatarUrl } from "../utils";
 import Avatar from "./Avatar";
 import CustomSelect from "./CustomSelect";
+import PortalDropdown from "./PortalDropdown";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -14,13 +15,21 @@ const ALL_TYPES = [
   { value: "note", label: "Note" },
 ];
 
+// System/automated accounts that should never be treated as clickable
+// players -- clicking them would try (and fail) to open a real profile.
+const NON_CLICKABLE_NAMES = ["Remote Server"];
+
+function isClickableName(name) {
+  return !!name && !NON_CLICKABLE_NAMES.includes(name);
+}
+
 /**
  * Renders a single punishment log matching the reference layout: the
  * enforcing staff member's Discord identity at the top, then the type,
  * then who got punished (User:), Roblox Player ID, Reason, Previous
- * Punishments, and a timestamp at the bottom. A three-dot menu replaces
- * always-visible action buttons. Shared across the Dashboard, standalone
- * Punishment Search page, and User Panel.
+ * Punishments, and a timestamp at the bottom. A three-dot menu (rendered
+ * via a portal so it can never get clipped by a scrolling ancestor)
+ * replaces always-visible action buttons.
  */
 export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick }) {
   const { user } = useAuth();
@@ -29,21 +38,15 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   const [editReason, setEditReason] = useState(log.reason);
   const [editType, setEditType] = useState(log.type);
   const [busy, setBusy] = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    function onClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
+  const menuTriggerRef = useRef(null);
 
   const canModify = log.issuer_discord_id === user?.discordId || user?.tier === "management" || user?.tier === "director";
   const editableTypes = ALL_TYPES.filter(t =>
     (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value) || t.value === log.type
   );
   const isActiveBolo = log.type === "bolo" && !log.completed_at;
+  const issuerClickable = isClickableName(log.issuer_username) && !!onIssuerClick;
+  const targetClickable = isClickableName(log.target_roblox_username) && !!onUsernameClick;
 
   async function handleDelete() {
     setMenuOpen(false);
@@ -95,25 +98,23 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           alt=""
         />
         <span
-          className="log-card-issuer-name log-card-clickable-name"
-          style={onIssuerClick ? { cursor: "pointer" } : undefined}
-          onClick={() => onIssuerClick?.(log.issuer_discord_id)}
+          className={issuerClickable ? "log-card-issuer-name log-card-clickable-name" : "log-card-issuer-name"}
+          style={issuerClickable ? { cursor: "pointer" } : undefined}
+          onClick={() => issuerClickable && onIssuerClick(log.issuer_discord_id)}
         >
           {log.issuer_username ?? log.issuer_discord_id}
         </span>
 
-        <div className="log-card-menu" ref={menuRef}>
-          <button className="log-card-menu-trigger" onClick={() => setMenuOpen(o => !o)} disabled={busy}>⋮</button>
-          {menuOpen && (
-            <div className="log-card-dropdown">
-              {canModify && <button onClick={() => { setEditing(true); setMenuOpen(false); }}>✎ Edit</button>}
-              {log.type === "bolo" && !log.completed_at && (
-                <button onClick={handleComplete} className="dropdown-item-accent">🔨 Complete (Ban User)</button>
-              )}
-              {canModify && <button onClick={handleDelete} className="dropdown-item-danger">🗑 Delete</button>}
-              {!canModify && log.type !== "bolo" && <span className="dropdown-empty">No actions available</span>}
-            </div>
-          )}
+        <div className="log-card-menu">
+          <button ref={menuTriggerRef} className="log-card-menu-trigger" onClick={() => setMenuOpen(o => !o)} disabled={busy}>⋮</button>
+          <PortalDropdown anchorRef={menuTriggerRef} open={menuOpen} onClose={() => setMenuOpen(false)} align="right" className="log-card-dropdown-portal">
+            {canModify && <button onClick={() => { setEditing(true); setMenuOpen(false); }}>Edit</button>}
+            {log.type === "bolo" && !log.completed_at && (
+              <button onClick={handleComplete} className="dropdown-item-accent">Complete (Ban User)</button>
+            )}
+            {canModify && <button onClick={handleDelete} className="dropdown-item-danger">Delete</button>}
+            {!canModify && log.type !== "bolo" && <span className="dropdown-empty">No actions available</span>}
+          </PortalDropdown>
         </div>
       </div>
 
@@ -137,9 +138,9 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           <div className="log-card-field">
             <span className="muted">User:</span>{" "}
             <span
-              className="log-card-target log-card-clickable-name"
-              style={onUsernameClick ? { cursor: "pointer" } : undefined}
-              onClick={() => onUsernameClick?.(log.target_roblox_username)}
+              className={targetClickable ? "log-card-target log-card-clickable-name" : "log-card-target"}
+              style={targetClickable ? { cursor: "pointer" } : undefined}
+              onClick={() => targetClickable && onUsernameClick(log.target_roblox_username)}
             >
               <Avatar username={log.target_roblox_username} robloxId={log.target_roblox_id} size={18} />
               {log.target_roblox_username}
