@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
  * or floating panel that needs to reliably show its full content instead of
  * being cut off by whatever scrollable container happens to hold it.
  */
-export default function PortalDropdown({ anchorRef, open, onClose, align = "left", children, className = "" }) {
+export default function PortalDropdown({ anchorRef, open, onClose, align = "left", matchWidth = true, children, className = "" }) {
   const [coords, setCoords] = useState(null);
   const dropdownRef = useRef(null);
 
@@ -18,7 +18,7 @@ export default function PortalDropdown({ anchorRef, open, onClose, align = "left
       top: rect.bottom + 4,
       left: align === "right" ? undefined : rect.left,
       right: align === "right" ? window.innerWidth - rect.right : undefined,
-      width: rect.width,
+      width: matchWidth ? rect.width : undefined,
     });
   }
 

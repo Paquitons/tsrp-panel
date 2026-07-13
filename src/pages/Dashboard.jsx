@@ -163,13 +163,39 @@ export default function Dashboard() {
   // ---------- Toolbox: Player Lookup quick-search modal ----------
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
   const [lookupValue, setLookupValue] = useState("");
+  const [lookupSuggestions, setLookupSuggestions] = useState([]);
+  const [showLookupSuggestions, setShowLookupSuggestions] = useState(false);
+  const lookupInputRef = useRef(null);
+  const lookupDebounceRef = useRef(null);
+
+  function onLookupValueChange(value) {
+    setLookupValue(value);
+    clearTimeout(lookupDebounceRef.current);
+    if (value.trim().length < 2) {
+      setLookupSuggestions([]);
+      setShowLookupSuggestions(false);
+      return;
+    }
+    lookupDebounceRef.current = setTimeout(async () => {
+      try {
+        const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
+        setLookupSuggestions(suggestions);
+        setShowLookupSuggestions(suggestions.length > 0);
+      } catch { setLookupSuggestions([]); }
+    }, 250);
+  }
+
+  function selectLookupSuggestion(username) {
+    setShowLookupSuggestions(false);
+    setSelectedUser({ type: "username", value: username });
+    setLookupModalOpen(false);
+    setLookupValue("");
+  }
 
   function openLookup(e) {
     e.preventDefault();
     if (!lookupValue.trim()) return;
-    setSelectedUser({ type: "username", value: lookupValue.trim() });
-    setLookupModalOpen(false);
-    setLookupValue("");
+    selectLookupSuggestion(lookupValue.trim());
   }
 
   // ---------- Toolbox: LOA modal ----------
@@ -326,7 +352,7 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
         <div className="page-header-info-wrap">
           <button ref={headerInfoRef} className="page-header-info-btn" onClick={() => setHeaderInfoOpen(o => !o)}>⋯</button>
-          <PortalDropdown anchorRef={headerInfoRef} open={headerInfoOpen} onClose={() => setHeaderInfoOpen(false)} className="page-header-info-portal">
+          <PortalDropdown anchorRef={headerInfoRef} open={headerInfoOpen} onClose={() => setHeaderInfoOpen(false)} matchWidth={false} className="page-header-info-portal">
             <p style={{ margin: 0 }}>Everything you need in one place: shifts, logs, activity, and quick actions.</p>
           </PortalDropdown>
         </div>
@@ -559,7 +585,27 @@ export default function Dashboard() {
             <h2>Player Lookup</h2>
             <form onSubmit={openLookup}>
               <label>Roblox Username</label>
-              <input required autoFocus value={lookupValue} onChange={e => setLookupValue(e.target.value)} placeholder="Enter a username" />
+              <div className="autocomplete-wrap">
+                <input
+                  ref={lookupInputRef}
+                  required
+                  autoFocus
+                  autoComplete="off"
+                  value={lookupValue}
+                  onChange={e => onLookupValueChange(e.target.value)}
+                  onFocus={() => lookupSuggestions.length > 0 && setShowLookupSuggestions(true)}
+                  placeholder="Enter a username"
+                />
+                <PortalDropdown anchorRef={lookupInputRef} open={showLookupSuggestions} onClose={() => setShowLookupSuggestions(false)} className="autocomplete-list-portal">
+                  {lookupSuggestions.map(s => (
+                    <div key={s.username} className="autocomplete-item" onClick={() => selectLookupSuggestion(s.username)}>
+                      <Avatar username={s.username} robloxId={s.robloxId} size={26} />
+                      <span className="autocomplete-name">{s.username}</span>
+                      <span className="autocomplete-hint">{s.hint}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
+              </div>
               <div className="button-row">
                 <button className="primary" type="submit">Look Up</button>
                 <button className="secondary" type="button" onClick={() => setLookupModalOpen(false)}>Close</button>

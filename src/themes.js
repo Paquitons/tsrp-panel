@@ -22,6 +22,22 @@ export const THEMES = {
       "--btn-pink-1": "#c07394", "--btn-pink-2": "#a75c7c",
     },
   },
+  midnight_vivid: {
+    label: "Midnight Blue (Vivid)",
+    vars: {
+      "--bg-gradient-start": "#14171f",
+      "--bg-gradient-end": "#0b0d12",
+      "--card-bg": "#12141b",
+      "--sidebar-bg": "#12141b",
+      "--accent": "#5865f2",
+      "--accent-hover": "#4752c4",
+      "--btn-green-1": "#2ee6a0", "--btn-green-2": "#16b87a",
+      "--btn-orange-1": "#ffb648", "--btn-orange-2": "#f2932a",
+      "--btn-red-1": "#ff6b6b", "--btn-red-2": "#e8433f",
+      "--btn-blue-1": "#7c8bff", "--btn-blue-2": "#5865f2",
+      "--btn-pink-1": "#ff7fb0", "--btn-pink-2": "#e8548c",
+    },
+  },
   slate: {
     label: "Slate & Teal",
     vars: {
