@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo } from "../utils";
+import { timeAgo, discordAvatarUrl } from "../utils";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -127,7 +127,10 @@ export default function HrPanel() {
               {pendingLOAs.map(r => (
                 <div className="loa-card" key={r.id}>
                   <div className="loa-card-top loa-card-top-stack">
-                    <span className="log-card-username">{r.discord_id}</span>
+                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                    </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
                   </div>
                   <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
@@ -149,7 +152,8 @@ export default function HrPanel() {
             {groupedStrikes.map(([discordId, strikes]) => (
               <div className="log-card" key={discordId}>
                 <div className="log-card-issuer-row">
-                  <span className="log-card-issuer-name">{discordId}</span>
+                  <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
+                  <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
                   <span className={`active-bolo-label`} style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
                 </div>
                 <div className="log-card-body">
@@ -157,7 +161,7 @@ export default function HrPanel() {
                     <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                       <span>
                         <span className="muted">Strike {s.role_slot}:</span> {s.reason}
-                        <span className="muted"> ({expiresLabel(s.expires_at)}, issued {timeAgo(s.created_at)})</span>
+                        <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_username ?? s.issued_by} {timeAgo(s.created_at)})</span>
                       </span>
                       <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
                     </div>

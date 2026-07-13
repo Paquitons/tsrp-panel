@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { discordAvatarUrl } from "../utils";
 
 function todayISO() {
   const d = new Date();
@@ -130,7 +131,10 @@ export default function LOAModal({ onClose }) {
               {allPending.map(r => (
                 <div className="loa-card" key={r.id}>
                   <div className="loa-card-top loa-card-top-stack">
-                    <span className="log-card-username">{r.discord_id}</span>
+                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                    </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
                   </div>
                   <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
