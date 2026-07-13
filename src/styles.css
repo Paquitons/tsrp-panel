@@ -1294,6 +1294,17 @@ code {
   margin-bottom: 6px;
 }
 
+/* Used specifically where a long Discord ID sits next to a full date
+   range (management's Pending Requests list) -- those two together don't
+   fit one row cleanly, so this variant stacks them instead of squeezing
+   both onto a single cramped, awkwardly-wrapping line. */
+.loa-card-top-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
 .loa-status-pending { background: #2e2712; color: #f9a825; }
 .loa-status-approved { background: #14251a; color: #69f0ae; }
 .loa-status-denied { background: #2a1517; color: #ff6f60; }

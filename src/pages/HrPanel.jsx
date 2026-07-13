@@ -126,7 +126,7 @@ export default function HrPanel() {
             <div className="loa-list">
               {pendingLOAs.map(r => (
                 <div className="loa-card" key={r.id}>
-                  <div className="loa-card-top">
+                  <div className="loa-card-top loa-card-top-stack">
                     <span className="log-card-username">{r.discord_id}</span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
                   </div>
