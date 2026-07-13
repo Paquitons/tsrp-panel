@@ -29,7 +29,9 @@ export default function HrPanel() {
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
   const [activeLOAs, setActiveLOAs] = useState([]);
+  const [pendingPromotions, setPendingPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isDirector = user?.tier === "director";
 
   // ---------- Issue Strike: staff search-autocomplete ----------
   const [strikeTarget, setStrikeTarget] = useState(null); // { discordId, username, avatarHash }
@@ -61,6 +63,12 @@ export default function HrPanel() {
       const { requests } = await apiFetch("/loa/active");
       setActiveLOAs(requests);
     } catch { /* ignore */ }
+    if (isDirector) {
+      try {
+        const { suggestions } = await apiFetch("/promotions/pending");
+        setPendingPromotions(suggestions);
+      } catch { /* ignore */ }
+    }
     setLoading(false);
   }
 
@@ -129,6 +137,15 @@ export default function HrPanel() {
   async function reviewLOA(requestId, status) {
     try {
       await apiFetch(`/loa/${requestId}`, { method: "PATCH", body: { status } });
+      await refresh();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function reviewPromotion(id, status) {
+    try {
+      await apiFetch(`/promotions/${id}`, { method: "PATCH", body: { status } });
       await refresh();
     } catch (err) {
       alert(err.message);
@@ -259,6 +276,37 @@ export default function HrPanel() {
                 </div>
               ))}
             </div>
+          )}
+
+          {isDirector && (
+            <>
+              <h2 style={{ marginTop: 24 }}>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
+              {pendingPromotions.length === 0 ? (
+                <p className="muted">No pending suggestions.</p>
+              ) : (
+                <div className="loa-list">
+                  {pendingPromotions.map(s => (
+                    <div className="loa-card" key={s.id}>
+                      <div className="loa-card-top loa-card-top-stack">
+                        <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                          <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
+                          <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
+                        </span>
+                        <span className="muted">Suggested: {s.suggested_rank}</span>
+                      </div>
+                      <div className="muted" style={{ marginBottom: 4 }}>{s.reason}</div>
+                      <div className="muted" style={{ marginBottom: 8, fontSize: 12 }}>
+                        Suggested by {s.suggester_username ?? s.suggested_by}
+                      </div>
+                      <div className="button-row">
+                        <button className="btn-green small" onClick={() => reviewPromotion(s.id, "acknowledged")}>Acknowledge</button>
+                        <button className="secondary small" onClick={() => reviewPromotion(s.id, "dismissed")}>Dismiss</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 

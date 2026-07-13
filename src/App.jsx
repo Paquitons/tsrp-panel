@@ -6,6 +6,7 @@ import ThemeSwitcher from "./components/ThemeSwitcher";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
+import InternalAffairs from "./pages/InternalAffairs";
 import { loadSavedTheme } from "./themes";
 
 function AppShell() {
@@ -27,6 +28,7 @@ function AppShell() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/hr" element={<HrPanel />} />
+        <Route path="/internalaffairs" element={<InternalAffairs />} />
       </Routes>
       <ThemeSwitcher />
     </div>
