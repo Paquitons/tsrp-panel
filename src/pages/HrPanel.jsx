@@ -195,7 +195,7 @@ export default function HrPanel() {
     <div className="content">
       <div className="page-header">
         <h1>HR Panel</h1>
-        <p className="muted">Strikes and Leave of Absence, in one place. Promotions/demotions/terminations coming soon.</p>
+        <p className="muted">Strikes and Leave of Absence, in one place.</p>
       </div>
 
       <div className="two-col">

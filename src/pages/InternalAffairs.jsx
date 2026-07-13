@@ -132,7 +132,7 @@ export default function InternalAffairs() {
     <div className="content">
       <div className="page-header">
         <h1>Internal Affairs</h1>
-        <p className="muted">Issue strikes and suggest promotions. Rank changes still go through a Director once suggested.</p>
+        <p className="muted">Issue strikes and suggest promotions.</p>
       </div>
 
       <div className="two-col">
@@ -171,7 +171,6 @@ export default function InternalAffairs() {
 
         <div className="card">
           <h2>Suggest a Promotion</h2>
-          <p className="muted" style={{ marginTop: -8 }}>This doesn't change anyone's rank -- it flags the suggestion for a Director to review and action.</p>
           {promoError && <div className="error-banner">{promoError}</div>}
           {promoSuccess && <div className="success-banner">Suggestion submitted.</div>}
           <form onSubmit={submitPromotion}>
