@@ -25,16 +25,16 @@ function expiresLabel(expiresAt) {
 export default function HrPanel() {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
+  const canReviewBigActions = !!user?.canReviewBigActions;
 
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
   const [activeLOAs, setActiveLOAs] = useState([]);
   const [pendingPromotions, setPendingPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isDirector = user?.tier === "director";
 
   // ---------- Issue Strike: staff search-autocomplete ----------
-  const [strikeTarget, setStrikeTarget] = useState(null); // { discordId, username, avatarHash }
+  const [strikeTarget, setStrikeTarget] = useState(null);
   const [staffQuery, setStaffQuery] = useState("");
   const [staffSuggestions, setStaffSuggestions] = useState([]);
   const [showStaffSuggestions, setShowStaffSuggestions] = useState(false);
@@ -63,7 +63,7 @@ export default function HrPanel() {
       const { requests } = await apiFetch("/loa/active");
       setActiveLOAs(requests);
     } catch { /* ignore */ }
-    if (isDirector) {
+    if (canReviewBigActions) {
       try {
         const { suggestions } = await apiFetch("/promotions/pending");
         setPendingPromotions(suggestions);
@@ -192,111 +192,155 @@ export default function HrPanel() {
   const groupedStrikes = groupByDiscordId(activeStrikes);
 
   return (
-    <div className="content">
+    <div className="content dashboard-content">
       <div className="page-header">
         <h1>HR Panel</h1>
         <p className="muted">Strikes and Leave of Absence, in one place.</p>
       </div>
 
-      <div className="two-col">
-        <div className="card">
-          <h2>Issue a Strike</h2>
-          <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
-          {strikeError && <div className="error-banner">{strikeError}</div>}
-          <form onSubmit={submitStrike}>
-            <label>Staff Member</label>
-            <div className="autocomplete-wrap">
-              <input
-                ref={staffInputRef}
-                required
-                autoComplete="off"
-                value={staffQuery}
-                onChange={e => onStaffQueryChange(e.target.value)}
-                onFocus={() => staffSuggestions.length > 0 && setShowStaffSuggestions(true)}
-                placeholder="Search by username or nickname"
-              />
-              <PortalDropdown anchorRef={staffInputRef} open={showStaffSuggestions} onClose={() => setShowStaffSuggestions(false)} className="autocomplete-list-portal">
-                {staffSuggestions.map(s => (
-                  <div key={s.discordId} className="autocomplete-item" onClick={() => pickStaff(s)}>
-                    <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
-                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                    {s.nickname && <span className="autocomplete-hint">@{s.username}</span>}
+      <div className="multi-col-grid">
+        {/* ---------- Issue Strike ---------- */}
+        <div className="dashboard-col">
+          <div className="card">
+            <h2>Issue a Strike</h2>
+            <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
+            {strikeError && <div className="error-banner">{strikeError}</div>}
+            <form onSubmit={submitStrike}>
+              <label>Staff Member</label>
+              <div className="autocomplete-wrap">
+                <input
+                  ref={staffInputRef}
+                  required
+                  autoComplete="off"
+                  value={staffQuery}
+                  onChange={e => onStaffQueryChange(e.target.value)}
+                  onFocus={() => staffSuggestions.length > 0 && setShowStaffSuggestions(true)}
+                  placeholder="Search by username or nickname"
+                />
+                <PortalDropdown anchorRef={staffInputRef} open={showStaffSuggestions} onClose={() => setShowStaffSuggestions(false)} className="autocomplete-list-portal">
+                  {staffSuggestions.map(s => (
+                    <div key={s.discordId} className="autocomplete-item" onClick={() => pickStaff(s)}>
+                      <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
+              </div>
+              <label>Reason</label>
+              <textarea rows={2} required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
+              <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
+            </form>
+          </div>
+        </div>
+
+        {/* ---------- Currently On Strike ---------- */}
+        <div className="dashboard-col">
+          <div className="card">
+            <h2>Currently On Strike ({groupedStrikes.length})</h2>
+            {loading && <p className="muted">Loading…</p>}
+            {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
+            <div className="log-card-list">
+              {groupedStrikes.map(([discordId, strikes]) => (
+                <div className="log-card" key={discordId}>
+                  <div className="log-card-issuer-row">
+                    <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
+                    <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
+                    <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
+                  </div>
+                  <div className="log-card-body">
+                    {strikes.map(s => (
+                      <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                        <span>
+                          <span className="muted">Strike {s.role_slot}:</span> {s.reason}
+                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_username ?? s.issued_by} {timeAgo(s.created_at)})</span>
+                        </span>
+                        <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ---------- LOA: Pending + Active ---------- */}
+        <div className="dashboard-col">
+          <div className="card">
+            <h2>Pending LOA Requests</h2>
+            {pendingLOAs.length === 0 ? (
+              <p className="muted">No pending requests.</p>
+            ) : (
+              <div className="loa-list">
+                {pendingLOAs.map(r => (
+                  <div className="loa-card" key={r.id}>
+                    <div className="loa-card-top loa-card-top-stack">
+                      <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                        <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                        <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                      </span>
+                      <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
+                    <div className="button-row">
+                      <button className="btn-green small" onClick={() => reviewLOA(r.id, "approved")}>Approve</button>
+                      <button className="btn-red small" onClick={() => reviewLOA(r.id, "denied")}>Deny</button>
+                    </div>
                   </div>
                 ))}
-              </PortalDropdown>
-            </div>
-            <label>Reason</label>
-            <textarea rows={2} required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
-            <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
-          </form>
+              </div>
+            )}
+          </div>
 
-          <h2 style={{ marginTop: 24 }}>Pending LOA Requests</h2>
-          {pendingLOAs.length === 0 ? (
-            <p className="muted">No pending requests.</p>
-          ) : (
-            <div className="loa-list">
-              {pendingLOAs.map(r => (
-                <div className="loa-card" key={r.id}>
-                  <div className="loa-card-top loa-card-top-stack">
-                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
-                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
-                    </span>
-                    <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
+          <div className="card">
+            <h2>Active LOAs ({activeLOAs.length})</h2>
+            {activeLOAs.length === 0 ? (
+              <p className="muted">Nobody is currently on LOA.</p>
+            ) : (
+              <div className="loa-list">
+                {activeLOAs.map(r => (
+                  <div className="loa-card" key={r.id}>
+                    <div className="loa-card-top loa-card-top-stack">
+                      <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                        <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                        <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                      </span>
+                      <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
+                    <div className="button-row">
+                      <button className="secondary small" onClick={() => openExtend(r.discord_id, r.end_date)}>Extend / Change Date</button>
+                      <button className="btn-red small" onClick={() => endLOANow(r.discord_id)}>End Now</button>
+                    </div>
                   </div>
-                  <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
-                  <div className="button-row">
-                    <button className="btn-green small" onClick={() => reviewLOA(r.id, "approved")}>Approve</button>
-                    <button className="btn-red small" onClick={() => reviewLOA(r.id, "denied")}>Deny</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
-          <h2 style={{ marginTop: 24 }}>Active LOAs ({activeLOAs.length})</h2>
-          {activeLOAs.length === 0 ? (
-            <p className="muted">Nobody is currently on LOA.</p>
-          ) : (
-            <div className="loa-list">
-              {activeLOAs.map(r => (
-                <div className="loa-card" key={r.id}>
-                  <div className="loa-card-top loa-card-top-stack">
-                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
-                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
-                    </span>
-                    <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
-                  </div>
-                  <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
-                  <div className="button-row">
-                    <button className="secondary small" onClick={() => openExtend(r.discord_id, r.end_date)}>Extend / Change Date</button>
-                    <button className="btn-red small" onClick={() => endLOANow(r.discord_id)}>End Now</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {isDirector && (
-            <>
-              <h2 style={{ marginTop: 24 }}>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
+        {/* ---------- Promotion Suggestions ---------- */}
+        {canReviewBigActions && (
+          <div className="dashboard-col">
+            <div className="card">
+              <h2>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
               {pendingPromotions.length === 0 ? (
                 <p className="muted">No pending suggestions.</p>
               ) : (
                 <div className="loa-list">
                   {pendingPromotions.map(s => (
                     <div className="loa-card" key={s.id}>
-                      <div className="loa-card-top loa-card-top-stack">
-                        <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                          <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
-                          <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
-                        </span>
-                        <span className="muted">Suggested: {s.suggested_rank}</span>
+                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
+                        <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
                       </div>
-                      <div className="muted" style={{ marginBottom: 4 }}>{s.reason}</div>
-                      <div className="muted" style={{ marginBottom: 8, fontSize: 12 }}>
-                        Suggested by {s.suggester_username ?? s.suggested_by}
+                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.current_rank_label ?? "Unknown"}</div>
+                      <div className="log-card-field"><span className="muted">Suggested rank:</span> {s.suggested_rank_label}</div>
+                      <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
+                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                        <span className="muted" style={{ fontSize: 12.5 }}>Suggested by</span>
+                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.suggested_by, s.suggester_avatar_hash)} alt="" />
+                        <span style={{ fontSize: 12.5 }}>{s.suggester_username ?? s.suggested_by}</span>
                       </div>
                       <div className="button-row">
                         <button className="btn-green small" onClick={() => reviewPromotion(s.id, "acknowledged")}>Acknowledge</button>
@@ -306,37 +350,9 @@ export default function HrPanel() {
                   ))}
                 </div>
               )}
-            </>
-          )}
-        </div>
-
-        <div className="card">
-          <h2>Currently On Strike ({groupedStrikes.length})</h2>
-          {loading && <p className="muted">Loading…</p>}
-          {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
-          <div className="log-card-list">
-            {groupedStrikes.map(([discordId, strikes]) => (
-              <div className="log-card" key={discordId}>
-                <div className="log-card-issuer-row">
-                  <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
-                  <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
-                  <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
-                </div>
-                <div className="log-card-body">
-                  {strikes.map(s => (
-                    <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                      <span>
-                        <span className="muted">Strike {s.role_slot}:</span> {s.reason}
-                        <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_username ?? s.issued_by} {timeAgo(s.created_at)})</span>
-                      </span>
-                      <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {extendingDiscordId && (

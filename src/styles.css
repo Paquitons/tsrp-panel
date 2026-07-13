@@ -893,6 +893,23 @@ code {
   overflow: visible;
 }
 
+/* Same independent-scroll mechanics as .dashboard-grid, but auto-sizing its
+   column count instead of a hardcoded 3 -- used by HR Panel and Internal
+   Affairs, which have a different number of distinct sections than the
+   main Dashboard. */
+.multi-col-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 1000px) {
+  .multi-col-grid { grid-template-columns: 1fr; flex: none; }
+}
+
 /* ---------- Modals ---------- */
 
 .modal-backdrop {
@@ -1332,13 +1349,14 @@ code {
 }
 
 .activity-filter-trigger {
-  width: 42px;
-  height: 100%;
+  padding: 0 14px;
+  white-space: nowrap;
   background: #1a1d26;
   border: 1px solid #262a36;
   border-radius: 6px;
   color: #d0d3d9;
-  font-size: 16px;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
 }
 .activity-filter-trigger:hover { background: #21242f; }
