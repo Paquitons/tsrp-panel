@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, discordAvatarUrl } from "../utils";
+import PortalDropdown from "../components/PortalDropdown";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -21,18 +22,35 @@ function expiresLabel(expiresAt) {
   return `expires in ${hours}h`;
 }
 
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function HrPanel() {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
 
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
+  const [activeLOAs, setActiveLOAs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [strikeDiscordId, setStrikeDiscordId] = useState("");
+  // ---------- Issue Strike: staff search-autocomplete ----------
+  const [strikeTarget, setStrikeTarget] = useState(null); // { discordId, username, avatarHash }
+  const [staffQuery, setStaffQuery] = useState("");
+  const [staffSuggestions, setStaffSuggestions] = useState([]);
+  const [showStaffSuggestions, setShowStaffSuggestions] = useState(false);
+  const staffInputRef = useRef(null);
+  const staffDebounceRef = useRef(null);
+
   const [strikeReason, setStrikeReason] = useState("");
   const [strikeError, setStrikeError] = useState(null);
   const [strikeSubmitting, setStrikeSubmitting] = useState(false);
+
+  // ---------- Extend LOA modal state ----------
+  const [extendingDiscordId, setExtendingDiscordId] = useState(null);
+  const [extendDate, setExtendDate] = useState("");
+  const [extendError, setExtendError] = useState(null);
 
   async function refresh() {
     try {
@@ -42,6 +60,10 @@ export default function HrPanel() {
     try {
       const { requests } = await apiFetch("/loa/pending");
       setPendingLOAs(requests);
+    } catch { /* ignore */ }
+    try {
+      const { requests } = await apiFetch("/loa/active");
+      setActiveLOAs(requests);
     } catch { /* ignore */ }
     setLoading(false);
   }
@@ -53,13 +75,42 @@ export default function HrPanel() {
     return () => clearInterval(interval);
   }, [canAccess]);
 
+  function onStaffQueryChange(value) {
+    setStaffQuery(value);
+    setStrikeTarget(null);
+    clearTimeout(staffDebounceRef.current);
+    if (value.trim().length < 2) {
+      setStaffSuggestions([]);
+      setShowStaffSuggestions(false);
+      return;
+    }
+    staffDebounceRef.current = setTimeout(async () => {
+      try {
+        const { staff } = await apiFetch(`/staff/search?q=${encodeURIComponent(value)}`);
+        setStaffSuggestions(staff);
+        setShowStaffSuggestions(staff.length > 0);
+      } catch { setStaffSuggestions([]); }
+    }, 250);
+  }
+
+  function pickStaff(member) {
+    setStrikeTarget(member);
+    setStaffQuery(member.nickname ?? member.username);
+    setShowStaffSuggestions(false);
+  }
+
   async function submitStrike(e) {
     e.preventDefault();
     setStrikeError(null);
+    if (!strikeTarget) {
+      setStrikeError("Pick a staff member from the search results first.");
+      return;
+    }
     setStrikeSubmitting(true);
     try {
-      await apiFetch("/strikes", { method: "POST", body: { discordId: strikeDiscordId.trim(), reason: strikeReason } });
-      setStrikeDiscordId("");
+      await apiFetch("/strikes", { method: "POST", body: { discordId: strikeTarget.discordId, reason: strikeReason } });
+      setStrikeTarget(null);
+      setStaffQuery("");
       setStrikeReason("");
       await refresh();
     } catch (err) {
@@ -88,6 +139,34 @@ export default function HrPanel() {
     }
   }
 
+  async function endLOANow(discordId) {
+    if (!confirm("End this person's LOA right now?")) return;
+    try {
+      await apiFetch(`/loa/end/${discordId}`, { method: "PATCH" });
+      await refresh();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  function openExtend(discordId, currentEndDate) {
+    setExtendingDiscordId(discordId);
+    setExtendDate(new Date(currentEndDate).toISOString().slice(0, 10));
+    setExtendError(null);
+  }
+
+  async function submitExtend(e) {
+    e.preventDefault();
+    setExtendError(null);
+    try {
+      await apiFetch(`/loa/extend/${extendingDiscordId}`, { method: "PATCH", body: { newEndDate: new Date(extendDate).getTime() } });
+      setExtendingDiscordId(null);
+      await refresh();
+    } catch (err) {
+      setExtendError(err.message);
+    }
+  }
+
   if (!canAccess) {
     return (
       <div className="content">
@@ -112,8 +191,27 @@ export default function HrPanel() {
           <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
           {strikeError && <div className="error-banner">{strikeError}</div>}
           <form onSubmit={submitStrike}>
-            <label>Staff Member's Discord ID</label>
-            <input required value={strikeDiscordId} onChange={e => setStrikeDiscordId(e.target.value)} placeholder="e.g. 111222333444555666" />
+            <label>Staff Member</label>
+            <div className="autocomplete-wrap">
+              <input
+                ref={staffInputRef}
+                required
+                autoComplete="off"
+                value={staffQuery}
+                onChange={e => onStaffQueryChange(e.target.value)}
+                onFocus={() => staffSuggestions.length > 0 && setShowStaffSuggestions(true)}
+                placeholder="Search by username or nickname"
+              />
+              <PortalDropdown anchorRef={staffInputRef} open={showStaffSuggestions} onClose={() => setShowStaffSuggestions(false)} className="autocomplete-list-portal">
+                {staffSuggestions.map(s => (
+                  <div key={s.discordId} className="autocomplete-item" onClick={() => pickStaff(s)}>
+                    <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                    {s.nickname && <span className="autocomplete-hint">@{s.username}</span>}
+                  </div>
+                ))}
+              </PortalDropdown>
+            </div>
             <label>Reason</label>
             <textarea rows={2} required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
             <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
@@ -142,6 +240,30 @@ export default function HrPanel() {
               ))}
             </div>
           )}
+
+          <h2 style={{ marginTop: 24 }}>Active LOAs ({activeLOAs.length})</h2>
+          {activeLOAs.length === 0 ? (
+            <p className="muted">Nobody is currently on LOA.</p>
+          ) : (
+            <div className="loa-list">
+              {activeLOAs.map(r => (
+                <div className="loa-card" key={r.id}>
+                  <div className="loa-card-top loa-card-top-stack">
+                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                    </span>
+                    <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
+                  <div className="button-row">
+                    <button className="secondary small" onClick={() => openExtend(r.discord_id, r.end_date)}>Extend / Change Date</button>
+                    <button className="btn-red small" onClick={() => endLOANow(r.discord_id)}>End Now</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="card">
@@ -154,7 +276,7 @@ export default function HrPanel() {
                 <div className="log-card-issuer-row">
                   <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
                   <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
-                  <span className={`active-bolo-label`} style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
+                  <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
                 </div>
                 <div className="log-card-body">
                   {strikes.map(s => (
@@ -172,6 +294,23 @@ export default function HrPanel() {
           </div>
         </div>
       </div>
+
+      {extendingDiscordId && (
+        <div className="modal-backdrop" onClick={() => setExtendingDiscordId(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Change Return Date</h2>
+            {extendError && <div className="error-banner">{extendError}</div>}
+            <form onSubmit={submitExtend}>
+              <label>New Return Date</label>
+              <input type="date" required min={todayISO()} value={extendDate} onChange={e => setExtendDate(e.target.value)} />
+              <div className="button-row">
+                <button className="primary" type="submit">Save</button>
+                <button className="secondary" type="button" onClick={() => setExtendingDiscordId(null)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
