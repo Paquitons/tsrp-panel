@@ -3,6 +3,8 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, discordAvatarUrl, parseLocalDateInput, toDateInputValue, todayLocalISO } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
+import CustomSelect from "../components/CustomSelect";
+import { useStaffSearch } from "../hooks/useStaffSearch";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -49,6 +51,28 @@ export default function HrPanel() {
   const [extendingDiscordId, setExtendingDiscordId] = useState(null);
   const [extendDate, setExtendDate] = useState("");
   const [extendError, setExtendError] = useState(null);
+
+  // ---------- Promote / Demote ----------
+  const rankChangeSearch = useStaffSearch();
+  const [rankChangeAction, setRankChangeAction] = useState("promote");
+  const [rankOptions, setRankOptions] = useState([]);
+  const [newRank, setNewRank] = useState("");
+  const [rankChangeReason, setRankChangeReason] = useState("");
+  const [rankChangeError, setRankChangeError] = useState(null);
+  const [rankChangeSuccess, setRankChangeSuccess] = useState(false);
+  const [rankChangeSubmitting, setRankChangeSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!canReviewBigActions || !rankChangeSearch.target) {
+      setRankOptions([]);
+      setNewRank("");
+      return;
+    }
+    apiFetch(`/rank-changes/ranks?targetId=${rankChangeSearch.target.discordId}&action=${rankChangeAction}`).then(({ ranks }) => {
+      setRankOptions(ranks);
+      setNewRank(ranks[0]?.value ?? "");
+    }).catch(() => setRankOptions([]));
+  }, [rankChangeSearch.target, rankChangeAction, canReviewBigActions]);
 
   async function refresh() {
     try {
@@ -149,6 +173,34 @@ export default function HrPanel() {
       await refresh();
     } catch (err) {
       alert(err.message);
+    }
+  }
+
+  async function submitRankChange(e) {
+    e.preventDefault();
+    setRankChangeError(null);
+    setRankChangeSuccess(false);
+    if (!rankChangeSearch.target) {
+      setRankChangeError("Pick a staff member from the search results first.");
+      return;
+    }
+    if (!newRank) {
+      setRankChangeError("No valid rank available for this action.");
+      return;
+    }
+    setRankChangeSubmitting(true);
+    try {
+      await apiFetch("/rank-changes", {
+        method: "POST",
+        body: { action: rankChangeAction, targetDiscordId: rankChangeSearch.target.discordId, newRank, reason: rankChangeReason },
+      });
+      setRankChangeSuccess(true);
+      rankChangeSearch.reset();
+      setRankChangeReason("");
+    } catch (err) {
+      setRankChangeError(err.message);
+    } finally {
+      setRankChangeSubmitting(false);
     }
   }
 
@@ -318,6 +370,64 @@ export default function HrPanel() {
             )}
           </div>
         </div>
+
+        {/* ---------- Promote / Demote ---------- */}
+        {canReviewBigActions && (
+          <div className="dashboard-col">
+            <div className="card">
+              <h2>Promote / Demote</h2>
+              {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
+              {rankChangeSuccess && <div className="success-banner">Done.</div>}
+              <form onSubmit={submitRankChange}>
+                <label>Action</label>
+                <CustomSelect
+                  value={rankChangeAction}
+                  onChange={setRankChangeAction}
+                  options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+                />
+                <label style={{ marginTop: 12 }}>Staff Member</label>
+                <div className="autocomplete-wrap">
+                  <input
+                    ref={rankChangeSearch.inputRef}
+                    required
+                    autoComplete="off"
+                    value={rankChangeSearch.query}
+                    onChange={e => rankChangeSearch.onQueryChange(e.target.value)}
+                    onFocus={() => rankChangeSearch.suggestions.length > 0 && rankChangeSearch.setShowSuggestions(true)}
+                    placeholder="Search by username or nickname"
+                  />
+                  <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                    {rankChangeSearch.suggestions.map(s => (
+                      <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                      </div>
+                    ))}
+                  </PortalDropdown>
+                </div>
+
+                {rankChangeSearch.target && (
+                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rank ?? "Unknown"}</p>
+                )}
+
+                <label>New Rank</label>
+                {rankOptions.length > 0 ? (
+                  <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
+                ) : (
+                  <p className="muted" style={{ marginTop: -6 }}>
+                    {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
+                  </p>
+                )}
+
+                <label style={{ marginTop: 12 }}>Reason</label>
+                <textarea rows={2} required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
+                <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
+                  {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* ---------- Promotion Suggestions ---------- */}
         {canReviewBigActions && (
