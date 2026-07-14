@@ -17,8 +17,9 @@ export default function InternalAffairs() {
   const [strikeSuccess, setStrikeSuccess] = useState(false);
   const [strikeSubmitting, setStrikeSubmitting] = useState(false);
 
-  // ---------- Suggest Promotion ----------
+  // ---------- Suggest Promotion/Demotion ----------
   const promoSearch = useStaffSearch();
+  const [promoAction, setPromoAction] = useState("promote");
   const [rankOptions, setRankOptions] = useState([]);
   const [suggestedRank, setSuggestedRank] = useState("");
   const [promoReason, setPromoReason] = useState("");
@@ -35,11 +36,11 @@ export default function InternalAffairs() {
       setSuggestedRank("");
       return;
     }
-    apiFetch(`/promotions/ranks?targetId=${promoSearch.target.discordId}`).then(({ ranks }) => {
+    apiFetch(`/rank-changes/ranks?targetId=${promoSearch.target.discordId}&action=${promoAction}`).then(({ ranks }) => {
       setRankOptions(ranks);
       setSuggestedRank(ranks[0]?.value ?? "");
     }).catch(() => setRankOptions([]));
-  }, [promoSearch.target]);
+  }, [promoSearch.target, promoAction]);
 
   async function submitStrike(e) {
     e.preventDefault();
@@ -76,9 +77,9 @@ export default function InternalAffairs() {
     }
     setPromoSubmitting(true);
     try {
-      await apiFetch("/promotions/suggest", {
+      await apiFetch("/rank-changes", {
         method: "POST",
-        body: { discordId: promoSearch.target.discordId, suggestedRank, reason: promoReason },
+        body: { action: promoAction, targetDiscordId: promoSearch.target.discordId, newRank: suggestedRank, reason: promoReason },
       });
       setPromoSuccess(true);
       promoSearch.reset();
@@ -143,11 +144,17 @@ export default function InternalAffairs() {
 
         <div className="dashboard-col">
           <div className="card">
-            <h2>Suggest a Promotion</h2>
+            <h2>Suggest a Rank Change</h2>
             {promoError && <div className="error-banner">{promoError}</div>}
-            {promoSuccess && <div className="success-banner">Suggestion submitted.</div>}
+            {promoSuccess && <div className="success-banner">Submitted -- a Chief of Staff+ will review it.</div>}
             <form onSubmit={submitPromotion}>
-              <label>Staff Member</label>
+              <label>Action</label>
+              <CustomSelect
+                value={promoAction}
+                onChange={setPromoAction}
+                options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+              />
+              <label style={{ marginTop: 12 }}>Staff Member</label>
               <div className="autocomplete-wrap">
                 <input
                   ref={promoSearch.inputRef}
@@ -172,18 +179,18 @@ export default function InternalAffairs() {
                 <p className="muted" style={{ marginTop: -6 }}>Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
               )}
 
-              <label>Suggested Rank</label>
+              <label>New Rank</label>
               {rankOptions.length > 0 ? (
                 <CustomSelect value={suggestedRank} onChange={setSuggestedRank} options={rankOptions} />
               ) : (
                 <p className="muted" style={{ marginTop: -6 }}>
-                  {promoSearch.target ? "No valid rank available -- they may already outrank what you can suggest." : "Pick a staff member first."}
+                  {promoSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
                 </p>
               )}
 
               <label style={{ marginTop: 12 }}>Reason</label>
               <textarea rows={2} required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
-              <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Suggest Promotion"}</button>
+              <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Submit for Approval"}</button>
             </form>
           </div>
         </div>

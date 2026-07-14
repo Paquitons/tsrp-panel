@@ -89,8 +89,8 @@ export default function HrPanel() {
     } catch { /* ignore */ }
     if (canReviewBigActions) {
       try {
-        const { suggestions } = await apiFetch("/promotions/pending");
-        setPendingPromotions(suggestions);
+        const { requests } = await apiFetch("/rank-changes/pending");
+        setPendingPromotions(requests);
       } catch { /* ignore */ }
     }
     setLoading(false);
@@ -167,9 +167,9 @@ export default function HrPanel() {
     }
   }
 
-  async function reviewPromotion(id, status) {
+  async function reviewRankChange(id, status) {
     try {
-      await apiFetch(`/promotions/${id}`, { method: "PATCH", body: { status } });
+      await apiFetch(`/rank-changes/${id}`, { method: "PATCH", body: { status } });
       await refresh();
     } catch (err) {
       alert(err.message);
@@ -372,28 +372,29 @@ export default function HrPanel() {
 
           {canReviewBigActions && (
             <div className="card">
-              <h2>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
+              <h2>Pending Rank Change Requests ({pendingPromotions.length})</h2>
               {pendingPromotions.length === 0 ? (
-                <p className="muted">No pending suggestions.</p>
+                <p className="muted">No pending requests.</p>
               ) : (
                 <div className="loa-list">
                   {pendingPromotions.map(s => (
                     <div className="loa-card" key={s.id}>
                       <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
-                        <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.target_discord_id, s.target_avatar_hash)} alt="" />
+                        <span className="log-card-username">{s.target_username ?? s.target_discord_id}</span>
+                        <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
                       </div>
-                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.current_rank_label ?? "Unknown"}</div>
-                      <div className="log-card-field"><span className="muted">Suggested rank:</span> {s.suggested_rank_label}</div>
+                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.old_rank_label ?? "Unknown"}</div>
+                      <div className="log-card-field"><span className="muted">New rank:</span> {s.new_rank_label}</div>
                       <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
                       <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <span className="muted" style={{ fontSize: 12.5 }}>Suggested by</span>
-                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.suggested_by, s.suggester_avatar_hash)} alt="" />
-                        <span style={{ fontSize: 12.5 }}>{s.suggester_username ?? s.suggested_by}</span>
+                        <span className="muted" style={{ fontSize: 12.5 }}>Requested by</span>
+                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.requested_by, s.requester_avatar_hash)} alt="" />
+                        <span style={{ fontSize: 12.5 }}>{s.requester_username ?? s.requested_by}</span>
                       </div>
                       <div className="button-row">
-                        <button className="btn-green small" onClick={() => reviewPromotion(s.id, "acknowledged")}>Acknowledge</button>
-                        <button className="secondary small" onClick={() => reviewPromotion(s.id, "dismissed")}>Dismiss</button>
+                        <button className="btn-green small" onClick={() => reviewRankChange(s.id, "approved")}>Approve</button>
+                        <button className="btn-red small" onClick={() => reviewRankChange(s.id, "denied")}>Deny</button>
                       </div>
                     </div>
                   ))}
