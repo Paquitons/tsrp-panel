@@ -169,7 +169,7 @@ export default function InternalAffairs() {
               </div>
 
               {promoSearch.target && (
-                <p className="muted" style={{ marginTop: -6 }}>Current rank: {promoSearch.target.rank ?? "Unknown"}</p>
+                <p className="muted" style={{ marginTop: -6 }}>Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
               )}
 
               <label>Suggested Rank</label>

@@ -349,7 +349,7 @@ export default function HrPanel() {
                 </div>
 
                 {rankChangeSearch.target && (
-                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rank ?? "Unknown"}</p>
+                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rankLabel ?? "Unknown"}</p>
                 )}
 
                 <label>New Rank</label>
