@@ -251,7 +251,7 @@ export default function HrPanel() {
       </div>
 
       <div className="multi-col-grid">
-        {/* ---------- Left column: Issue Strike + Promote/Demote ---------- */}
+        {/* ---------- Column 1: Strikes -- issue form + who's currently struck ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Issue a Strike</h2>
@@ -284,6 +284,37 @@ export default function HrPanel() {
             </form>
           </div>
 
+          <div className="card">
+            <h2>Currently On Strike ({groupedStrikes.length})</h2>
+            {loading && <p className="muted">Loading…</p>}
+            {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
+            <div className="log-card-list">
+              {groupedStrikes.map(([discordId, strikes]) => (
+                <div className="log-card" key={discordId}>
+                  <div className="log-card-issuer-row">
+                    <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
+                    <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
+                    <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
+                  </div>
+                  <div className="log-card-body">
+                    {strikes.map(s => (
+                      <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                        <span>
+                          <span className="muted">Strike {s.role_slot}:</span> {s.reason}
+                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_username ?? s.issued_by} {timeAgo(s.created_at)})</span>
+                        </span>
+                        <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ---------- Column 2: Promotions -- promote/demote form + suggestions ---------- */}
+        <div className="dashboard-col">
           {canReviewBigActions && (
             <div className="card">
               <h2>Promote / Demote</h2>
@@ -338,37 +369,6 @@ export default function HrPanel() {
               </form>
             </div>
           )}
-        </div>
-
-        {/* ---------- Middle column: Currently On Strike + Promotion Suggestions ---------- */}
-        <div className="dashboard-col">
-          <div className="card">
-            <h2>Currently On Strike ({groupedStrikes.length})</h2>
-            {loading && <p className="muted">Loading…</p>}
-            {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
-            <div className="log-card-list">
-              {groupedStrikes.map(([discordId, strikes]) => (
-                <div className="log-card" key={discordId}>
-                  <div className="log-card-issuer-row">
-                    <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
-                    <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
-                    <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
-                  </div>
-                  <div className="log-card-body">
-                    {strikes.map(s => (
-                      <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                        <span>
-                          <span className="muted">Strike {s.role_slot}:</span> {s.reason}
-                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_username ?? s.issued_by} {timeAgo(s.created_at)})</span>
-                        </span>
-                        <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {canReviewBigActions && (
             <div className="card">
@@ -403,7 +403,7 @@ export default function HrPanel() {
           )}
         </div>
 
-        {/* ---------- Right column: LOA ---------- */}
+        {/* ---------- Column 3: Leave of Absence -- pending + active ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Pending LOA Requests</h2>

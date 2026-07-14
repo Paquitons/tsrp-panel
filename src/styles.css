@@ -899,7 +899,7 @@ code {
    main Dashboard. */
 .multi-col-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(320px, 1fr) minmax(280px, 360px);
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
   gap: 16px;
   align-items: start;
   flex: 1;
@@ -908,7 +908,7 @@ code {
 
 @media (max-width: 1300px) {
   .multi-col-grid {
-    grid-template-columns: minmax(240px, 300px) minmax(280px, 1fr) minmax(240px, 300px);
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
     gap: 12px;
   }
 }
