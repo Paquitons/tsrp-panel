@@ -899,15 +899,23 @@ code {
    main Dashboard. */
 .multi-col-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: minmax(280px, 360px) minmax(320px, 1fr) minmax(280px, 360px);
   gap: 16px;
   align-items: start;
   flex: 1;
   min-height: 0;
 }
 
+@media (max-width: 1300px) {
+  .multi-col-grid {
+    grid-template-columns: minmax(240px, 300px) minmax(280px, 1fr) minmax(240px, 300px);
+    gap: 12px;
+  }
+}
+
 @media (max-width: 1000px) {
   .multi-col-grid { grid-template-columns: 1fr; flex: none; }
+  .dashboard-col { max-height: none !important; overflow: visible !important; }
 }
 
 /* ---------- Modals ---------- */

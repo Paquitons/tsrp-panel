@@ -251,7 +251,7 @@ export default function HrPanel() {
       </div>
 
       <div className="multi-col-grid">
-        {/* ---------- Issue Strike ---------- */}
+        {/* ---------- Left column: Issue Strike + Promote/Demote ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Issue a Strike</h2>
@@ -283,9 +283,64 @@ export default function HrPanel() {
               <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
             </form>
           </div>
+
+          {canReviewBigActions && (
+            <div className="card">
+              <h2>Promote / Demote</h2>
+              {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
+              {rankChangeSuccess && <div className="success-banner">Done.</div>}
+              <form onSubmit={submitRankChange}>
+                <label>Action</label>
+                <CustomSelect
+                  value={rankChangeAction}
+                  onChange={setRankChangeAction}
+                  options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+                />
+                <label style={{ marginTop: 12 }}>Staff Member</label>
+                <div className="autocomplete-wrap">
+                  <input
+                    ref={rankChangeSearch.inputRef}
+                    required
+                    autoComplete="off"
+                    value={rankChangeSearch.query}
+                    onChange={e => rankChangeSearch.onQueryChange(e.target.value)}
+                    onFocus={() => rankChangeSearch.suggestions.length > 0 && rankChangeSearch.setShowSuggestions(true)}
+                    placeholder="Search by username or nickname"
+                  />
+                  <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                    {rankChangeSearch.suggestions.map(s => (
+                      <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                      </div>
+                    ))}
+                  </PortalDropdown>
+                </div>
+
+                {rankChangeSearch.target && (
+                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rank ?? "Unknown"}</p>
+                )}
+
+                <label>New Rank</label>
+                {rankOptions.length > 0 ? (
+                  <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
+                ) : (
+                  <p className="muted" style={{ marginTop: -6 }}>
+                    {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
+                  </p>
+                )}
+
+                <label style={{ marginTop: 12 }}>Reason</label>
+                <textarea rows={2} required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
+                <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
+                  {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
 
-        {/* ---------- Currently On Strike ---------- */}
+        {/* ---------- Middle column: Currently On Strike + Promotion Suggestions ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Currently On Strike ({groupedStrikes.length})</h2>
@@ -314,9 +369,41 @@ export default function HrPanel() {
               ))}
             </div>
           </div>
+
+          {canReviewBigActions && (
+            <div className="card">
+              <h2>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
+              {pendingPromotions.length === 0 ? (
+                <p className="muted">No pending suggestions.</p>
+              ) : (
+                <div className="loa-list">
+                  {pendingPromotions.map(s => (
+                    <div className="loa-card" key={s.id}>
+                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
+                        <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
+                      </div>
+                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.current_rank_label ?? "Unknown"}</div>
+                      <div className="log-card-field"><span className="muted">Suggested rank:</span> {s.suggested_rank_label}</div>
+                      <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
+                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                        <span className="muted" style={{ fontSize: 12.5 }}>Suggested by</span>
+                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.suggested_by, s.suggester_avatar_hash)} alt="" />
+                        <span style={{ fontSize: 12.5 }}>{s.suggester_username ?? s.suggested_by}</span>
+                      </div>
+                      <div className="button-row">
+                        <button className="btn-green small" onClick={() => reviewPromotion(s.id, "acknowledged")}>Acknowledge</button>
+                        <button className="secondary small" onClick={() => reviewPromotion(s.id, "dismissed")}>Dismiss</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* ---------- LOA: Pending + Active ---------- */}
+        {/* ---------- Right column: LOA ---------- */}
         <div className="dashboard-col">
           <div className="card">
             <h2>Pending LOA Requests</h2>
@@ -370,99 +457,6 @@ export default function HrPanel() {
             )}
           </div>
         </div>
-
-        {/* ---------- Promote / Demote ---------- */}
-        {canReviewBigActions && (
-          <div className="dashboard-col">
-            <div className="card">
-              <h2>Promote / Demote</h2>
-              {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
-              {rankChangeSuccess && <div className="success-banner">Done.</div>}
-              <form onSubmit={submitRankChange}>
-                <label>Action</label>
-                <CustomSelect
-                  value={rankChangeAction}
-                  onChange={setRankChangeAction}
-                  options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
-                />
-                <label style={{ marginTop: 12 }}>Staff Member</label>
-                <div className="autocomplete-wrap">
-                  <input
-                    ref={rankChangeSearch.inputRef}
-                    required
-                    autoComplete="off"
-                    value={rankChangeSearch.query}
-                    onChange={e => rankChangeSearch.onQueryChange(e.target.value)}
-                    onFocus={() => rankChangeSearch.suggestions.length > 0 && rankChangeSearch.setShowSuggestions(true)}
-                    placeholder="Search by username or nickname"
-                  />
-                  <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                    {rankChangeSearch.suggestions.map(s => (
-                      <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
-                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                      </div>
-                    ))}
-                  </PortalDropdown>
-                </div>
-
-                {rankChangeSearch.target && (
-                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rank ?? "Unknown"}</p>
-                )}
-
-                <label>New Rank</label>
-                {rankOptions.length > 0 ? (
-                  <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
-                ) : (
-                  <p className="muted" style={{ marginTop: -6 }}>
-                    {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
-                  </p>
-                )}
-
-                <label style={{ marginTop: 12 }}>Reason</label>
-                <textarea rows={2} required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
-                <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
-                  {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ---------- Promotion Suggestions ---------- */}
-        {canReviewBigActions && (
-          <div className="dashboard-col">
-            <div className="card">
-              <h2>Pending Promotion Suggestions ({pendingPromotions.length})</h2>
-              {pendingPromotions.length === 0 ? (
-                <p className="muted">No pending suggestions.</p>
-              ) : (
-                <div className="loa-list">
-                  {pendingPromotions.map(s => (
-                    <div className="loa-card" key={s.id}>
-                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discord_id, s.target_avatar_hash)} alt="" />
-                        <span className="log-card-username">{s.target_username ?? s.discord_id}</span>
-                      </div>
-                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.current_rank_label ?? "Unknown"}</div>
-                      <div className="log-card-field"><span className="muted">Suggested rank:</span> {s.suggested_rank_label}</div>
-                      <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
-                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <span className="muted" style={{ fontSize: 12.5 }}>Suggested by</span>
-                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.suggested_by, s.suggester_avatar_hash)} alt="" />
-                        <span style={{ fontSize: 12.5 }}>{s.suggester_username ?? s.suggested_by}</span>
-                      </div>
-                      <div className="button-row">
-                        <button className="btn-green small" onClick={() => reviewPromotion(s.id, "acknowledged")}>Acknowledge</button>
-                        <button className="secondary small" onClick={() => reviewPromotion(s.id, "dismissed")}>Dismiss</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {extendingDiscordId && (
