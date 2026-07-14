@@ -28,6 +28,7 @@ export default function HrPanel() {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
   const canReviewBigActions = !!user?.canReviewBigActions;
+  const canProcessResignations = !!user?.canProcessResignations;
 
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
@@ -73,6 +74,66 @@ export default function HrPanel() {
       setNewRank(ranks[0]?.value ?? "");
     }).catch(() => setRankOptions([]));
   }, [rankChangeSearch.target, rankChangeAction, canReviewBigActions]);
+
+  // ---------- Terminate ----------
+  const terminateSearch = useStaffSearch();
+  const [terminateReason, setTerminateReason] = useState("");
+  const [terminateError, setTerminateError] = useState(null);
+  const [terminateSuccess, setTerminateSuccess] = useState(false);
+  const [terminateSubmitting, setTerminateSubmitting] = useState(false);
+
+  async function submitTerminate(e) {
+    e.preventDefault();
+    setTerminateError(null);
+    setTerminateSuccess(false);
+    if (!terminateSearch.target) {
+      setTerminateError("Pick a staff member from the search results first.");
+      return;
+    }
+    if (!confirm(`Terminate ${terminateSearch.target.nickname ?? terminateSearch.target.username}? This removes all their staff roles immediately.`)) return;
+    setTerminateSubmitting(true);
+    try {
+      await apiFetch("/staff-removal/terminate", { method: "POST", body: { targetDiscordId: terminateSearch.target.discordId, reason: terminateReason } });
+      setTerminateSuccess(true);
+      terminateSearch.reset();
+      setTerminateReason("");
+      await refresh();
+    } catch (err) {
+      setTerminateError(err.message);
+    } finally {
+      setTerminateSubmitting(false);
+    }
+  }
+
+  // ---------- Process Resignation ----------
+  const resignSearch = useStaffSearch();
+  const [resignReason, setResignReason] = useState("");
+  const [resignError, setResignError] = useState(null);
+  const [resignSuccess, setResignSuccess] = useState(false);
+  const [resignSubmitting, setResignSubmitting] = useState(false);
+
+  async function submitResignation(e) {
+    e.preventDefault();
+    setResignError(null);
+    setResignSuccess(false);
+    if (!resignSearch.target) {
+      setResignError("Pick a staff member from the search results first.");
+      return;
+    }
+    if (!confirm(`Process ${resignSearch.target.nickname ?? resignSearch.target.username}'s resignation? This removes all their staff roles.`)) return;
+    setResignSubmitting(true);
+    try {
+      await apiFetch("/staff-removal/resign", { method: "POST", body: { targetDiscordId: resignSearch.target.discordId, reason: resignReason } });
+      setResignSuccess(true);
+      resignSearch.reset();
+      setResignReason("");
+      await refresh();
+    } catch (err) {
+      setResignError(err.message);
+    } finally {
+      setResignSubmitting(false);
+    }
+  }
 
   async function refresh() {
     try {
@@ -400,6 +461,80 @@ export default function HrPanel() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {canReviewBigActions && (
+            <div className="card">
+              <h2>Terminate</h2>
+              {terminateError && <div className="error-banner">{terminateError}</div>}
+              {terminateSuccess && <div className="success-banner">Done.</div>}
+              <form onSubmit={submitTerminate}>
+                <label>Staff Member</label>
+                <div className="autocomplete-wrap">
+                  <input
+                    ref={terminateSearch.inputRef}
+                    required
+                    autoComplete="off"
+                    value={terminateSearch.query}
+                    onChange={e => terminateSearch.onQueryChange(e.target.value)}
+                    onFocus={() => terminateSearch.suggestions.length > 0 && terminateSearch.setShowSuggestions(true)}
+                    placeholder="Search by username or nickname"
+                  />
+                  <PortalDropdown anchorRef={terminateSearch.inputRef} open={terminateSearch.showSuggestions} onClose={() => terminateSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                    {terminateSearch.suggestions.map(s => (
+                      <div key={s.discordId} className="autocomplete-item" onClick={() => terminateSearch.pick(s)}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                      </div>
+                    ))}
+                  </PortalDropdown>
+                </div>
+                {terminateSearch.target && (
+                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
+                )}
+                <label>Reason</label>
+                <textarea rows={2} required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
+                <button className="primary" type="submit" disabled={terminateSubmitting} style={{ background: "#e53935" }}>
+                  {terminateSubmitting ? "Processing…" : "Terminate"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {canProcessResignations && (
+            <div className="card">
+              <h2>Process a Resignation</h2>
+              <p className="muted" style={{ marginTop: -8 }}>For processing someone else's resignation on their behalf.</p>
+              {resignError && <div className="error-banner">{resignError}</div>}
+              {resignSuccess && <div className="success-banner">Done.</div>}
+              <form onSubmit={submitResignation}>
+                <label>Staff Member</label>
+                <div className="autocomplete-wrap">
+                  <input
+                    ref={resignSearch.inputRef}
+                    required
+                    autoComplete="off"
+                    value={resignSearch.query}
+                    onChange={e => resignSearch.onQueryChange(e.target.value)}
+                    onFocus={() => resignSearch.suggestions.length > 0 && resignSearch.setShowSuggestions(true)}
+                    placeholder="Search by username or nickname"
+                  />
+                  <PortalDropdown anchorRef={resignSearch.inputRef} open={resignSearch.showSuggestions} onClose={() => resignSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                    {resignSearch.suggestions.map(s => (
+                      <div key={s.discordId} className="autocomplete-item" onClick={() => resignSearch.pick(s)}>
+                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                      </div>
+                    ))}
+                  </PortalDropdown>
+                </div>
+                <label>Notes</label>
+                <textarea rows={2} value={resignReason} onChange={e => setResignReason(e.target.value)} />
+                <button className="primary" type="submit" disabled={resignSubmitting}>
+                  {resignSubmitting ? "Processing…" : "Process Resignation"}
+                </button>
+              </form>
             </div>
           )}
         </div>

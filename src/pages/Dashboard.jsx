@@ -202,6 +202,29 @@ export default function Dashboard() {
   const [loaModalOpen, setLoaModalOpen] = useState(false);
   const [activityModalOpen, setActivityModalOpen] = useState(false);
 
+  // ---------- Toolbox: Resign modal -- any staff member can resign themselves ----------
+  const [resignModalOpen, setResignModalOpen] = useState(false);
+  const [resignNotes, setResignNotes] = useState("");
+  const [resignError, setResignError] = useState(null);
+  const [resignSubmitting, setResignSubmitting] = useState(false);
+
+  async function submitOwnResignation(e) {
+    e.preventDefault();
+    setResignError(null);
+    if (!confirm("Resign from the staff team? This removes all your staff roles and cannot be undone automatically.")) return;
+    setResignSubmitting(true);
+    try {
+      await apiFetch("/staff-removal/resign", { method: "POST", body: { reason: resignNotes } });
+      setResignModalOpen(false);
+      setResignNotes("");
+      window.location.reload(); // roles just changed -- refresh so the panel reflects the new (former-staff) state
+    } catch (err) {
+      setResignError(err.message);
+    } finally {
+      setResignSubmitting(false);
+    }
+  }
+
   // ---------- Create log ----------
   const allowedTypes = ALL_TYPES.filter(t => (user?.allowedPunishmentTypes ?? ["bolo"]).includes(t.value));
   const [form, setForm] = useState({ targetRobloxUsername: "", type: allowedTypes[0]?.value ?? "bolo", reason: "", unbanAt: "" });
@@ -419,6 +442,7 @@ export default function Dashboard() {
               <button className="toolbox-btn toolbox-orange" onClick={() => setStaffModalOpen(true)}>Request Staff</button>
               <button className="toolbox-btn toolbox-green" onClick={() => setLoaModalOpen(true)}>Manage LOA</button>
               <button className="toolbox-btn toolbox-blue" onClick={() => setLookupModalOpen(true)}>Player Lookup</button>
+              <button className="toolbox-btn toolbox-pink" onClick={() => setResignModalOpen(true)}>Resign</button>
             </div>
           </div>
 
@@ -633,6 +657,25 @@ export default function Dashboard() {
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
+
+      {resignModalOpen && (
+        <div className="modal-backdrop" onClick={() => setResignModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Resign</h2>
+            {resignError && <div className="error-banner">{resignError}</div>}
+            <form onSubmit={submitOwnResignation}>
+              <label>Notes (optional)</label>
+              <textarea rows={2} value={resignNotes} onChange={e => setResignNotes(e.target.value)} />
+              <div className="button-row">
+                <button className="primary" type="submit" disabled={resignSubmitting} style={{ background: "#e53935" }}>
+                  {resignSubmitting ? "Processing…" : "Confirm Resignation"}
+                </button>
+                <button className="secondary" type="button" onClick={() => setResignModalOpen(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ---------- Activity modal ---------- */}
       {activityModalOpen && <ActivityModal onClose={() => setActivityModalOpen(false)} onUserClick={openUser} />}
