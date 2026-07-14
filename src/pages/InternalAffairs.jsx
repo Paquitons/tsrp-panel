@@ -72,7 +72,7 @@ export default function InternalAffairs() {
       return;
     }
     if (!suggestedRank) {
-      setPromoError("No valid rank to suggest for this person -- they may already outrank what you're allowed to suggest.");
+      setPromoError("No valid rank to suggest for this person. They may already outrank what you're allowed to suggest.");
       return;
     }
     setPromoSubmitting(true);
@@ -146,7 +146,7 @@ export default function InternalAffairs() {
           <div className="card">
             <h2>Suggest a Rank Change</h2>
             {promoError && <div className="error-banner">{promoError}</div>}
-            {promoSuccess && <div className="success-banner">Submitted -- a Chief of Staff+ will review it.</div>}
+            {promoSuccess && <div className="success-banner">Submitted.</div>}
             <form onSubmit={submitPromotion}>
               <label>Action</label>
               <CustomSelect
