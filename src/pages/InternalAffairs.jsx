@@ -10,6 +10,26 @@ export default function InternalAffairs() {
   const { user } = useAuth();
   const canAccess = user?.tier === "ia" || user?.tier === "management" || user?.tier === "director";
 
+  // ---------- Request Staff ----------
+  const [staffReason, setStaffReason] = useState("");
+  const [staffStatus, setStaffStatus] = useState(null);
+  const [staffSending, setStaffSending] = useState(false);
+
+  async function sendStaffRequest(e) {
+    e.preventDefault();
+    setStaffSending(true);
+    setStaffStatus(null);
+    try {
+      await apiFetch("/staff-request", { method: "POST", body: { reason: staffReason } });
+      setStaffStatus({ ok: true, message: "Staff requested." });
+      setStaffReason("");
+    } catch (err) {
+      setStaffStatus({ ok: false, message: err.message });
+    } finally {
+      setStaffSending(false);
+    }
+  }
+
   // ---------- Issue Strike ----------
   const strikeSearch = useStaffSearch();
   const [strikeReason, setStrikeReason] = useState("");
@@ -109,6 +129,16 @@ export default function InternalAffairs() {
 
       <div className="multi-col-grid">
         <div className="dashboard-col">
+          <div className="card">
+            <h2>Request Staff</h2>
+            {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
+            <form onSubmit={sendStaffRequest}>
+              <label>Reason</label>
+              <textarea required rows={2} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
+              <button className="primary" type="submit" disabled={staffSending}>{staffSending ? "Sending…" : "Request Staff"}</button>
+            </form>
+          </div>
+
           <div className="card">
             <h2>Issue a Strike</h2>
             <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>

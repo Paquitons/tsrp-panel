@@ -118,48 +118,6 @@ export default function Dashboard() {
       - (onBreak && Number.isFinite(active.break_started_at) ? Math.floor((now - active.break_started_at) / 1000) : 0)
     : 0;
 
-  // ---------- Toolbox: Run Command modal ----------
-  const [commandModalOpen, setCommandModalOpen] = useState(false);
-  const [commandText, setCommandText] = useState("");
-  const [commandStatus, setCommandStatus] = useState(null);
-  const [commandSending, setCommandSending] = useState(false);
-
-  async function sendCommand(e) {
-    e.preventDefault();
-    setCommandSending(true);
-    setCommandStatus(null);
-    try {
-      await apiFetch("/command", { method: "POST", body: { command: commandText } });
-      setCommandStatus({ ok: true, message: "Command sent." });
-      setCommandText("");
-    } catch (err) {
-      setCommandStatus({ ok: false, message: err.message });
-    } finally {
-      setCommandSending(false);
-    }
-  }
-
-  // ---------- Toolbox: Request Staff modal ----------
-  const [staffModalOpen, setStaffModalOpen] = useState(false);
-  const [staffReason, setStaffReason] = useState("");
-  const [staffStatus, setStaffStatus] = useState(null);
-  const [staffSending, setStaffSending] = useState(false);
-
-  async function sendStaffRequest(e) {
-    e.preventDefault();
-    setStaffSending(true);
-    setStaffStatus(null);
-    try {
-      await apiFetch("/staff-request", { method: "POST", body: { reason: staffReason } });
-      setStaffStatus({ ok: true, message: "Staff requested." });
-      setStaffReason("");
-    } catch (err) {
-      setStaffStatus({ ok: false, message: err.message });
-    } finally {
-      setStaffSending(false);
-    }
-  }
-
   // ---------- Toolbox: Player Lookup quick-search modal ----------
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
   const [lookupValue, setLookupValue] = useState("");
@@ -436,10 +394,6 @@ export default function Dashboard() {
           <div className="card">
             <h2>Toolbox</h2>
             <div className="toolbox-grid">
-              {user?.canRunCommand && (
-                <button className="toolbox-btn toolbox-pink" onClick={() => setCommandModalOpen(true)}>Run Command</button>
-              )}
-              <button className="toolbox-btn toolbox-orange" onClick={() => setStaffModalOpen(true)}>Request Staff</button>
               <button className="toolbox-btn toolbox-green" onClick={() => setLoaModalOpen(true)}>Manage LOA</button>
               <button className="toolbox-btn toolbox-blue" onClick={() => setLookupModalOpen(true)}>Player Lookup</button>
               <button className="toolbox-btn toolbox-pink" onClick={() => setResignModalOpen(true)}>Resign</button>
@@ -565,42 +519,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* ---------- Run Command modal ---------- */}
-      {commandModalOpen && (
-        <div className="modal-backdrop" onClick={() => setCommandModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Run Command</h2>
-            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
-            <form onSubmit={sendCommand}>
-              <label>ER:LC Command</label>
-              <input required autoFocus value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
-              <div className="button-row">
-                <button className="primary" type="submit" disabled={commandSending}>{commandSending ? "Sending…" : "Send"}</button>
-                <button className="secondary" type="button" onClick={() => setCommandModalOpen(false)}>Close</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ---------- Request Staff modal ---------- */}
-      {staffModalOpen && (
-        <div className="modal-backdrop" onClick={() => setStaffModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Request Staff</h2>
-            {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
-            <form onSubmit={sendStaffRequest}>
-              <label>Reason</label>
-              <textarea required autoFocus rows={3} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
-              <div className="button-row">
-                <button className="primary" type="submit" disabled={staffSending}>{staffSending ? "Sending…" : "Request Staff"}</button>
-                <button className="secondary" type="button" onClick={() => setStaffModalOpen(false)}>Close</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ---------- Player Lookup quick-search modal ---------- */}
       {lookupModalOpen && (

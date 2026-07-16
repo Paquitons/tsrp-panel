@@ -28,6 +28,26 @@ export default function HrPanel() {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
   const canReviewBigActions = !!user?.canReviewBigActions;
+
+  // ---------- Run Command ----------
+  const [commandText, setCommandText] = useState("");
+  const [commandStatus, setCommandStatus] = useState(null);
+  const [commandSending, setCommandSending] = useState(false);
+
+  async function sendCommand(e) {
+    e.preventDefault();
+    setCommandSending(true);
+    setCommandStatus(null);
+    try {
+      await apiFetch("/command", { method: "POST", body: { command: commandText } });
+      setCommandStatus({ ok: true, message: "Command sent." });
+      setCommandText("");
+    } catch (err) {
+      setCommandStatus({ ok: false, message: err.message });
+    } finally {
+      setCommandSending(false);
+    }
+  }
   const canProcessResignations = !!user?.canProcessResignations;
 
   const [activeStrikes, setActiveStrikes] = useState([]);
@@ -314,6 +334,16 @@ export default function HrPanel() {
       <div className="multi-col-grid">
         {/* ---------- Column 1: Strikes -- issue form + who's currently struck ---------- */}
         <div className="dashboard-col">
+          <div className="card">
+            <h2>Run Command</h2>
+            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
+            <form onSubmit={sendCommand}>
+              <label>ER:LC Command</label>
+              <input required value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
+              <button className="primary" type="submit" disabled={commandSending}>{commandSending ? "Sending…" : "Send"}</button>
+            </form>
+          </div>
+
           <div className="card">
             <h2>Issue a Strike</h2>
             <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
