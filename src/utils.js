@@ -36,10 +36,22 @@ export function formatDurationWithSeconds(seconds) {
  * to Discord's default avatar if there's no hash (user never set one, or
  * we haven't seen them log in yet to capture it).
  */
+// Discord's CDN only accepts specific power-of-two sizes for avatar
+// images -- any other value (e.g. 30, 24) gets rejected outright with a
+// 400 error, not resized or clamped. This rounds UP to the nearest valid
+// size, decoupled from whatever size the image is actually displayed at
+// (which CSS width/height on the <img> already control independently) --
+// also means a sharper source image on high-DPI screens as a side effect.
+const VALID_CDN_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+function nearestValidCdnSize(size) {
+  return VALID_CDN_SIZES.find(v => v >= size) ?? 4096;
+}
+
 export function discordAvatarUrl(discordId, avatarHash, size = 64) {
+  const cdnSize = nearestValidCdnSize(size);
   if (discordId && avatarHash) {
     const ext = avatarHash.startsWith("a_") ? "gif" : "png";
-    return `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.${ext}?size=${size}`;
+    return `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.${ext}?size=${cdnSize}`;
   }
   // Discord's default avatar set (current formula: (id >> 22) % 6).
   const index = discordId ? Number((BigInt(discordId) >> 22n) % 6n) : 0;
