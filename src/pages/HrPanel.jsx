@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO, formatDuration } from "../utils";
+import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
@@ -55,9 +55,6 @@ export default function HrPanel() {
   const [pendingLOAs, setPendingLOAs] = useState([]);
   const [activeLOAs, setActiveLOAs] = useState([]);
   const [loaHistory, setLoaHistory] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [leaderboardResetAt, setLeaderboardResetAt] = useState(null);
-  const [resettingLeaderboard, setResettingLeaderboard] = useState(false);
   const [pendingPromotions, setPendingPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -177,11 +174,6 @@ export default function HrPanel() {
       const { requests } = await apiFetch("/loa/history");
       setLoaHistory(requests);
     } catch { /* ignore */ }
-    try {
-      const { leaderboard, lastReset } = await apiFetch("/shifts/leaderboard");
-      setLeaderboard(leaderboard);
-      setLeaderboardResetAt(lastReset);
-    } catch { /* ignore */ }
     if (canReviewBigActions) {
       try {
         const { requests } = await apiFetch("/rank-changes/pending");
@@ -259,19 +251,6 @@ export default function HrPanel() {
       await refresh();
     } catch (err) {
       alert(err.message);
-    }
-  }
-
-  async function resetLeaderboard() {
-    if (!confirm("Reset the shift leaderboard? This starts a new counting period -- existing shift records and reports are not deleted.")) return;
-    setResettingLeaderboard(true);
-    try {
-      await apiFetch("/shifts/leaderboard/reset", { method: "POST" });
-      await refresh();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setResettingLeaderboard(false);
     }
   }
 
@@ -428,32 +407,6 @@ export default function HrPanel() {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="card">
-            <div className="log-card-issuer-row" style={{ marginBottom: 12 }}>
-              <h2 style={{ margin: 0 }}>Shift Leaderboard</h2>
-              <button className="secondary small" style={{ marginLeft: "auto" }} onClick={resetLeaderboard} disabled={resettingLeaderboard}>
-                {resettingLeaderboard ? "Resetting…" : "Reset"}
-              </button>
-            </div>
-            {leaderboardResetAt && (
-              <p className="muted" style={{ marginTop: -8 }}>Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
-            )}
-            {leaderboard.length === 0 ? (
-              <p className="muted">No shift activity yet this period.</p>
-            ) : (
-              <div className="log-card-list">
-                {leaderboard.map((row, idx) => (
-                  <div key={row.discord_id} className="log-card-issuer-row" style={{ padding: "6px 0" }}>
-                    <span className="muted" style={{ width: 20 }}>#{idx + 1}</span>
-                    <DiscordAvatar discordId={row.discord_id} avatarHash={row.staff_avatar_hash} size={24} />
-                    <span className="log-card-username">{row.staff_username ?? row.discord_id}</span>
-                    <span className="muted" style={{ marginLeft: "auto" }}>{formatDuration(row.totalSeconds)} · {row.shiftCount} shift{row.shiftCount === 1 ? "" : "s"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, formatDurationWithSeconds } from "../utils";
+import { timeAgo, formatDurationWithSeconds, formatDuration } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
 import UserPanel from "../components/UserPanel";
@@ -64,6 +64,10 @@ export default function Dashboard() {
   const [shiftError, setShiftError] = useState(null);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardResetAt, setLeaderboardResetAt] = useState(null);
+  const [resettingLeaderboard, setResettingLeaderboard] = useState(false);
+  const [forceEndingId, setForceEndingId] = useState(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
   useEffect(() => {
@@ -86,6 +90,41 @@ export default function Dashboard() {
       const { staff } = await apiFetch("/shifts/on-duty");
       setOnDutyStaff(staff);
     } catch { /* ignore */ }
+  }
+
+  async function refreshLeaderboard() {
+    try {
+      const { leaderboard, lastReset } = await apiFetch("/shifts/leaderboard");
+      setLeaderboard(leaderboard);
+      setLeaderboardResetAt(lastReset);
+    } catch { /* ignore */ }
+  }
+
+  async function resetLeaderboard() {
+    if (!confirm("Reset the shift leaderboard? This starts a new counting period -- existing shift records and reports are not deleted.")) return;
+    setResettingLeaderboard(true);
+    try {
+      await apiFetch("/shifts/leaderboard/reset", { method: "POST" });
+      await refreshLeaderboard();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setResettingLeaderboard(false);
+    }
+  }
+
+  async function forceEndShift(discordId, name) {
+    if (!confirm(`End ${name}'s active shift? Use this if they forgot to clock out or for shift-farming concerns.`)) return;
+    setForceEndingId(discordId);
+    try {
+      await apiFetch(`/shifts/end/${discordId}`, { method: "POST" });
+      await refreshOnDuty();
+      await refreshLeaderboard();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setForceEndingId(null);
+    }
   }
 
   async function startShift() {
@@ -313,11 +352,13 @@ export default function Dashboard() {
   useEffect(() => {
     refreshShift();
     refreshOnDuty();
+    refreshLeaderboard();
     refreshLogs();
     fetchActivity();
     fetchLivePlayers();
     const interval = setInterval(() => {
       refreshOnDuty();
+      refreshLeaderboard();
       refreshLogs();
       fetchActivity();
       fetchLivePlayers();
@@ -392,6 +433,48 @@ export default function Dashboard() {
             <button className="secondary small" style={{ marginTop: 12, width: "100%" }} onClick={() => setHistoryModalOpen(true)}>
               View Shift History
             </button>
+          </div>
+
+          <div className="card">
+            <div className="log-card-issuer-row" style={{ marginBottom: 12 }}>
+              <h2 style={{ margin: 0 }}>Shift Leaderboard</h2>
+              {user?.isManagementOrAbove && (
+                <button className="secondary small" style={{ marginLeft: "auto" }} onClick={resetLeaderboard} disabled={resettingLeaderboard}>
+                  {resettingLeaderboard ? "Resetting…" : "Reset"}
+                </button>
+              )}
+            </div>
+            {leaderboardResetAt && (
+              <p className="muted" style={{ marginTop: -8 }}>Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
+            )}
+            {leaderboard.length === 0 ? (
+              <p className="muted">No shift activity yet this period.</p>
+            ) : (
+              <div className="log-card-list">
+                {leaderboard.map((row, idx) => {
+                  const isActive = onDutyStaff.some(s => s.discordId === row.discord_id);
+                  const name = row.staff_username ?? row.discord_id;
+                  return (
+                    <div key={row.discord_id} className="log-card-issuer-row" style={{ padding: "6px 0" }}>
+                      <span className="muted" style={{ width: 20 }}>#{idx + 1}</span>
+                      <DiscordAvatar discordId={row.discord_id} avatarHash={row.staff_avatar_hash} size={24} />
+                      <span className="log-card-username">{name}</span>
+                      <span className="muted" style={{ marginLeft: "auto" }}>{formatDuration(row.totalSeconds)} · {row.shiftCount} shift{row.shiftCount === 1 ? "" : "s"}</span>
+                      {user?.isManagementOrAbove && isActive && (
+                        <button
+                          className="btn-red small"
+                          style={{ marginLeft: 8 }}
+                          onClick={() => forceEndShift(row.discord_id, name)}
+                          disabled={forceEndingId === row.discord_id}
+                        >
+                          {forceEndingId === row.discord_id ? "Ending…" : "End Shift"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="card">
