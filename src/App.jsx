@@ -1,18 +1,13 @@
-import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
-import ThemeSwitcher from "./components/ThemeSwitcher";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
-import { loadSavedTheme } from "./themes";
 
 function AppShell() {
   const { user, loading } = useAuth();
-
-  useEffect(() => { loadSavedTheme(); }, []);
 
   if (loading) {
     return <div className="login-screen">Loading...</div>;
@@ -30,7 +25,6 @@ function AppShell() {
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
       </Routes>
-      <ThemeSwitcher />
     </div>
   );
 }
