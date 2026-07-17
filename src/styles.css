@@ -447,6 +447,12 @@ button.small {
   font-size: var(--text-base);
 }
 
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-scroll table { min-width: 480px; }
+
 th, td {
   text-align: left;
   padding: var(--space-3) var(--space-3);
@@ -551,7 +557,7 @@ tbody tr:hover { background: var(--surface-hover); }
   flex-shrink: 0;
 }
 
-.activity-text { flex: 1; }
+.activity-text { flex: 1 1 auto; min-width: 0; word-break: break-word; }
 .activity-time { font-size: var(--text-sm); flex-shrink: 0; color: var(--text-faint); }
 
 /* ---------- Login ---------- */
@@ -637,9 +643,19 @@ code {
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background var(--duration-fast) var(--ease);
+  min-width: 0;
 }
+.autocomplete-item > * { flex-shrink: 0; }
 .autocomplete-item:hover { background: var(--surface-hover); }
-.autocomplete-name { font-size: var(--text-base); color: var(--text-primary); }
+.autocomplete-name {
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  flex: 1 1 auto;
+  min-width: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .autocomplete-hint {
   margin-left: auto;
   font-size: var(--text-xs);
@@ -669,12 +685,23 @@ code {
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
+  min-width: 0;
+}
+
+.log-card-issuer-row > * {
+  flex-shrink: 0;
 }
 
 .log-card-issuer-name, .log-card-username {
   font-weight: 600;
   color: var(--text-primary);
   font-size: var(--text-base);
+  flex: 1 1 auto;
+  flex-shrink: 1;
+  min-width: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .log-card-body { display: flex; flex-direction: column; gap: 6px; }
@@ -970,6 +997,11 @@ code {
   align-items: center;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
+  min-width: 0;
+}
+.user-panel-identity > *:not(img):not(.avatar-fallback) {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .user-panel-badges {
@@ -1083,8 +1115,18 @@ code {
   cursor: pointer;
   font-size: var(--text-base);
   transition: background var(--duration-fast) var(--ease);
+  min-width: 0;
 }
 .players-list-row:hover { background: var(--surface-hover); }
+.players-list-row > * { flex-shrink: 0; }
+
+.players-list-name {
+  flex: 1 1 auto;
+  min-width: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ---------- Custom Select (replaces generic native <select>) ---------- */
 
@@ -1106,7 +1148,17 @@ code {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-2);
   transition: border-color var(--duration-fast) var(--ease);
+}
+
+.custom-select-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
 }
 .custom-select-trigger:hover { border-color: var(--border-strong); }
 .custom-select-trigger.open { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }

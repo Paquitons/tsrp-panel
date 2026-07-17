@@ -498,7 +498,7 @@ export default function Dashboard() {
                 filteredPlayers.map(p => (
                   <div key={p.username} className="players-list-row" onClick={() => openUser(p.username)}>
                     <Avatar username={p.username} robloxId={p.robloxId} size={24} />
-                    <span>{p.username}</span>
+                    <span className="players-list-name">{p.username}</span>
                   </div>
                 ))
               )}

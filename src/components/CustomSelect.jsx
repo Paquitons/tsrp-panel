@@ -58,7 +58,7 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
   return (
     <div className="custom-select">
       <button type="button" ref={triggerRef} className="custom-select-trigger" onClick={() => setOpen(o => !o)}>
-        <span>{selected?.label ?? placeholder}</span>
+        <span className="custom-select-label">{selected?.label ?? placeholder}</span>
         <span className={`custom-select-chevron ${open ? "custom-select-chevron-open" : ""}`}>⌄</span>
       </button>
       {open && coords && createPortal(

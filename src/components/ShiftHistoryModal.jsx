@@ -47,6 +47,7 @@ export default function ShiftHistoryModal({ onClose }) {
         {!loading && history.length === 0 && <p className="muted">No completed shifts yet.</p>}
 
         {history.length > 0 && (
+          <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr><th>Started</th><th>Duration</th><th>Break</th><th>Type</th><th></th></tr>
@@ -82,6 +83,7 @@ export default function ShiftHistoryModal({ onClose }) {
                                 <div><span className="stat-value">{report.punishmentLogs.length}</span><span className="muted"> log(s) issued</span></div>
                               </div>
                               {report.punishmentLogs.length > 0 ? (
+                                <div className="table-scroll">
                                 <table className="data-table">
                                   <thead><tr><th>Type</th><th>Target</th><th>Reason</th></tr></thead>
                                   <tbody>
@@ -94,6 +96,7 @@ export default function ShiftHistoryModal({ onClose }) {
                                     ))}
                                   </tbody>
                                 </table>
+                                </div>
                               ) : (
                                 <p className="muted">No punishment logs were issued during this shift.</p>
                               )}
@@ -107,6 +110,7 @@ export default function ShiftHistoryModal({ onClose }) {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
