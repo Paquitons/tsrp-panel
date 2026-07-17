@@ -21,7 +21,7 @@ const ALL_TYPES = [
   { value: "note", label: "Note" },
 ];
 
-const POLL_MS = 15_000;
+const POLL_MS = 3_000; // fast poll so the panel feels live without a full push/WebSocket layer
 
 const ACTIVITY_META = {
   join:      { color: "#69f0ae" },

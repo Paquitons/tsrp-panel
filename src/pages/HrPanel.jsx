@@ -186,7 +186,7 @@ export default function HrPanel() {
   useEffect(() => {
     if (!canAccess) return;
     refresh();
-    const interval = setInterval(refresh, 30_000);
+    const interval = setInterval(refresh, 3_000);
     return () => clearInterval(interval);
   }, [canAccess]);
 

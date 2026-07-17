@@ -59,7 +59,7 @@ export default function ActivityModal({ onClose, onUserClick }) {
 
   useEffect(() => {
     fetchActivity();
-    const interval = setInterval(fetchActivity, 15_000);
+    const interval = setInterval(fetchActivity, 3_000);
     return () => clearInterval(interval);
   }, []);
 
