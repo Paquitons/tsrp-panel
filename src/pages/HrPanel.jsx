@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, discordAvatarUrl, parseLocalDateInput, toDateInputValue, todayLocalISO } from "../utils";
+import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO, formatDuration } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
+import DiscordAvatar from "../components/DiscordAvatar";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -53,6 +54,10 @@ export default function HrPanel() {
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
   const [activeLOAs, setActiveLOAs] = useState([]);
+  const [loaHistory, setLoaHistory] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardResetAt, setLeaderboardResetAt] = useState(null);
+  const [resettingLeaderboard, setResettingLeaderboard] = useState(false);
   const [pendingPromotions, setPendingPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,6 +173,15 @@ export default function HrPanel() {
       const { requests } = await apiFetch("/loa/active");
       setActiveLOAs(requests);
     } catch { /* ignore */ }
+    try {
+      const { requests } = await apiFetch("/loa/history");
+      setLoaHistory(requests);
+    } catch { /* ignore */ }
+    try {
+      const { leaderboard, lastReset } = await apiFetch("/shifts/leaderboard");
+      setLeaderboard(leaderboard);
+      setLeaderboardResetAt(lastReset);
+    } catch { /* ignore */ }
     if (canReviewBigActions) {
       try {
         const { requests } = await apiFetch("/rank-changes/pending");
@@ -245,6 +259,19 @@ export default function HrPanel() {
       await refresh();
     } catch (err) {
       alert(err.message);
+    }
+  }
+
+  async function resetLeaderboard() {
+    if (!confirm("Reset the shift leaderboard? This starts a new counting period -- existing shift records and reports are not deleted.")) return;
+    setResettingLeaderboard(true);
+    try {
+      await apiFetch("/shifts/leaderboard/reset", { method: "POST" });
+      await refresh();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setResettingLeaderboard(false);
     }
   }
 
@@ -363,7 +390,7 @@ export default function HrPanel() {
                 <PortalDropdown anchorRef={staffInputRef} open={showStaffSuggestions} onClose={() => setShowStaffSuggestions(false)} className="autocomplete-list-portal">
                   {staffSuggestions.map(s => (
                     <div key={s.discordId} className="autocomplete-item" onClick={() => pickStaff(s)}>
-                      <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                       <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                     </div>
                   ))}
@@ -383,7 +410,7 @@ export default function HrPanel() {
               {groupedStrikes.map(([discordId, strikes]) => (
                 <div className="log-card" key={discordId}>
                   <div className="log-card-issuer-row">
-                    <img className="avatar-img" style={{ width: 28, height: 28 }} src={discordAvatarUrl(discordId, strikes[0].target_avatar_hash)} alt="" />
+                    <DiscordAvatar discordId={discordId} avatarHash={strikes[0].target_avatar_hash} size={28} />
                     <span className="log-card-issuer-name">{strikes[0].target_username ?? discordId}</span>
                     <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
                   </div>
@@ -401,6 +428,32 @@ export default function HrPanel() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="card">
+            <div className="log-card-issuer-row" style={{ marginBottom: 12 }}>
+              <h2 style={{ margin: 0 }}>Shift Leaderboard</h2>
+              <button className="secondary small" style={{ marginLeft: "auto" }} onClick={resetLeaderboard} disabled={resettingLeaderboard}>
+                {resettingLeaderboard ? "Resetting…" : "Reset"}
+              </button>
+            </div>
+            {leaderboardResetAt && (
+              <p className="muted" style={{ marginTop: -8 }}>Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
+            )}
+            {leaderboard.length === 0 ? (
+              <p className="muted">No shift activity yet this period.</p>
+            ) : (
+              <div className="log-card-list">
+                {leaderboard.map((row, idx) => (
+                  <div key={row.discord_id} className="log-card-issuer-row" style={{ padding: "6px 0" }}>
+                    <span className="muted" style={{ width: 20 }}>#{idx + 1}</span>
+                    <DiscordAvatar discordId={row.discord_id} avatarHash={row.staff_avatar_hash} size={24} />
+                    <span className="log-card-username">{row.staff_username ?? row.discord_id}</span>
+                    <span className="muted" style={{ marginLeft: "auto" }}>{formatDuration(row.totalSeconds)} · {row.shiftCount} shift{row.shiftCount === 1 ? "" : "s"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -432,7 +485,7 @@ export default function HrPanel() {
                   <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
                     {rankChangeSearch.suggestions.map(s => (
                       <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                         <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                       </div>
                     ))}
@@ -471,7 +524,7 @@ export default function HrPanel() {
                   {pendingPromotions.map(s => (
                     <div className="loa-card" key={s.id}>
                       <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.target_discord_id, s.target_avatar_hash)} alt="" />
+                        <DiscordAvatar discordId={s.target_discord_id} avatarHash={s.target_avatar_hash} size={26} />
                         <span className="log-card-username">{s.target_username ?? s.target_discord_id}</span>
                         <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
                       </div>
@@ -480,7 +533,7 @@ export default function HrPanel() {
                       <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
                       <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
                         <span className="muted" style={{ fontSize: 12.5 }}>Requested by</span>
-                        <img className="avatar-img" style={{ width: 18, height: 18 }} src={discordAvatarUrl(s.requested_by, s.requester_avatar_hash)} alt="" />
+                        <DiscordAvatar discordId={s.requested_by} avatarHash={s.requester_avatar_hash} size={18} />
                         <span style={{ fontSize: 12.5 }}>{s.requester_username ?? s.requested_by}</span>
                       </div>
                       <div className="button-row">
@@ -514,7 +567,7 @@ export default function HrPanel() {
                   <PortalDropdown anchorRef={terminateSearch.inputRef} open={terminateSearch.showSuggestions} onClose={() => terminateSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
                     {terminateSearch.suggestions.map(s => (
                       <div key={s.discordId} className="autocomplete-item" onClick={() => terminateSearch.pick(s)}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                         <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                       </div>
                     ))}
@@ -553,7 +606,7 @@ export default function HrPanel() {
                   <PortalDropdown anchorRef={resignSearch.inputRef} open={resignSearch.showSuggestions} onClose={() => resignSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
                     {resignSearch.suggestions.map(s => (
                       <div key={s.discordId} className="autocomplete-item" onClick={() => resignSearch.pick(s)}>
-                        <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                         <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                       </div>
                     ))}
@@ -581,7 +634,7 @@ export default function HrPanel() {
                   <div className="loa-card" key={r.id}>
                     <div className="loa-card-top loa-card-top-stack">
                       <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                        <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
                         <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
                       </span>
                       <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
@@ -607,7 +660,7 @@ export default function HrPanel() {
                   <div className="loa-card" key={r.id}>
                     <div className="loa-card-top loa-card-top-stack">
                       <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                        <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
                         <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
                       </span>
                       <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
@@ -617,6 +670,33 @@ export default function HrPanel() {
                       <button className="secondary small" onClick={() => openExtend(r.discord_id, r.end_date)}>Extend / Change Date</button>
                       <button className="btn-red small" onClick={() => endLOANow(r.discord_id)}>End Now</button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="card">
+            <h2>LOA History</h2>
+            {loaHistory.length === 0 ? (
+              <p className="muted">No completed LOAs yet.</p>
+            ) : (
+              <div className="loa-list">
+                {loaHistory.map(r => (
+                  <div className="loa-card" key={r.id}>
+                    <div className="loa-card-top loa-card-top-stack">
+                      <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
+                        <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                      </span>
+                      <span className={r.returned_early ? "loa-status-approved" : "muted"}>
+                        {r.returned_early ? "Returned early" : "Completed"} {new Date(r.ended_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="muted" style={{ marginBottom: 4 }}>
+                      Planned {new Date(r.start_date).toLocaleDateString()} – {new Date(r.end_date).toLocaleDateString()}
+                    </div>
+                    <div className="muted">{r.reason}</div>
                   </div>
                 ))}
               </div>

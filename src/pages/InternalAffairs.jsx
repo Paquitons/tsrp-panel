@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { discordAvatarUrl } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
+import DiscordAvatar from "../components/DiscordAvatar";
 
 export default function InternalAffairs() {
   const { user } = useAuth();
@@ -159,7 +159,7 @@ export default function InternalAffairs() {
                 <PortalDropdown anchorRef={strikeSearch.inputRef} open={strikeSearch.showSuggestions} onClose={() => strikeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
                   {strikeSearch.suggestions.map(s => (
                     <div key={s.discordId} className="autocomplete-item" onClick={() => strikeSearch.pick(s)}>
-                      <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                       <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                     </div>
                   ))}
@@ -198,7 +198,7 @@ export default function InternalAffairs() {
                 <PortalDropdown anchorRef={promoSearch.inputRef} open={promoSearch.showSuggestions} onClose={() => promoSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
                   {promoSearch.suggestions.map(s => (
                     <div key={s.discordId} className="autocomplete-item" onClick={() => promoSearch.pick(s)}>
-                      <img className="avatar-img" style={{ width: 26, height: 26 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
                       <span className="autocomplete-name">{s.nickname ?? s.username}</span>
                     </div>
                   ))}

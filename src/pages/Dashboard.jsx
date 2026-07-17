@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, formatDurationWithSeconds, discordAvatarUrl } from "../utils";
+import { timeAgo, formatDurationWithSeconds } from "../utils";
 import Avatar from "../components/Avatar";
+import DiscordAvatar from "../components/DiscordAvatar";
 import UserPanel from "../components/UserPanel";
 import LogCard from "../components/LogCard";
 import CustomSelect from "../components/CustomSelect";
@@ -345,7 +346,7 @@ export default function Dashboard() {
         {/* ---------- LEFT: Greeting + Shift + Toolbox + On Duty + Players ---------- */}
         <div className="dashboard-col">
           <div className="card dashboard-greeting-card">
-            <img className="avatar-img" style={{ width: 40, height: 40 }} src={discordAvatarUrl(user?.discordId, user?.avatar)} alt="" />
+            <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatar} size={40} />
             <h2 style={{ margin: 0 }}>Hey, {user?.username}!</h2>
           </div>
 
@@ -381,7 +382,7 @@ export default function Dashboard() {
                     onClick={() => openUserByDiscord(s.discordId)}
                     style={{ cursor: "pointer" }}
                   >
-                    <img className="avatar-img" style={{ width: 30, height: 30 }} src={discordAvatarUrl(s.discordId, s.avatarHash)} alt="" />
+                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={30} />
                     <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
                   </div>
                 ))}
