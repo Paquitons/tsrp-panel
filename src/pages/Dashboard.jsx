@@ -126,21 +126,22 @@ export default function Dashboard() {
   const lookupInputRef = useRef(null);
   const lookupDebounceRef = useRef(null);
 
+  async function fetchLookupSuggestions(value) {
+    try {
+      const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
+      setLookupSuggestions(suggestions);
+      setShowLookupSuggestions(suggestions.length > 0);
+    } catch { setLookupSuggestions([]); }
+  }
+
   function onLookupValueChange(value) {
     setLookupValue(value);
     clearTimeout(lookupDebounceRef.current);
-    if (value.trim().length < 2) {
-      setLookupSuggestions([]);
-      setShowLookupSuggestions(false);
-      return;
-    }
-    lookupDebounceRef.current = setTimeout(async () => {
-      try {
-        const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
-        setLookupSuggestions(suggestions);
-        setShowLookupSuggestions(suggestions.length > 0);
-      } catch { setLookupSuggestions([]); }
-    }, 250);
+    lookupDebounceRef.current = setTimeout(() => fetchLookupSuggestions(value.trim()), 250);
+  }
+
+  function onLookupFocus() {
+    fetchLookupSuggestions(lookupValue.trim());
   }
 
   function selectLookupSuggestion(username) {
@@ -198,21 +199,22 @@ export default function Dashboard() {
     setForm(prev => ({ ...prev, [key]: value }));
   }
 
+  async function fetchUsernameSuggestions(value) {
+    try {
+      const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
+      setSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } catch { setSuggestions([]); }
+  }
+
   function onUsernameChange(value) {
     updateField("targetRobloxUsername", value);
     clearTimeout(debounceRef.current);
-    if (value.trim().length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const { suggestions } = await apiFetch(`/punishments/autocomplete?q=${encodeURIComponent(value)}`);
-        setSuggestions(suggestions);
-        setShowSuggestions(suggestions.length > 0);
-      } catch { setSuggestions([]); }
-    }, 250);
+    debounceRef.current = setTimeout(() => fetchUsernameSuggestions(value.trim()), 250);
+  }
+
+  function onUsernameFocus() {
+    fetchUsernameSuggestions((form.targetRobloxUsername ?? "").trim());
   }
 
   function openUser(username) {
@@ -435,7 +437,7 @@ export default function Dashboard() {
                   autoComplete="off"
                   value={form.targetRobloxUsername}
                   onChange={e => onUsernameChange(e.target.value)}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                  onFocus={onUsernameFocus}
                   placeholder="Enter Roblox username"
                 />
                 <PortalDropdown anchorRef={usernameInputRef} open={showSuggestions} onClose={() => setShowSuggestions(false)} className="autocomplete-list-portal">
@@ -535,7 +537,7 @@ export default function Dashboard() {
                   autoComplete="off"
                   value={lookupValue}
                   onChange={e => onLookupValueChange(e.target.value)}
-                  onFocus={() => lookupSuggestions.length > 0 && setShowLookupSuggestions(true)}
+                  onFocus={onLookupFocus}
                   placeholder="Enter a username"
                 />
                 <PortalDropdown anchorRef={lookupInputRef} open={showLookupSuggestions} onClose={() => setShowLookupSuggestions(false)} className="autocomplete-list-portal">
