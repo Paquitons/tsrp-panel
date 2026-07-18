@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, TYPE_LABELS, discordAvatarUrl } from "../utils";
+import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "./Avatar";
+import DiscordAvatar from "./DiscordAvatar";
 import CustomSelect from "./CustomSelect";
 import PortalDropdown from "./PortalDropdown";
 
@@ -91,12 +92,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   return (
     <div className={`log-card ${isActiveBolo ? "bolo-active" : ""}`}>
       <div className="log-card-issuer-row">
-        <img
-          className="avatar-img"
-          style={{ width: 28, height: 28 }}
-          src={discordAvatarUrl(log.issuer_discord_id, log.issuer_avatar_hash)}
-          alt=""
-        />
+        <DiscordAvatar discordId={log.issuer_discord_id} avatarHash={log.issuer_avatar_hash} size={28} />
         <span
           className={issuerClickable ? "log-card-issuer-name log-card-clickable-name" : "log-card-issuer-name"}
           style={issuerClickable ? { cursor: "pointer" } : undefined}
@@ -156,7 +152,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           {log.completed_at && (
             <div className="log-card-completed">
               <span className="muted">Completed by</span>{" "}
-              <img className="avatar-img" style={{ width: 16, height: 16, verticalAlign: "middle" }} src={discordAvatarUrl(log.completed_by, log.completed_by_avatar_hash)} alt="" />{" "}
+              <DiscordAvatar discordId={log.completed_by} avatarHash={log.completed_by_avatar_hash} size={16} style={{ verticalAlign: "middle" }} />{" "}
               {log.completed_by_username ?? log.completed_by}
             </div>
           )}
