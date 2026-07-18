@@ -141,7 +141,7 @@ export default function InternalAffairs() {
 
           <div className="card">
             <h2>Issue a Strike</h2>
-            <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
+            <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
             {strikeError && <div className="error-banner">{strikeError}</div>}
             {strikeSuccess && <div className="success-banner">Strike issued.</div>}
             <form onSubmit={submitStrike}>
@@ -206,14 +206,14 @@ export default function InternalAffairs() {
               </div>
 
               {promoSearch.target && (
-                <p className="muted" style={{ marginTop: -6 }}>Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
+                <p className="muted field-hint">Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
               )}
 
               <label>New Rank</label>
               {rankOptions.length > 0 ? (
                 <CustomSelect value={suggestedRank} onChange={setSuggestedRank} options={rankOptions} />
               ) : (
-                <p className="muted" style={{ marginTop: -6 }}>
+                <p className="muted field-hint">
                   {promoSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
                 </p>
               )}

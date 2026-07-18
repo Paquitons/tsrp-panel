@@ -445,7 +445,7 @@ export default function Dashboard() {
               )}
             </div>
             {leaderboardResetAt && (
-              <p className="muted" style={{ marginTop: -8 }}>Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
+              <p className="muted card-subtitle">Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
             )}
             {leaderboard.length === 0 ? (
               <p className="muted">No shift activity yet this period.</p>
@@ -488,7 +488,7 @@ export default function Dashboard() {
 
           <div className="card">
             <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
-            {queueCount > 0 && <p className="muted" style={{ marginTop: -8 }}>{queueCount} in queue</p>}
+            {queueCount > 0 && <p className="muted card-subtitle">{queueCount} in queue</p>}
             <CustomSelect value={teamFilter} onChange={setTeamFilter} options={teamOptions} />
             <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} style={{ marginTop: 10 }} />
             <div className="players-list">
@@ -507,7 +507,7 @@ export default function Dashboard() {
         </div>
 
         {/* ---------- CENTER: Create log + live activity ---------- */}
-        <div className="dashboard-col dashboard-col-wide">
+        <div className="dashboard-col">
           <div className="card">
             <h2>Create New Log</h2>
             {createError && <div className="error-banner">{createError}</div>}
