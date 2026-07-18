@@ -79,7 +79,7 @@ export default function UserPanel({ username, discordId, onClose }) {
           </div>
 
           {data.joinedAt && (
-            <p className="muted" style={{ marginTop: -6 }}>Joined server {timeAgo(data.joinedAt * 1000)}.</p>
+            <p className="muted joined-note">Joined server {timeAgo(data.joinedAt * 1000)}.</p>
           )}
 
           {data.player && (

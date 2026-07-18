@@ -89,7 +89,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   }
 
   return (
-    <div className={`log-card ${isActiveBolo ? "log-card-active-bolo" : ""}`}>
+    <div className={`log-card ${isActiveBolo ? "bolo-active" : ""}`}>
       <div className="log-card-issuer-row">
         <img
           className="avatar-img"

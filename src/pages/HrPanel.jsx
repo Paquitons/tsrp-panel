@@ -352,7 +352,7 @@ export default function HrPanel() {
 
           <div className="card">
             <h2>Issue a Strike</h2>
-            <p className="muted" style={{ marginTop: -8 }}>Every strike automatically expires after 2 weeks.</p>
+            <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
             {strikeError && <div className="error-banner">{strikeError}</div>}
             <form onSubmit={submitStrike}>
               <label>Staff Member</label>
@@ -446,14 +446,14 @@ export default function HrPanel() {
                 </div>
 
                 {rankChangeSearch.target && (
-                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {rankChangeSearch.target.rankLabel ?? "Unknown"}</p>
+                  <p className="muted field-hint">Current rank: {rankChangeSearch.target.rankLabel ?? "Unknown"}</p>
                 )}
 
                 <label>New Rank</label>
                 {rankOptions.length > 0 ? (
                   <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
                 ) : (
-                  <p className="muted" style={{ marginTop: -6 }}>
+                  <p className="muted field-hint">
                     {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
                   </p>
                 )}
@@ -527,7 +527,7 @@ export default function HrPanel() {
                   </PortalDropdown>
                 </div>
                 {terminateSearch.target && (
-                  <p className="muted" style={{ marginTop: -6 }}>Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
+                  <p className="muted field-hint">Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
                 )}
                 <label>Reason</label>
                 <textarea rows={2} required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
@@ -541,7 +541,7 @@ export default function HrPanel() {
           {canProcessResignations && (
             <div className="card">
               <h2>Process a Resignation</h2>
-              <p className="muted" style={{ marginTop: -8 }}>For processing someone else's resignation on their behalf.</p>
+              <p className="muted card-subtitle">For processing someone else's resignation on their behalf.</p>
               {resignError && <div className="error-banner">{resignError}</div>}
               {resignSuccess && <div className="success-banner">Done.</div>}
               <form onSubmit={submitResignation}>
