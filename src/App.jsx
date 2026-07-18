@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
+import Strike3Prompt from "./components/Strike3Prompt";
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ function AppShell() {
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
       </Routes>
+      <Strike3Prompt />
     </div>
   );
 }

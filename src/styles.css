@@ -1151,6 +1151,19 @@ code {
   max-width: 560px;
 }
 
+/* ---------- 3rd Strike action prompt ---------- */
+
+.strike3-modal {
+  max-width: 480px;
+}
+
+.strike3-history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* ---------- LOA modal ---------- */
 
 .loa-modal {
@@ -1326,7 +1339,7 @@ code {
     padding-bottom: var(--space-4);
   }
 
-  .modal, .user-panel-modal, .shift-history-modal, .loa-modal, .activity-modal {
+  .modal, .user-panel-modal, .shift-history-modal, .loa-modal, .activity-modal, .strike3-modal {
     max-width: 100%;
     max-height: calc(100vh - 24px);
   }
