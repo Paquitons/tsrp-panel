@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { discordAvatarUrl, parseLocalDateInput, todayLocalISO } from "../utils";
+import { parseLocalDateInput, todayLocalISO } from "../utils";
+import DiscordAvatar from "./DiscordAvatar";
 
 export default function LOAModal({ onClose }) {
   const { user } = useAuth();
@@ -37,7 +38,11 @@ export default function LOAModal({ onClose }) {
     }
   }
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(refresh, 3_000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function submit(e) {
     e.preventDefault();
@@ -127,7 +132,7 @@ export default function LOAModal({ onClose }) {
                 <div className="loa-card" key={r.id}>
                   <div className="loa-card-top loa-card-top-stack">
                     <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                      <img className="avatar-img" style={{ width: 22, height: 22 }} src={discordAvatarUrl(r.discord_id, r.requester_avatar_hash)} alt="" />
+                      <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
                       <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
                     </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>

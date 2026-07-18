@@ -357,6 +357,7 @@ export default function Dashboard() {
     fetchActivity();
     fetchLivePlayers();
     const interval = setInterval(() => {
+      refreshShift();
       refreshOnDuty();
       refreshLeaderboard();
       refreshLogs();
@@ -436,10 +437,10 @@ export default function Dashboard() {
           </div>
 
           <div className="card">
-            <div className="log-card-issuer-row" style={{ marginBottom: 12 }}>
+            <div className="modal-title-row" style={{ marginBottom: 12 }}>
               <h2 style={{ margin: 0 }}>Shift Leaderboard</h2>
               {user?.isManagementOrAbove && (
-                <button className="secondary small" style={{ marginLeft: "auto" }} onClick={resetLeaderboard} disabled={resettingLeaderboard}>
+                <button className="secondary small" onClick={resetLeaderboard} disabled={resettingLeaderboard}>
                   {resettingLeaderboard ? "Resetting…" : "Reset"}
                 </button>
               )}
