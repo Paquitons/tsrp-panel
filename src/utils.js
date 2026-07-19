@@ -106,6 +106,27 @@ export function todayLocalISO() {
   return toDateInputValue(Date.now());
 }
 
+/**
+ * Converts an epoch-ms timestamp into a datetime-local input value
+ * ("YYYY-MM-DDTHH:mm") using LOCAL components. Unlike the date-only
+ * helpers above, a "T"-containing string is parsed by JS as local time
+ * already (not UTC), so this doesn't need the same UTC-vs-local guard --
+ * only the conversion TO the input's string format needs to be explicit.
+ */
+export function toDateTimeInputValue(epochMs) {
+  const d = new Date(epochMs);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export function parseDateTimeInput(value) {
+  return new Date(value).getTime();
+}
+
 export const TYPE_LABELS = {
   warning: "Warning",
   kick: "Kick",

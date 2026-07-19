@@ -15,6 +15,9 @@ export default function Nav() {
         {(user?.tier === "management" || user?.tier === "director") && (
           <NavLink to="/hr" className={({ isActive }) => (isActive ? "active" : "")}>HR Panel</NavLink>
         )}
+        {user?.isSuperAdmin && (
+          <NavLink to="/super-admin" className={({ isActive }) => (isActive ? "active" : "")}>Super Admin</NavLink>
+        )}
       </nav>
       <div className="sidebar-footer">
         <div className="sidebar-user">

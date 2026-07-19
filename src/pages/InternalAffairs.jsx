@@ -133,8 +133,8 @@ export default function InternalAffairs() {
             <h2>Request Staff</h2>
             {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
             <form onSubmit={sendStaffRequest}>
-              <label>Reason</label>
-              <textarea required rows={2} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
+              <label>Reason (optional)</label>
+              <textarea rows={2} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
               <button className="primary" type="submit" disabled={staffSending}>{staffSending ? "Sending…" : "Request Staff"}</button>
             </form>
           </div>
