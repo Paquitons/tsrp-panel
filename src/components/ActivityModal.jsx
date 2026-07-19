@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
-import { timeAgo } from "../utils";
+import { formatClockTime } from "../utils";
 import PortalDropdown from "./PortalDropdown";
 
 // Colored dot per event type -- no glyph/emoji, just a simple indicator.
@@ -123,7 +123,7 @@ export default function ActivityModal({ onClose, onUserClick }) {
                   >
                     {describeEvent(e)}
                   </span>
-                  <span className="activity-time muted">{timeAgo(e.timestamp * 1000)}</span>
+                  <span className="activity-time muted">{formatClockTime(e.timestamp * 1000)}</span>
                 </div>
               );
             })

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, formatDurationWithSeconds, formatDuration } from "../utils";
+import { formatClockTime, formatDurationWithSeconds, formatDuration } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
 import UserPanel from "../components/UserPanel";
@@ -582,7 +582,7 @@ export default function Dashboard() {
                       >
                         {describeEvent(e)}
                       </span>
-                      <span className="activity-time muted">{timeAgo(e.timestamp * 1000)}</span>
+                      <span className="activity-time muted">{formatClockTime(e.timestamp * 1000)}</span>
                     </div>
                   );
                 })}
