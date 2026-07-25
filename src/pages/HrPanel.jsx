@@ -6,6 +6,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -376,7 +377,7 @@ export default function HrPanel() {
                 </PortalDropdown>
               </div>
               <label>Reason</label>
-              <textarea rows={2} required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
+              <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
               <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
             </form>
           </div>
@@ -459,7 +460,7 @@ export default function HrPanel() {
                 )}
 
                 <label style={{ marginTop: 12 }}>Reason</label>
-                <textarea rows={2} required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
+                <AutoGrowTextarea required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
                 <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
                   {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
                 </button>
@@ -530,7 +531,7 @@ export default function HrPanel() {
                   <p className="muted field-hint">Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
                 )}
                 <label>Reason</label>
-                <textarea rows={2} required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
+                <AutoGrowTextarea required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
                 <button className="primary" type="submit" disabled={terminateSubmitting} style={{ background: "#e53935" }}>
                   {terminateSubmitting ? "Processing…" : "Terminate"}
                 </button>
@@ -566,7 +567,7 @@ export default function HrPanel() {
                   </PortalDropdown>
                 </div>
                 <label>Notes</label>
-                <textarea rows={2} value={resignReason} onChange={e => setResignReason(e.target.value)} />
+                <AutoGrowTextarea value={resignReason} onChange={e => setResignReason(e.target.value)} />
                 <button className="primary" type="submit" disabled={resignSubmitting}>
                   {resignSubmitting ? "Processing…" : "Process Resignation"}
                 </button>

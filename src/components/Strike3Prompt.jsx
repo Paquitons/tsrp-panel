@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { timeAgo } from "../utils";
 import DiscordAvatar from "./DiscordAvatar";
 import CustomSelect from "./CustomSelect";
+import AutoGrowTextarea from "./AutoGrowTextarea";
 
 const POLL_MS = 3_000;
 
@@ -155,7 +156,7 @@ export default function Strike3Prompt() {
         {view === "terminate" && (
           <form onSubmit={terminate}>
             <label>Reason</label>
-            <textarea rows={2} value={reason} onChange={e => setReason(e.target.value)} placeholder={`Defaults to "3rd strike: ${prompt.reason}"`} />
+            <AutoGrowTextarea value={reason} onChange={e => setReason(e.target.value)} placeholder={`Defaults to "3rd strike: ${prompt.reason}"`} />
             <div className="button-row">
               <button className="btn-red" type="submit" disabled={submitting}>{submitting ? "Terminating…" : "Confirm Termination"}</button>
               <button className="secondary" type="button" disabled={submitting} onClick={() => setView("summary")}>Back</button>
@@ -172,7 +173,7 @@ export default function Strike3Prompt() {
               <p className="muted">Loading valid ranks…</p>
             )}
             <label>Reason</label>
-            <textarea rows={2} value={reason} onChange={e => setReason(e.target.value)} placeholder={`Defaults to "3rd strike: ${prompt.reason}"`} />
+            <AutoGrowTextarea value={reason} onChange={e => setReason(e.target.value)} placeholder={`Defaults to "3rd strike: ${prompt.reason}"`} />
             <div className="button-row">
               <button className="btn-orange" type="submit" disabled={submitting || !newRank}>{submitting ? "Demoting…" : "Confirm Demotion"}</button>
               <button className="secondary" type="button" disabled={submitting} onClick={() => setView("summary")}>Back</button>
