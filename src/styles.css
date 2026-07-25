@@ -272,6 +272,11 @@ input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   transition: border-color var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
 }
 
+textarea {
+  resize: none;
+  overflow: hidden;
+}
+
 input:not([type="checkbox"]):not([type="radio"])::placeholder, textarea::placeholder {
   color: var(--text-faint);
 }

@@ -3,6 +3,7 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { parseLocalDateInput, todayLocalISO } from "../utils";
 import DiscordAvatar from "./DiscordAvatar";
+import AutoGrowTextarea from "./AutoGrowTextarea";
 
 export default function LOAModal({ onClose }) {
   const { user } = useAuth();
@@ -118,7 +119,7 @@ export default function LOAModal({ onClose }) {
                 </div>
               </div>
               <label>Reason</label>
-              <textarea rows={2} required value={reason} onChange={e => setReason(e.target.value)} />
+              <AutoGrowTextarea required value={reason} onChange={e => setReason(e.target.value)} />
               <button className="primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : "Submit Request"}</button>
             </form>
           </>

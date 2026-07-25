@@ -11,6 +11,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import ShiftHistoryModal from "../components/ShiftHistoryModal";
 import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 
 const ALL_TYPES = [
   { value: "warning", label: "Warning" },
@@ -670,7 +671,7 @@ export default function Dashboard() {
             {resignError && <div className="error-banner">{resignError}</div>}
             <form onSubmit={submitOwnResignation}>
               <label>Notes (optional)</label>
-              <textarea rows={2} value={resignNotes} onChange={e => setResignNotes(e.target.value)} />
+              <AutoGrowTextarea value={resignNotes} onChange={e => setResignNotes(e.target.value)} />
               <div className="button-row">
                 <button className="primary" type="submit" disabled={resignSubmitting} style={{ background: "#e53935" }}>
                   {resignSubmitting ? "Processing…" : "Confirm Resignation"}

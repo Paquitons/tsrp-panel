@@ -5,6 +5,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 
 export default function InternalAffairs() {
   const { user } = useAuth();
@@ -134,7 +135,7 @@ export default function InternalAffairs() {
             {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
             <form onSubmit={sendStaffRequest}>
               <label>Reason (optional)</label>
-              <textarea rows={2} value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
+              <AutoGrowTextarea value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
               <button className="primary" type="submit" disabled={staffSending}>{staffSending ? "Sending…" : "Request Staff"}</button>
             </form>
           </div>
@@ -166,7 +167,7 @@ export default function InternalAffairs() {
                 </PortalDropdown>
               </div>
               <label>Reason</label>
-              <textarea rows={2} required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
+              <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
               <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
             </form>
           </div>
@@ -219,7 +220,7 @@ export default function InternalAffairs() {
               )}
 
               <label style={{ marginTop: 12 }}>Reason</label>
-              <textarea rows={2} required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
+              <AutoGrowTextarea required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
               <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Submit for Approval"}</button>
             </form>
           </div>
