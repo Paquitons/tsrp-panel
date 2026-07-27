@@ -131,6 +131,8 @@ export default function SuperAdmin() {
         </div>
       </div>
 
+      <EconomyControl />
+
       {search.target && (
         <>
           <div className="card">
@@ -234,6 +236,115 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
         <button className="primary small" type="button" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
         <button className="btn-red small" type="button" onClick={onDelete}>Delete</button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Unrestricted economy controls -- looked up by raw Discord ID (not the
+ * staff-search autocomplete) since anyone active in the server can have a
+ * wallet, not just people who've logged into the panel.
+ */
+function EconomyControl() {
+  const [discordId, setDiscordId] = useState("");
+  const [balance, setBalanceState] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [setAmountValue, setSetAmountValue] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function loadBalance(e) {
+    e?.preventDefault();
+    if (!discordId.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiFetch(`/super-admin/economy/${discordId.trim()}`);
+      setBalanceState(result.balance);
+    } catch (err) {
+      setError(err.message);
+      setBalanceState(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function adjust(sign) {
+    const parsed = Math.trunc(Number(amount));
+    if (!discordId.trim() || !Number.isFinite(parsed) || parsed <= 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await apiFetch("/super-admin/economy/adjust", {
+        method: "POST",
+        body: { discordId: discordId.trim(), amount: parsed * sign },
+      });
+      setBalanceState(result.balance);
+      setAmount("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function applySet(e) {
+    e.preventDefault();
+    const parsed = Math.trunc(Number(setAmountValue));
+    if (!discordId.trim() || !Number.isFinite(parsed)) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await apiFetch("/super-admin/economy/set", {
+        method: "POST",
+        body: { discordId: discordId.trim(), amount: parsed },
+      });
+      setBalanceState(result.balance);
+      setSetAmountValue("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <h2>Economy Control</h2>
+      <p className="muted">Give, take, or set anyone's balance directly. No limits or checks.</p>
+      {error && <div className="error-banner">{error}</div>}
+
+      <form onSubmit={loadBalance} style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
+        <div style={{ flex: 1 }}>
+          <label>Discord ID</label>
+          <input value={discordId} onChange={e => setDiscordId(e.target.value)} placeholder="e.g. 1115356536160653444" />
+        </div>
+        <button className="secondary" type="submit" disabled={loading}>{loading ? "Loading…" : "Look Up"}</button>
+      </form>
+
+      {balance !== null && (
+        <>
+          <p style={{ marginTop: 12 }}>Current balance: <strong>${balance.toLocaleString()}</strong></p>
+
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-end", marginTop: 8 }}>
+            <div style={{ flex: 1 }}>
+              <label>Amount</label>
+              <input type="number" min="1" value={amount} onChange={e => setAmount(e.target.value)} />
+            </div>
+            <button className="primary" type="button" disabled={busy} onClick={() => adjust(1)}>Give</button>
+            <button className="btn-red" type="button" disabled={busy} onClick={() => adjust(-1)}>Take</button>
+          </div>
+
+          <form onSubmit={applySet} style={{ display: "flex", gap: 16, alignItems: "flex-end", marginTop: 8 }}>
+            <div style={{ flex: 1 }}>
+              <label>Set Balance To</label>
+              <input type="number" value={setAmountValue} onChange={e => setSetAmountValue(e.target.value)} />
+            </div>
+            <button className="secondary" type="submit" disabled={busy}>Set</button>
+          </form>
+        </>
+      )}
     </div>
   );
 }
