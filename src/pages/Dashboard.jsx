@@ -48,8 +48,8 @@ function describeEvent(e) {
     case "join": return `${displayName(e.player)} joined the server`;
     case "leave": return `${displayName(e.player)} left the server`;
     case "kill": return `${displayName(e.killer)} killed ${displayName(e.killed)}`;
-    case "command": return `${displayName(e.player)} ran ${e.command}`;
-    case "modcall": return `Mod call from ${displayName(e.caller)}`;
+    case "command": return `${displayName(e.player)} ran the command ${e.command}`;
+    case "modcall": return `${displayName(e.caller)} called for a moderator`;
     case "emergency": return `${e.team} call from ${displayName(e.caller)}${e.description ? `: ${e.description}` : ""}`;
     default: return "Unknown event";
   }
@@ -389,7 +389,7 @@ export default function Dashboard() {
         {/* ---------- LEFT: Greeting + Shift + Toolbox + On Duty + Players ---------- */}
         <div className="dashboard-col">
           <div className="card dashboard-greeting-card">
-            <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatar} size={40} />
+            <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatarHash} size={40} />
             <h2 style={{ margin: 0 }}>Hey, {user?.username}!</h2>
           </div>
 

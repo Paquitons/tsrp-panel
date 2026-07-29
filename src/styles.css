@@ -364,7 +364,7 @@ button.small {
    treatment as .primary but themed per-action, so "Start Shift" /
    "End Shift" / etc read as distinct at a glance without needing text
    alone to carry the meaning. */
-.btn-green, .btn-orange, .btn-red, .btn-blue, .btn-pink {
+.btn-green, .btn-orange, .btn-red {
   color: #0d1410;
   border: none;
   padding: 10px 20px;
@@ -376,15 +376,13 @@ button.small {
 .btn-green  { background: linear-gradient(180deg, var(--btn-green-1), var(--btn-green-2)); }
 .btn-orange { background: linear-gradient(180deg, var(--btn-orange-1), var(--btn-orange-2)); }
 .btn-red    { background: linear-gradient(180deg, var(--btn-red-1), var(--btn-red-2)); color: #1a0d0d; }
-.btn-blue   { background: linear-gradient(180deg, var(--btn-blue-1), var(--btn-blue-2)); color: #fff; }
-.btn-pink   { background: linear-gradient(180deg, var(--btn-pink-1), var(--btn-pink-2)); color: #1a0d14; }
 
-.btn-green:hover, .btn-orange:hover, .btn-red:hover, .btn-blue:hover, .btn-pink:hover {
+.btn-green:hover, .btn-orange:hover, .btn-red:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
-.btn-green:disabled, .btn-orange:disabled, .btn-red:disabled, .btn-blue:disabled, .btn-pink:disabled {
+.btn-green:disabled, .btn-orange:disabled, .btn-red:disabled {
   opacity: 0.5; cursor: not-allowed; transform: none;
 }
 
