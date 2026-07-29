@@ -33,7 +33,7 @@ function isClickable(name) {
 
 function describeEvent(e) {
   switch (e.type) {
-    case "join": return `${displayName(e.player)} joined the game`;
+    case "join": return `${displayName(e.player)} joined the server`;
     case "leave": return `${displayName(e.player)} left the server`;
     case "kill": return `${displayName(e.killer)} killed ${displayName(e.killed)}`;
     case "command": return `${displayName(e.player)} ran the command ${e.command}`;
