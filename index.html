@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TSRP Staff Panel</title>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages -- https://github.com/rafgraph/spa-github-pages
+      // Undoes the redirect 404.html performs: unpacks the real path back
+      // out of the query string and restores it via history.replaceState
+      // before React Router mounts, so the URL ends up exactly where the
+      // user actually navigated to (or refreshed on).
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location));
+    </script>
   </head>
   <body>
     <div id="root"></div>
