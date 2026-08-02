@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { formatClockTime, formatDurationWithSeconds, formatDuration } from "../utils";
+import { formatClockTime, formatDurationWithSeconds, formatDuration, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
 import UserPanel from "../components/UserPanel";
@@ -13,14 +13,7 @@ import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 
-const ALL_TYPES = [
-  { value: "warning", label: "Warning" },
-  { value: "kick", label: "Kick" },
-  { value: "ban", label: "Ban" },
-  { value: "temp_ban", label: "Temp Ban" },
-  { value: "bolo", label: "Ban BOLO" },
-  { value: "note", label: "Note" },
-];
+const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
 const POLL_MS = 3_000; // fast poll so the panel feels live without a full push/WebSocket layer
 

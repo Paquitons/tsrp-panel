@@ -133,5 +133,6 @@ export const TYPE_LABELS = {
   ban: "Ban",
   temp_ban: "Temp Ban",
   bolo: "Ban BOLO",
+  unban: "Unban",
   note: "Note",
 };

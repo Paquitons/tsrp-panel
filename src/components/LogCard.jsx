@@ -7,14 +7,7 @@ import DiscordAvatar from "./DiscordAvatar";
 import CustomSelect from "./CustomSelect";
 import PortalDropdown from "./PortalDropdown";
 
-const ALL_TYPES = [
-  { value: "warning", label: "Warning" },
-  { value: "kick", label: "Kick" },
-  { value: "ban", label: "Ban" },
-  { value: "temp_ban", label: "Temp Ban" },
-  { value: "bolo", label: "Ban BOLO" },
-  { value: "note", label: "Note" },
-];
+const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
 // System/automated accounts that should never be treated as clickable
 // players -- clicking them would try (and fail) to open a real profile.
