@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
+import BoloReview from "./pages/BoloReview";
 import SuperAdmin from "./pages/SuperAdmin";
 import Strike3Prompt from "./components/Strike3Prompt";
 
@@ -26,6 +27,7 @@ function AppShell() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
+        <Route path="/bolo-review" element={<BoloReview />} />
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
       </Routes>
       <Strike3Prompt />
