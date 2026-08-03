@@ -1,5 +1,31 @@
 [
   {
+    "version": "1.2.0",
+    "slug": "v1-2-0",
+    "title": "TSRP Update",
+    "date": "2026-08-03",
+    "summary": "A new Changelog page for the staff panel, plus a full redesign of its navigation.",
+    "sections": [
+      {
+        "heading": "New Changelog Page",
+        "items": [
+          "Added a Changelog page to the staff panel, right from the sidebar -- browse every past update and click into the full details.",
+          "From now on, every update posts here on the site and in this channel at the same time."
+        ]
+      },
+      {
+        "heading": "Staff Panel Refresh",
+        "items": [
+          "Completely redesigned the sidebar navigation with a cleaner look and smoother animations.",
+          "Added a proper profile section at the bottom showing your avatar, name, and rank.",
+          "Fixed the sidebar being cut off and hard to use on phones -- it now slides open like a proper menu instead.",
+          "Fixed some pages not being centered correctly on wider screens.",
+          "The panel now uses the real Texas State RP logo instead of a placeholder."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.1.0",
     "slug": "v1-1-0",
     "title": "TSRP Update",
