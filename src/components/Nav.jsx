@@ -12,9 +12,6 @@ export default function Nav() {
         {(user?.tier === "ia" || user?.tier === "management" || user?.tier === "director") && (
           <NavLink to="/internalaffairs" className={({ isActive }) => (isActive ? "active" : "")}>Internal Affairs</NavLink>
         )}
-        {(user?.tier === "ia" || user?.tier === "management" || user?.tier === "director") && (
-          <NavLink to="/bolo-review" className={({ isActive }) => (isActive ? "active" : "")}>Ban BOLO Review</NavLink>
-        )}
         {(user?.tier === "management" || user?.tier === "director") && (
           <NavLink to="/hr" className={({ isActive }) => (isActive ? "active" : "")}>HR Panel</NavLink>
         )}
