@@ -13,7 +13,7 @@ import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
-import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon } from "../components/icons";
+import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon } from "../components/icons";
 
 const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -197,6 +197,28 @@ export default function Dashboard() {
   // ---------- Toolbox: LOA modal ----------
   const [loaModalOpen, setLoaModalOpen] = useState(false);
   const [activityModalOpen, setActivityModalOpen] = useState(false);
+
+  // ---------- Toolbox: Run Command modal (Management+) -- moved here from
+  // the HR Panel since it's a live-server tool, not a staff-HR action.
+  const [commandModalOpen, setCommandModalOpen] = useState(false);
+  const [commandText, setCommandText] = useState("");
+  const [commandStatus, setCommandStatus] = useState(null);
+  const [commandSending, setCommandSending] = useState(false);
+
+  async function sendCommand(e) {
+    e.preventDefault();
+    setCommandSending(true);
+    setCommandStatus(null);
+    try {
+      await apiFetch("/command", { method: "POST", body: { command: commandText } });
+      setCommandStatus({ ok: true, message: "Command sent." });
+      setCommandText("");
+    } catch (err) {
+      setCommandStatus({ ok: false, message: err.message });
+    } finally {
+      setCommandSending(false);
+    }
+  }
 
   // ---------- Toolbox: Resign modal -- any staff member can resign themselves ----------
   const [resignModalOpen, setResignModalOpen] = useState(false);
@@ -436,6 +458,9 @@ export default function Dashboard() {
           <button className="quick-action" onClick={() => setLoaModalOpen(true)}><CalendarIcon />Manage LOA</button>
           <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
           <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
+          {(user?.tier === "management" || user?.tier === "director") && (
+            <button className="quick-action" onClick={() => setCommandModalOpen(true)}><TerminalIcon />Run Command</button>
+          )}
           <button className="quick-action quick-action-danger" onClick={() => setResignModalOpen(true)}><DoorExitIcon />Resign</button>
         </div>
       </div>
@@ -633,6 +658,24 @@ export default function Dashboard() {
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
+
+      {/* ---------- Run Command modal (Management+) ---------- */}
+      {commandModalOpen && (
+        <div className="modal-backdrop" onClick={() => setCommandModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Run Command</h2>
+            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
+            <form onSubmit={sendCommand}>
+              <label>ER:LC Command</label>
+              <input required autoFocus value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
+              <div className="button-row">
+                <button className="primary" type="submit" disabled={commandSending}>{commandSending ? "Sending…" : "Send"}</button>
+                <button className="secondary" type="button" onClick={() => setCommandModalOpen(false)}>Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {resignModalOpen && (
         <div className="modal-backdrop" onClick={() => setResignModalOpen(false)}>

@@ -7,6 +7,7 @@ import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
+import Tabs from "../components/Tabs";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -30,27 +31,9 @@ export default function HrPanel() {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
   const canReviewBigActions = !!user?.canReviewBigActions;
-
-  // ---------- Run Command ----------
-  const [commandText, setCommandText] = useState("");
-  const [commandStatus, setCommandStatus] = useState(null);
-  const [commandSending, setCommandSending] = useState(false);
-
-  async function sendCommand(e) {
-    e.preventDefault();
-    setCommandSending(true);
-    setCommandStatus(null);
-    try {
-      await apiFetch("/command", { method: "POST", body: { command: commandText } });
-      setCommandStatus({ ok: true, message: "Command sent." });
-      setCommandText("");
-    } catch (err) {
-      setCommandStatus({ ok: false, message: err.message });
-    } finally {
-      setCommandSending(false);
-    }
-  }
   const canProcessResignations = !!user?.canProcessResignations;
+
+  const [actionTab, setActionTab] = useState("strike");
 
   const [activeStrikes, setActiveStrikes] = useState([]);
   const [pendingLOAs, setPendingLOAs] = useState([]);
@@ -330,29 +313,94 @@ export default function HrPanel() {
   }
 
   const groupedStrikes = groupByDiscordId(activeStrikes);
+  const pendingCount = pendingPromotions.length + pendingLOAs.length;
+  const actionTabs = [
+    { value: "strike", label: "Issue Strike" },
+    ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
+    ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
+    ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
+  ];
 
   return (
-    <div className="content dashboard-content">
+    <div className="content">
       <div className="page-header">
         <h1>HR Panel</h1>
-        <p className="muted">Strikes and Leave of Absence, in one place.</p>
+        <p className="muted">
+          {pendingCount > 0
+            ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
+            : "Nothing pending -- you're all caught up."}
+        </p>
       </div>
 
-      <div className="multi-col-grid">
-        {/* ---------- Column 1: Strikes -- issue form + who's currently struck ---------- */}
-        <div className="dashboard-col">
+      {/* ---------- Approvals: needs a decision now, always visible, zero clicks ---------- */}
+      <div className="hr-approvals-grid">
+        {canReviewBigActions && (
           <div className="card">
-            <h2>Run Command</h2>
-            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
-            <form onSubmit={sendCommand}>
-              <label>ER:LC Command</label>
-              <input required value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
-              <button className="primary" type="submit" disabled={commandSending}>{commandSending ? "Sending…" : "Send"}</button>
-            </form>
+            <h2>Pending Rank Changes ({pendingPromotions.length})</h2>
+            {pendingPromotions.length === 0 ? (
+              <p className="muted">No pending requests.</p>
+            ) : (
+              <div className="loa-list">
+                {pendingPromotions.map(s => (
+                  <div className="loa-card" key={s.id}>
+                    <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                      <DiscordAvatar discordId={s.target_discord_id} avatarHash={s.target_avatar_hash} size={26} />
+                      <span className="log-card-username">{s.target_username ?? s.target_discord_id}</span>
+                      <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
+                    </div>
+                    <div className="log-card-field"><span className="muted">Current rank:</span> {s.old_rank_label ?? "Unknown"}</div>
+                    <div className="log-card-field"><span className="muted">New rank:</span> {s.new_rank_label}</div>
+                    <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
+                    <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
+                      <span className="muted" style={{ fontSize: 12.5 }}>Requested by</span>
+                      <DiscordAvatar discordId={s.requested_by} avatarHash={s.requester_avatar_hash} size={18} />
+                      <span style={{ fontSize: 12.5 }}>{s.requester_username ?? s.requested_by}</span>
+                    </div>
+                    <div className="button-row">
+                      <button className="btn-green small" onClick={() => reviewRankChange(s.id, "approved")}>Approve</button>
+                      <button className="btn-red small" onClick={() => reviewRankChange(s.id, "denied")}>Deny</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+        )}
 
-          <div className="card">
-            <h2>Issue a Strike</h2>
+        <div className="card">
+          <h2>Pending LOA Requests ({pendingLOAs.length})</h2>
+          {pendingLOAs.length === 0 ? (
+            <p className="muted">No pending requests.</p>
+          ) : (
+            <div className="loa-list">
+              {pendingLOAs.map(r => (
+                <div className="loa-card" key={r.id}>
+                  <div className="loa-card-top loa-card-top-stack">
+                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                      <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
+                      <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
+                    </span>
+                    <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
+                  <div className="button-row">
+                    <button className="btn-green small" onClick={() => reviewLOA(r.id, "approved")}>Approve</button>
+                    <button className="btn-red small" onClick={() => reviewLOA(r.id, "denied")}>Deny</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ---------- Actions: tabbed forms, pick one instead of scrolling past all of them ---------- */}
+      <div className="card">
+        <h2>Take Action</h2>
+        <Tabs tabs={actionTabs} active={actionTab} onChange={setActionTab} />
+
+        {actionTab === "strike" && (
+          <>
             <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
             {strikeError && <div className="error-banner">{strikeError}</div>}
             <form onSubmit={submitStrike}>
@@ -380,8 +428,139 @@ export default function HrPanel() {
               <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
               <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
             </form>
-          </div>
+          </>
+        )}
 
+        {actionTab === "rank" && canReviewBigActions && (
+          <>
+            {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
+            {rankChangeSuccess && <div className="success-banner">Done.</div>}
+            <form onSubmit={submitRankChange}>
+              <label>Action</label>
+              <CustomSelect
+                value={rankChangeAction}
+                onChange={setRankChangeAction}
+                options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+              />
+              <label style={{ marginTop: 12 }}>Staff Member</label>
+              <div className="autocomplete-wrap">
+                <input
+                  ref={rankChangeSearch.inputRef}
+                  required
+                  autoComplete="off"
+                  value={rankChangeSearch.query}
+                  onChange={e => rankChangeSearch.onQueryChange(e.target.value)}
+                  onFocus={() => rankChangeSearch.suggestions.length > 0 && rankChangeSearch.setShowSuggestions(true)}
+                  placeholder="Search by username or nickname"
+                />
+                <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                  {rankChangeSearch.suggestions.map(s => (
+                    <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
+              </div>
+
+              {rankChangeSearch.target && (
+                <p className="muted field-hint">Current rank: {rankChangeSearch.target.rankLabel ?? "Unknown"}</p>
+              )}
+
+              <label>New Rank</label>
+              {rankOptions.length > 0 ? (
+                <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
+              ) : (
+                <p className="muted field-hint">
+                  {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
+                </p>
+              )}
+
+              <label style={{ marginTop: 12 }}>Reason</label>
+              <AutoGrowTextarea required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
+              <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
+                {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
+              </button>
+            </form>
+          </>
+        )}
+
+        {actionTab === "terminate" && canReviewBigActions && (
+          <>
+            {terminateError && <div className="error-banner">{terminateError}</div>}
+            {terminateSuccess && <div className="success-banner">Done.</div>}
+            <form onSubmit={submitTerminate}>
+              <label>Staff Member</label>
+              <div className="autocomplete-wrap">
+                <input
+                  ref={terminateSearch.inputRef}
+                  required
+                  autoComplete="off"
+                  value={terminateSearch.query}
+                  onChange={e => terminateSearch.onQueryChange(e.target.value)}
+                  onFocus={() => terminateSearch.suggestions.length > 0 && terminateSearch.setShowSuggestions(true)}
+                  placeholder="Search by username or nickname"
+                />
+                <PortalDropdown anchorRef={terminateSearch.inputRef} open={terminateSearch.showSuggestions} onClose={() => terminateSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                  {terminateSearch.suggestions.map(s => (
+                    <div key={s.discordId} className="autocomplete-item" onClick={() => terminateSearch.pick(s)}>
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
+              </div>
+              {terminateSearch.target && (
+                <p className="muted field-hint">Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
+              )}
+              <label>Reason</label>
+              <AutoGrowTextarea required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
+              <button className="danger" type="submit" disabled={terminateSubmitting}>
+                {terminateSubmitting ? "Processing…" : "Terminate"}
+              </button>
+            </form>
+          </>
+        )}
+
+        {actionTab === "resign" && canProcessResignations && (
+          <>
+            <p className="muted card-subtitle">For processing someone else's resignation on their behalf.</p>
+            {resignError && <div className="error-banner">{resignError}</div>}
+            {resignSuccess && <div className="success-banner">Done.</div>}
+            <form onSubmit={submitResignation}>
+              <label>Staff Member</label>
+              <div className="autocomplete-wrap">
+                <input
+                  ref={resignSearch.inputRef}
+                  required
+                  autoComplete="off"
+                  value={resignSearch.query}
+                  onChange={e => resignSearch.onQueryChange(e.target.value)}
+                  onFocus={() => resignSearch.suggestions.length > 0 && resignSearch.setShowSuggestions(true)}
+                  placeholder="Search by username or nickname"
+                />
+                <PortalDropdown anchorRef={resignSearch.inputRef} open={resignSearch.showSuggestions} onClose={() => resignSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                  {resignSearch.suggestions.map(s => (
+                    <div key={s.discordId} className="autocomplete-item" onClick={() => resignSearch.pick(s)}>
+                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                    </div>
+                  ))}
+                </PortalDropdown>
+              </div>
+              <label>Notes</label>
+              <AutoGrowTextarea value={resignReason} onChange={e => setResignReason(e.target.value)} />
+              <button className="primary" type="submit" disabled={resignSubmitting}>
+                {resignSubmitting ? "Processing…" : "Process Resignation"}
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+
+      {/* ---------- Reference: read-only, glance info ---------- */}
+      <div className="multi-col-grid">
+        <div className="dashboard-col">
           <div className="card">
             <h2>Currently On Strike ({groupedStrikes.length})</h2>
             {loading && <p className="muted">Loading…</p>}
@@ -411,199 +590,7 @@ export default function HrPanel() {
           </div>
         </div>
 
-        {/* ---------- Column 2: Promotions -- promote/demote form + suggestions ---------- */}
         <div className="dashboard-col">
-          {canReviewBigActions && (
-            <div className="card">
-              <h2>Promote / Demote</h2>
-              {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
-              {rankChangeSuccess && <div className="success-banner">Done.</div>}
-              <form onSubmit={submitRankChange}>
-                <label>Action</label>
-                <CustomSelect
-                  value={rankChangeAction}
-                  onChange={setRankChangeAction}
-                  options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
-                />
-                <label style={{ marginTop: 12 }}>Staff Member</label>
-                <div className="autocomplete-wrap">
-                  <input
-                    ref={rankChangeSearch.inputRef}
-                    required
-                    autoComplete="off"
-                    value={rankChangeSearch.query}
-                    onChange={e => rankChangeSearch.onQueryChange(e.target.value)}
-                    onFocus={() => rankChangeSearch.suggestions.length > 0 && rankChangeSearch.setShowSuggestions(true)}
-                    placeholder="Search by username or nickname"
-                  />
-                  <PortalDropdown anchorRef={rankChangeSearch.inputRef} open={rankChangeSearch.showSuggestions} onClose={() => rankChangeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                    {rankChangeSearch.suggestions.map(s => (
-                      <div key={s.discordId} className="autocomplete-item" onClick={() => rankChangeSearch.pick(s)}>
-                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                      </div>
-                    ))}
-                  </PortalDropdown>
-                </div>
-
-                {rankChangeSearch.target && (
-                  <p className="muted field-hint">Current rank: {rankChangeSearch.target.rankLabel ?? "Unknown"}</p>
-                )}
-
-                <label>New Rank</label>
-                {rankOptions.length > 0 ? (
-                  <CustomSelect value={newRank} onChange={setNewRank} options={rankOptions} />
-                ) : (
-                  <p className="muted field-hint">
-                    {rankChangeSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
-                  </p>
-                )}
-
-                <label style={{ marginTop: 12 }}>Reason</label>
-                <AutoGrowTextarea required value={rankChangeReason} onChange={e => setRankChangeReason(e.target.value)} />
-                <button className="primary" type="submit" disabled={rankChangeSubmitting || rankOptions.length === 0}>
-                  {rankChangeSubmitting ? "Submitting…" : rankChangeAction === "promote" ? "Promote" : "Demote"}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {canReviewBigActions && (
-            <div className="card">
-              <h2>Pending Rank Change Requests ({pendingPromotions.length})</h2>
-              {pendingPromotions.length === 0 ? (
-                <p className="muted">No pending requests.</p>
-              ) : (
-                <div className="loa-list">
-                  {pendingPromotions.map(s => (
-                    <div className="loa-card" key={s.id}>
-                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <DiscordAvatar discordId={s.target_discord_id} avatarHash={s.target_avatar_hash} size={26} />
-                        <span className="log-card-username">{s.target_username ?? s.target_discord_id}</span>
-                        <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
-                      </div>
-                      <div className="log-card-field"><span className="muted">Current rank:</span> {s.old_rank_label ?? "Unknown"}</div>
-                      <div className="log-card-field"><span className="muted">New rank:</span> {s.new_rank_label}</div>
-                      <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
-                      <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                        <span className="muted" style={{ fontSize: 12.5 }}>Requested by</span>
-                        <DiscordAvatar discordId={s.requested_by} avatarHash={s.requester_avatar_hash} size={18} />
-                        <span style={{ fontSize: 12.5 }}>{s.requester_username ?? s.requested_by}</span>
-                      </div>
-                      <div className="button-row">
-                        <button className="btn-green small" onClick={() => reviewRankChange(s.id, "approved")}>Approve</button>
-                        <button className="btn-red small" onClick={() => reviewRankChange(s.id, "denied")}>Deny</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {canReviewBigActions && (
-            <div className="card">
-              <h2>Terminate</h2>
-              {terminateError && <div className="error-banner">{terminateError}</div>}
-              {terminateSuccess && <div className="success-banner">Done.</div>}
-              <form onSubmit={submitTerminate}>
-                <label>Staff Member</label>
-                <div className="autocomplete-wrap">
-                  <input
-                    ref={terminateSearch.inputRef}
-                    required
-                    autoComplete="off"
-                    value={terminateSearch.query}
-                    onChange={e => terminateSearch.onQueryChange(e.target.value)}
-                    onFocus={() => terminateSearch.suggestions.length > 0 && terminateSearch.setShowSuggestions(true)}
-                    placeholder="Search by username or nickname"
-                  />
-                  <PortalDropdown anchorRef={terminateSearch.inputRef} open={terminateSearch.showSuggestions} onClose={() => terminateSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                    {terminateSearch.suggestions.map(s => (
-                      <div key={s.discordId} className="autocomplete-item" onClick={() => terminateSearch.pick(s)}>
-                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                      </div>
-                    ))}
-                  </PortalDropdown>
-                </div>
-                {terminateSearch.target && (
-                  <p className="muted field-hint">Current rank: {terminateSearch.target.rankLabel ?? "Unknown"}</p>
-                )}
-                <label>Reason</label>
-                <AutoGrowTextarea required value={terminateReason} onChange={e => setTerminateReason(e.target.value)} />
-                <button className="primary" type="submit" disabled={terminateSubmitting} style={{ background: "#e53935" }}>
-                  {terminateSubmitting ? "Processing…" : "Terminate"}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {canProcessResignations && (
-            <div className="card">
-              <h2>Process a Resignation</h2>
-              <p className="muted card-subtitle">For processing someone else's resignation on their behalf.</p>
-              {resignError && <div className="error-banner">{resignError}</div>}
-              {resignSuccess && <div className="success-banner">Done.</div>}
-              <form onSubmit={submitResignation}>
-                <label>Staff Member</label>
-                <div className="autocomplete-wrap">
-                  <input
-                    ref={resignSearch.inputRef}
-                    required
-                    autoComplete="off"
-                    value={resignSearch.query}
-                    onChange={e => resignSearch.onQueryChange(e.target.value)}
-                    onFocus={() => resignSearch.suggestions.length > 0 && resignSearch.setShowSuggestions(true)}
-                    placeholder="Search by username or nickname"
-                  />
-                  <PortalDropdown anchorRef={resignSearch.inputRef} open={resignSearch.showSuggestions} onClose={() => resignSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                    {resignSearch.suggestions.map(s => (
-                      <div key={s.discordId} className="autocomplete-item" onClick={() => resignSearch.pick(s)}>
-                        <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                        <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                      </div>
-                    ))}
-                  </PortalDropdown>
-                </div>
-                <label>Notes</label>
-                <AutoGrowTextarea value={resignReason} onChange={e => setResignReason(e.target.value)} />
-                <button className="primary" type="submit" disabled={resignSubmitting}>
-                  {resignSubmitting ? "Processing…" : "Process Resignation"}
-                </button>
-              </form>
-            </div>
-          )}
-        </div>
-
-        {/* ---------- Column 3: Leave of Absence -- pending + active ---------- */}
-        <div className="dashboard-col">
-          <div className="card">
-            <h2>Pending LOA Requests</h2>
-            {pendingLOAs.length === 0 ? (
-              <p className="muted">No pending requests.</p>
-            ) : (
-              <div className="loa-list">
-                {pendingLOAs.map(r => (
-                  <div className="loa-card" key={r.id}>
-                    <div className="loa-card-top loa-card-top-stack">
-                      <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
-                        <span className="log-card-username">{r.requester_username ?? r.discord_id}</span>
-                      </span>
-                      <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
-                    <div className="button-row">
-                      <button className="btn-green small" onClick={() => reviewLOA(r.id, "approved")}>Approve</button>
-                      <button className="btn-red small" onClick={() => reviewLOA(r.id, "denied")}>Deny</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           <div className="card">
             <h2>Active LOAs ({activeLOAs.length})</h2>
             {activeLOAs.length === 0 ? (
@@ -629,7 +616,9 @@ export default function HrPanel() {
               </div>
             )}
           </div>
+        </div>
 
+        <div className="dashboard-col">
           <div className="card">
             <h2>LOA History</h2>
             {loaHistory.length === 0 ? (

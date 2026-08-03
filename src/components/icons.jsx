@@ -138,3 +138,12 @@ export function DoorExitIcon(props) {
     </Icon>
   );
 }
+
+export function TerminalIcon(props) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7 9.5l3.5 2.5L7 14.5M12.5 15h4.5" />
+    </Icon>
+  );
+}

@@ -431,6 +431,41 @@ html, body, #root {
   letter-spacing: -0.005em;
 }
 
+/* ---------- Tabs (segmented control) ---------- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-5);
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 1 1 0;
+  min-width: max-content;
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: calc(var(--radius-sm) - 2px);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: transparent;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+
+.tab:hover { color: var(--text-secondary); }
+
+.tab.active {
+  background: var(--card-bg-raised);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
 /* ---------- Forms ---------- */
 
 input:not([type="checkbox"]):not([type="radio"]), select, textarea {
@@ -487,6 +522,11 @@ label {
 .button-row {
   display: flex;
   gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.button-row > button {
+  flex-shrink: 0;
 }
 
 /* Inline label+input/button rows (Super Admin's economy/shift forms) --
@@ -524,6 +564,7 @@ button {
   font-family: inherit;
   cursor: pointer;
   border: none;
+  white-space: nowrap;
   transition: transform var(--duration-fast) var(--ease), filter var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease), opacity var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
 }
 button:active:not(:disabled) { transform: scale(0.97); }
@@ -1185,6 +1226,13 @@ code {
   align-items: start;
   flex: 1;
   min-height: 0;
+}
+
+.hr-approvals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
 }
 
 @media (max-width: 1300px) {
