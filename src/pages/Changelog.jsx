@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CHANGELOGS } from "../data/changelogs";
 
 export default function Changelog() {
@@ -8,24 +9,17 @@ export default function Changelog() {
         <p className="muted">Everything shipped on TSRP, most recent first.</p>
       </div>
 
-      {CHANGELOGS.map(entry => (
-        <div className="card" key={entry.version} id={`v${entry.version}`}>
-          <h2>{entry.title}, v{entry.version}</h2>
-          <p className="muted" style={{ marginTop: -4, marginBottom: 12 }}>{entry.date}</p>
-          <p>{entry.summary}</p>
-
-          {entry.sections.map(section => (
-            <div key={section.heading} style={{ marginTop: 16 }}>
-              <h3 style={{ fontSize: "var(--text-base)", marginBottom: 8 }}>{section.heading}</h3>
-              <ul style={{ margin: 0, paddingLeft: 20 }}>
-                {section.items.map((item, i) => (
-                  <li key={i} style={{ marginBottom: 6 }}>{item}</li>
-                ))}
-              </ul>
+      <div className="changelog-grid">
+        {CHANGELOGS.map(entry => (
+          <Link to={`/changelog/${entry.slug}`} className="changelog-card" key={entry.slug}>
+            <img src={entry.image} alt="" className="changelog-thumb" />
+            <div className="changelog-card-body">
+              <h3>{entry.title}, v{entry.version}</h3>
+              <p className="muted">{entry.date}</p>
             </div>
-          ))}
-        </div>
-      ))}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

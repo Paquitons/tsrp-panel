@@ -553,11 +553,69 @@ tbody tr:hover { background: var(--surface-hover); }
 }
 
 .standalone-content {
-  max-width: 720px;
+  max-width: 980px;
   margin: 0 auto;
   padding-top: var(--space-8);
   height: auto;
   overflow-y: visible;
+}
+
+.changelog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+@media (max-width: 720px) {
+  .changelog-grid { grid-template-columns: 1fr; }
+}
+
+.changelog-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--duration-base) var(--ease), transform var(--duration-base) var(--ease);
+}
+
+.changelog-card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-2px);
+}
+
+.changelog-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.changelog-card-body {
+  padding: var(--space-5);
+}
+
+.changelog-card-body h3 {
+  margin: 0 0 4px;
+  font-size: var(--text-md);
+  color: var(--text-primary);
+}
+
+.changelog-back-link {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  text-decoration: none;
+}
+
+.changelog-entry-banner {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
 }
 
 /* ---------- Misc ---------- */

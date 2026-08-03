@@ -1,50 +1,115 @@
 [
   {
     "version": "1.1.0",
+    "slug": "v1-1-0",
     "title": "TSRP Update",
     "date": "2026-08-03",
-    "summary": "A major update spanning moderation tooling, the Department Hub, staff onboarding, and a full player economy overhaul.",
+    "image": "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/ssu.png",
+    "summary": "A major update covering moderation, the Department Hub, staff onboarding, and a brand new player economy.",
     "sections": [
       {
-        "heading": "Moderation & Safety",
+        "heading": "Keeping the Server Safe",
         "items": [
-          "Added an anti-raid/anti-spam automod system that automatically detects and acts on mass-join raids and message spam.",
-          "Built /bolo, an interactive Ban BOLO review queue in Discord for Internal Affairs+ -- Accept, Decline, or Skip a pending ban request, with the actual ERLC ban executed on accept and everything logged for audit.",
-          "Tightened ticket and strike permissions so only the right ranks can take those actions."
+          "The bot now automatically catches and handles raids (a flood of new members joining at once) and message spam, without staff needing to step in.",
+          "Added a Ban Review queue in Discord for Internal Affairs and above -- staff can review a submitted ban request and accept, decline, or skip it right from Discord, and accepting it bans the player immediately.",
+          "Tightened up who's allowed to use tickets and issue strikes."
         ]
       },
       {
         "heading": "Department Hub & Staff Info",
         "items": [
-          "Fixed the Department Hub showing stale/outdated department info after edits.",
-          "Refreshed the Staff Handbook and added a new Staff Info panel with a Staff Striking System reference.",
-          "Removed the Cuff Rushing rule from the guidelines."
+          "Fixed the Department Hub showing old, outdated info after it had already been updated.",
+          "Refreshed the Staff Handbook and added a new Staff Info section with a striking system reference.",
+          "Removed the \"Cuff Rushing\" rule."
         ]
       },
       {
-        "heading": "Economy Overhaul",
+        "heading": "A Whole New Economy",
         "items": [
-          "Banking: /bank deposit, withdraw, and balance, with daily savings interest.",
-          "Taxes: personal and business taxes now apply automatically on a schedule.",
-          "Loans: /loan request, repay, and status, with credit limits based on activity and business ownership.",
-          "Investments: /invest offer, buy, sell, and portfolio -- buy into a business and earn dividends.",
-          "Property: /property buy, sell, and list -- own apartments, houses, mansions, and vehicles with daily upkeep.",
-          "Items & Inventory: /shop and /inventory for collectible items.",
-          "Marketplace: /market list, buy, cancel, and browse -- trade items directly with other players.",
-          "Contracts: /contract create, respond, pay, and list -- formal IOUs between players that track an obligation until it's settled.",
-          "Autocomplete added everywhere a business, property, listing, or contract needs to be picked, so nobody has to type an exact name."
+          "Banking -- deposit, withdraw, and earn daily interest on your savings.",
+          "Taxes -- personal and business taxes now apply automatically.",
+          "Loans -- borrow money with a credit limit based on how active you are, and pay it back over time.",
+          "Investments -- buy into someone else's business and earn a share of its profits.",
+          "Property -- buy houses, apartments, mansions, and vehicles, each with its own upkeep cost.",
+          "Items -- buy collectible items from the shop.",
+          "Marketplace -- buy and sell items directly with other players.",
+          "Contracts -- create a formal IOU with another player that tracks what they owe until it's paid off.",
+          "Typing out an exact business, property, or listing name is no longer required -- everything now suggests matches as you type."
         ]
       },
       {
         "heading": "Fixes & Improvements",
         "items": [
-          "Fixed department playtime tracking counting bot/server downtime as active playtime.",
-          "Fixed BOLO submissions showing \"user ID unknown\" for players without a recent server visit.",
-          ":h and :pm are no longer flagged by the off-duty command alert.",
-          "Multi-recipient :pm commands now send correctly to every recipient, not just the first.",
-          "Leaderboard and list-style messages (shift leaderboard, economy leaderboard, business/casino lists, giveaway cards) no longer mass-ping everyone listed.",
+          "Fixed department playtime counting time when the server or bot was actually down.",
+          "Fixed ban submissions sometimes showing \"user ID unknown.\"",
+          "Off-duty warnings no longer trigger from harmless commands.",
+          "Sending a message to multiple people at once now actually reaches everyone, not just the first person.",
+          "Leaderboards and other list-style messages no longer ping everyone shown in them.",
           "Added an Unban option to punishment logs.",
-          "Fixed refresh-to-404 on the Staff Panel for non-root pages."
+          "Fixed the staff panel showing a 404 error on refresh."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "slug": "v1-0-0",
+    "title": "TSRP Staff System",
+    "date": "2026-07-20",
+    "image": "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/ssu.png",
+    "summary": "The bot and the staff panel are now fully connected. Anything you do in one shows up in the other instantly, so there's no more guessing if something actually went through.",
+    "sections": [
+      {
+        "heading": "Logging In",
+        "items": [
+          "You log into the panel with your Discord account. Your permissions are pulled straight from your current rank, so there's nothing to set up manually."
+        ]
+      },
+      {
+        "heading": "Dashboard",
+        "items": [
+          "Start/pause/end your shift with a live timer",
+          "See who's currently on duty and who's on break",
+          "Shift leaderboard and your full personal shift history",
+          "Live, searchable in-game player list",
+          "Log punishments (Warning, Kick, Ban, Temp Ban, BOLO, Note) with username autofill",
+          "Live activity feed (joins, leaves, kills, commands, mod/emergency calls)"
+        ]
+      },
+      {
+        "heading": "HR Panel (Management+)",
+        "items": [
+          "Run in-game commands",
+          "Issue/remove strikes, with a live strike board (3 strikes triggers auto action)",
+          "Instant promote/demote",
+          "Review pending rank change requests",
+          "Terminate staff",
+          "Process resignations (Director only)",
+          "Manage LOAs (approve, extend, end early, view history)"
+        ]
+      },
+      {
+        "heading": "IA Panel (IA+)",
+        "items": [
+          "Request backup on duty",
+          "Issue strikes on anyone regardless of rank",
+          "Suggest rank changes"
+        ]
+      },
+      {
+        "heading": "Bot Commands",
+        "items": [
+          "Everything from the panel also works in Discord: /shift, /loa, /endloa, /strike, /unstrike, /rankChange, /terminate, /resign, /runcommand, /callstaff, /players, /status, /activitycheck, /passtraining, /failtraining, /feedback, /fixnick, /say, /startup, /shutdown, plus full ticket commands (/tclose, /tadd, /tremove, /ttranscript, etc)."
+        ]
+      },
+      {
+        "heading": "Automatic Stuff",
+        "items": [
+          "Nicknames update on their own based on your duty status and rank",
+          "Off-duty command use gets flagged",
+          "Booster perks granted/removed automatically",
+          "Live status card and voice channel stats",
+          "Everything logs to one central audit channel"
         ]
       }
     ]
