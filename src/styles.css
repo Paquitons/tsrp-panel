@@ -619,10 +619,6 @@ tbody tr:hover { background: var(--surface-hover); }
   text-decoration: none;
 }
 
-.changelog-entry-page {
-  max-width: 760px;
-}
-
 .changelog-entry-banner {
   width: 100%;
   height: 160px;
