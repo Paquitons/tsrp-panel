@@ -20,8 +20,8 @@ function AppShell() {
   if (!user) {
     return (
       <Routes>
-        <Route path="/changelog" element={<div className="content standalone-content"><Changelog /></div>} />
-        <Route path="/changelog/:slug" element={<div className="content standalone-content"><ChangelogEntry /></div>} />
+        <Route path="/changelog" element={<Changelog standalone />} />
+        <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
         <Route path="*" element={<Login />} />
       </Routes>
     );

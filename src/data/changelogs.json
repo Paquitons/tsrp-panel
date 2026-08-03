@@ -4,7 +4,6 @@
     "slug": "v1-1-0",
     "title": "TSRP Update",
     "date": "2026-08-03",
-    "image": "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/ssu.png",
     "summary": "A major update covering moderation, the Department Hub, staff onboarding, and a brand new player economy.",
     "sections": [
       {
@@ -56,7 +55,6 @@
     "slug": "v1-0-0",
     "title": "TSRP Staff System",
     "date": "2026-07-20",
-    "image": "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/ssu.png",
     "summary": "The bot and the staff panel are now fully connected. Anything you do in one shows up in the other instantly, so there's no more guessing if something actually went through.",
     "sections": [
       {
