@@ -18,6 +18,7 @@ export default function Nav() {
         {user?.isSuperAdmin && (
           <NavLink to="/super-admin" className={({ isActive }) => (isActive ? "active" : "")}>Super Admin</NavLink>
         )}
+        <NavLink to="/changelog" className={({ isActive }) => (isActive ? "active" : "")}>Changelog</NavLink>
       </nav>
       <div className="sidebar-footer">
         <div className="sidebar-user">

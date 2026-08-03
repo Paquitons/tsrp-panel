@@ -1,0 +1,56 @@
+// Source of truth for the public changelog page (src/pages/Changelog.jsx).
+// Newest entry goes first. Each `sections` heading becomes a subheading on
+// the page; `items` are rendered as a bullet list under it.
+export const CHANGELOGS = [
+  {
+    version: "1.1.0",
+    title: "TSRP Update",
+    date: "2026-08-03",
+    summary:
+      "A major update spanning moderation tooling, the Department Hub, staff onboarding, and a full player economy overhaul.",
+    sections: [
+      {
+        heading: "Moderation & Safety",
+        items: [
+          "Added an anti-raid/anti-spam automod system that automatically detects and acts on mass-join raids and message spam.",
+          "Built /bolo, an interactive Ban BOLO review queue in Discord for Internal Affairs+ -- Accept, Decline, or Skip a pending ban request, with the actual ERLC ban executed on accept and everything logged for audit.",
+          "Tightened ticket and strike permissions so only the right ranks can take those actions.",
+        ],
+      },
+      {
+        heading: "Department Hub & Staff Info",
+        items: [
+          "Fixed the Department Hub showing stale/outdated department info after edits.",
+          "Refreshed the Staff Handbook and added a new Staff Info panel with a Staff Striking System reference.",
+          "Removed the Cuff Rushing rule from the guidelines.",
+        ],
+      },
+      {
+        heading: "Economy Overhaul",
+        items: [
+          "Banking: /bank deposit, withdraw, and balance, with daily savings interest.",
+          "Taxes: personal and business taxes now apply automatically on a schedule.",
+          "Loans: /loan request, repay, and status, with credit limits based on activity and business ownership.",
+          "Investments: /invest offer, buy, sell, and portfolio -- buy into a business and earn dividends.",
+          "Property: /property buy, sell, and list -- own apartments, houses, mansions, and vehicles with daily upkeep.",
+          "Items & Inventory: /shop and /inventory for collectible items.",
+          "Marketplace: /market list, buy, cancel, and browse -- trade items directly with other players.",
+          "Contracts: /contract create, respond, pay, and list -- formal IOUs between players that track an obligation until it's settled.",
+          "Autocomplete added everywhere a business, property, listing, or contract needs to be picked, so nobody has to type an exact name.",
+        ],
+      },
+      {
+        heading: "Fixes & Improvements",
+        items: [
+          "Fixed department playtime tracking counting bot/server downtime as active playtime.",
+          "Fixed BOLO submissions showing \"user ID unknown\" for players without a recent server visit.",
+          ":h and :pm are no longer flagged by the off-duty command alert.",
+          "Multi-recipient :pm commands now send correctly to every recipient, not just the first.",
+          "Leaderboard and list-style messages (shift leaderboard, economy leaderboard, business/casino lists, giveaway cards) no longer mass-ping everyone listed.",
+          "Added an Unban option to punishment logs.",
+          "Fixed refresh-to-404 on the Staff Panel for non-root pages.",
+        ],
+      },
+    ],
+  },
+];

@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
 import SuperAdmin from "./pages/SuperAdmin";
+import Changelog from "./pages/Changelog";
 import Strike3Prompt from "./components/Strike3Prompt";
 
 function AppShell() {
@@ -16,7 +17,12 @@ function AppShell() {
   }
 
   if (!user) {
-    return <Login />;
+    return (
+      <Routes>
+        <Route path="/changelog" element={<div className="content standalone-content"><Changelog /></div>} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
   }
 
   return (
@@ -26,6 +32,7 @@ function AppShell() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
+        <Route path="/changelog" element={<Changelog />} />
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
       </Routes>
       <Strike3Prompt />

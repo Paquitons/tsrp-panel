@@ -552,6 +552,14 @@ tbody tr:hover { background: var(--surface-hover); }
   letter-spacing: -0.01em;
 }
 
+.standalone-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: var(--space-8);
+  height: auto;
+  overflow-y: visible;
+}
+
 /* ---------- Misc ---------- */
 
 .muted { color: var(--text-faint); font-size: var(--text-sm); }
