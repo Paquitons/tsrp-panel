@@ -204,17 +204,10 @@ html, body, #root {
 }
 
 .sidebar-brand-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--btn-blue-1), var(--btn-blue-2));
-  color: #fff;
-  font-weight: 800;
-  font-size: 15px;
+  object-fit: contain;
 }
 
 .sidebar-brand-text {
@@ -723,6 +716,12 @@ tbody tr:hover { background: var(--surface-hover); }
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
+}
+
+.login-logo {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
 }
 
 .standalone-content {

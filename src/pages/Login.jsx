@@ -6,6 +6,7 @@ export default function Login() {
 
   return (
     <div className="login-screen">
+      <img src="https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png" alt="" className="login-logo" />
       <h1>TSRP Staff Panel</h1>
       {error && <div className="error-banner">{error}</div>}
       <button className="primary" onClick={login}>Login with Discord</button>

@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import DiscordAvatar from "./DiscordAvatar";
 import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon } from "./icons";
 
+const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
+
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: DashboardIcon, end: true },
   {
@@ -53,7 +55,7 @@ export default function Nav() {
 
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <div className="sidebar-brand">
-          <span className="sidebar-brand-mark">T</span>
+          <img src={LOGO_URL} alt="" className="sidebar-brand-mark" />
           <span className="sidebar-brand-text">TSRP Panel</span>
         </div>
 
