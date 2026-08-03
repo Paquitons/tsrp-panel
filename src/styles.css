@@ -475,6 +475,35 @@ label {
   gap: var(--space-3);
 }
 
+/* Inline label+input/button rows (Super Admin's economy/shift forms) --
+   every column gets an equal-height label above it, even lone buttons
+   (via a visually-hidden one), so buttons line up with input baselines
+   instead of looking bottom-anchored and "sunken" next to them. */
+.form-inline-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-inline-field {
+  flex: 1;
+  min-width: 160px;
+}
+
+.form-inline-field input {
+  margin-bottom: 0;
+}
+
+.form-inline-field-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.form-inline-field-btn label {
+  visibility: hidden;
+}
+
 /* ---------- Buttons ---------- */
 
 button {
@@ -1040,15 +1069,6 @@ code {
 
 /* ---------- On-duty staff avatar row ---------- */
 
-.on-duty-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border-subtle);
-}
-
 .on-duty-avatar {
   position: relative;
   transition: transform var(--duration-fast) var(--ease);
@@ -1395,14 +1415,125 @@ code {
 .custom-select-option:hover { background: var(--surface-hover); }
 .custom-select-option.selected { color: var(--accent); font-weight: 600; }
 
-/* ---------- Dashboard greeting card ---------- */
+/* ---------- Dashboard hero (greeting + shift status + quick actions) ---------- */
 
-.dashboard-greeting-card {
+.dashboard-hero {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hero-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.hero-greeting {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-shrink: 0;
 }
-.dashboard-greeting-card h2 { font-size: var(--text-lg); }
+
+.hero-greeting h2 {
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.hero-shift {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.hero-shift .button-row button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.hero-shift-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero-shift-start input {
+  margin-bottom: 0;
+  width: 200px;
+  flex-shrink: 1;
+  min-width: 120px;
+}
+
+.hero-shift-start button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.hero-on-duty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.hero-on-duty-label {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  margin-right: 2px;
+}
+
+.hero-divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 0;
+}
+
+.quick-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 9px var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
+}
+
+.quick-action svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.quick-action:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.quick-action-danger:hover {
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.08);
+}
 
 /* ---------- Shared modal title/subheading ---------- */
 
@@ -1424,6 +1555,59 @@ code {
 
 .shift-history-modal {
   max-width: 560px;
+}
+
+/* ---------- Shift Leaderboard modal ---------- */
+
+.leaderboard-modal {
+  max-width: 600px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Grid (not flex) so the End Shift button can drop to its own row when
+   present, instead of squeezing into the same line and overflowing past
+   the card -- name still truncates via min-width:0 either way. */
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 26px auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: 9px var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--ease);
+}
+.leaderboard-row:hover { background: var(--surface-hover); }
+
+.leaderboard-rank {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.leaderboard-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-stat {
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.leaderboard-end-btn {
+  grid-column: 1 / -1;
+  justify-self: end;
 }
 
 /* ---------- 3rd Strike action prompt ---------- */
@@ -1561,29 +1745,6 @@ code {
 }
 .activity-filter-option:hover { background: var(--surface-hover); }
 
-/* ---------- Toolbox grid ---------- */
-
-.toolbox-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-}
-
-.toolbox-btn {
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-base);
-  font-weight: 600;
-  text-align: center;
-  border: 1px solid transparent;
-  transition: transform var(--duration-fast) var(--ease), filter var(--duration-fast) var(--ease);
-}
-.toolbox-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
-
-.toolbox-blue { background: rgba(124,139,255,0.14); color: var(--btn-blue-1); border-color: rgba(124,139,255,0.24); }
-.toolbox-green { background: rgba(46,230,160,0.14); color: var(--btn-green-1); border-color: rgba(46,230,160,0.24); }
-.toolbox-pink { background: rgba(255,127,176,0.14); color: var(--btn-pink-1); border-color: rgba(255,127,176,0.24); }
-
 /* ---------- Responsive pass: tablet & mobile ---------- */
 
 @media (max-width: 900px) {
@@ -1610,7 +1771,6 @@ code {
 @media (max-width: 480px) {
   .modal { padding: var(--space-4); }
   .card { padding: var(--space-4); }
-  .toolbox-grid { grid-template-columns: 1fr; }
 }
 
 /* ---------- Portal dropdown base + remaining variants ---------- */

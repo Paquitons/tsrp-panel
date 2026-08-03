@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { formatClockTime, formatDurationWithSeconds, formatDuration, TYPE_LABELS } from "../utils";
+import { formatClockTime, formatDurationWithSeconds, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
 import UserPanel from "../components/UserPanel";
@@ -12,6 +12,8 @@ import ShiftHistoryModal from "../components/ShiftHistoryModal";
 import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
+import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
+import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon } from "../components/icons";
 
 const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -63,6 +65,7 @@ export default function Dashboard() {
   const [resettingLeaderboard, setResettingLeaderboard] = useState(false);
   const [forceEndingId, setForceEndingId] = useState(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -378,109 +381,68 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="dashboard-grid">
-        {/* ---------- LEFT: Greeting + Shift + Toolbox + On Duty + Players ---------- */}
-        <div className="dashboard-col">
-          <div className="card dashboard-greeting-card">
+      {/* ---------- Hero: greeting, shift status, on-duty, quick actions -- everything a staff member needs at the start of an SSU, with zero scrolling ---------- */}
+      <div className="card dashboard-hero">
+        {shiftError && <div className="error-banner">{shiftError}</div>}
+
+        <div className="hero-top">
+          <div className="hero-greeting">
             <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatarHash} size={40} />
-            <h2 style={{ margin: 0 }}>Hey, {user?.username}!</h2>
+            <h2>Hey, {user?.username}!</h2>
           </div>
 
-          <div className="card">
-            <h2>Current Shift</h2>
-            {shiftError && <div className="error-banner">{shiftError}</div>}
+          <div className="hero-shift">
             {active ? (
               <>
-                <div className="shift-timer">
-                  <span className={`status-dot ${onBreak ? "status-break" : "status-active"}`} />
-                  <span className="timer-value">{formatDurationWithSeconds(Math.max(0, liveDurationSeconds))}</span>
-                </div>
-                {onBreak && <span className="badge" style={{ background: "#4a3f1a", color: "#f9a825", marginBottom: 10, display: "inline-block" }}>On Break</span>}
+                <span className={`status-dot ${onBreak ? "status-break" : "status-active"}`} />
+                <span className="timer-value">{formatDurationWithSeconds(Math.max(0, liveDurationSeconds))}</span>
+                {onBreak && <span className="badge" style={{ background: "#4a3f1a", color: "#f9a825" }}>On Break</span>}
                 <div className="button-row">
-                  <button className="btn-orange" onClick={toggleBreak}>{onBreak ? "Resume" : "Break"}</button>
-                  <button className="btn-red" onClick={endShift}>End Shift</button>
+                  <button className="btn-orange small" onClick={toggleBreak}>{onBreak ? "Resume" : "Break"}</button>
+                  <button className="btn-red small" onClick={endShift}>End Shift</button>
                 </div>
               </>
             ) : (
-              <>
+              <div className="hero-shift-start">
                 <input value={shiftType} onChange={e => setShiftType(e.target.value)} placeholder="Shift type (optional)" />
-                <button className="btn-green" onClick={startShift} style={{ width: "100%" }}>Start Shift</button>
-              </>
-            )}
-
-            {onDutyStaff.length > 0 && (
-              <div className="on-duty-row">
-                {onDutyStaff.map(s => (
-                  <div
-                    className="on-duty-avatar"
-                    key={s.discordId}
-                    title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}
-                    onClick={() => openUserByDiscord(s.discordId)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={30} />
-                    <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button className="secondary small" style={{ marginTop: 12, width: "100%" }} onClick={() => setHistoryModalOpen(true)}>
-              View Shift History
-            </button>
-          </div>
-
-          <div className="card">
-            <div className="modal-title-row" style={{ marginBottom: 12 }}>
-              <h2 style={{ margin: 0 }}>Shift Leaderboard</h2>
-              {user?.isManagementOrAbove && (
-                <button className="secondary small" onClick={resetLeaderboard} disabled={resettingLeaderboard}>
-                  {resettingLeaderboard ? "Resetting…" : "Reset"}
-                </button>
-              )}
-            </div>
-            {leaderboardResetAt && (
-              <p className="muted card-subtitle">Since {new Date(leaderboardResetAt).toLocaleDateString()}</p>
-            )}
-            {leaderboard.length === 0 ? (
-              <p className="muted">No shift activity yet this period.</p>
-            ) : (
-              <div className="log-card-list">
-                {leaderboard.map((row, idx) => {
-                  const isActive = onDutyStaff.some(s => s.discordId === row.discord_id);
-                  const name = row.staff_username ?? row.discord_id;
-                  return (
-                    <div key={row.discord_id} className="log-card-issuer-row" style={{ padding: "6px 0" }}>
-                      <span className="muted" style={{ width: 20 }}>#{idx + 1}</span>
-                      <DiscordAvatar discordId={row.discord_id} avatarHash={row.staff_avatar_hash} size={24} />
-                      <span className="log-card-username">{name}</span>
-                      <span className="muted" style={{ marginLeft: "auto" }}>{formatDuration(row.totalSeconds)} · {row.shiftCount} shift{row.shiftCount === 1 ? "" : "s"}</span>
-                      {user?.isManagementOrAbove && isActive && (
-                        <button
-                          className="btn-red small"
-                          style={{ marginLeft: 8 }}
-                          onClick={() => forceEndShift(row.discord_id, name)}
-                          disabled={forceEndingId === row.discord_id}
-                        >
-                          {forceEndingId === row.discord_id ? "Ending…" : "End Shift"}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+                <button className="btn-green small" onClick={startShift}>Start Shift</button>
               </div>
             )}
           </div>
 
-          <div className="card">
-            <h2>Toolbox</h2>
-            <div className="toolbox-grid">
-              <button className="toolbox-btn toolbox-green" onClick={() => setLoaModalOpen(true)}>Manage LOA</button>
-              <button className="toolbox-btn toolbox-blue" onClick={() => setLookupModalOpen(true)}>Player Lookup</button>
-              <button className="toolbox-btn toolbox-pink" onClick={() => setResignModalOpen(true)}>Resign</button>
+          {onDutyStaff.length > 0 && (
+            <div className="hero-on-duty">
+              <span className="hero-on-duty-label">On duty ({onDutyStaff.length})</span>
+              {onDutyStaff.map(s => (
+                <div
+                  className="on-duty-avatar"
+                  key={s.discordId}
+                  title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}
+                  onClick={() => openUserByDiscord(s.discordId)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={30} />
+                  <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
+                </div>
+              ))}
             </div>
-          </div>
+          )}
+        </div>
 
+        <hr className="hero-divider" />
+
+        <div className="quick-actions">
+          <button className="quick-action" onClick={() => setLookupModalOpen(true)}><SearchIcon />Player Lookup</button>
+          <button className="quick-action" onClick={() => setLoaModalOpen(true)}><CalendarIcon />Manage LOA</button>
+          <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
+          <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
+          <button className="quick-action quick-action-danger" onClick={() => setResignModalOpen(true)}><DoorExitIcon />Resign</button>
+        </div>
+      </div>
+
+      <div className="dashboard-grid">
+        {/* ---------- LEFT: live in-game players ---------- */}
+        <div className="dashboard-col">
           <div className="card">
             <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
             {queueCount > 0 && <p className="muted card-subtitle">{queueCount} in queue</p>}
@@ -653,6 +615,21 @@ export default function Dashboard() {
 
       {/* ---------- Shift History modal ---------- */}
       {historyModalOpen && <ShiftHistoryModal onClose={() => setHistoryModalOpen(false)} />}
+
+      {/* ---------- Shift Leaderboard modal ---------- */}
+      {leaderboardModalOpen && (
+        <ShiftLeaderboardModal
+          leaderboard={leaderboard}
+          leaderboardResetAt={leaderboardResetAt}
+          onDutyStaff={onDutyStaff}
+          canManage={user?.isManagementOrAbove}
+          resetting={resettingLeaderboard}
+          onReset={resetLeaderboard}
+          forceEndingId={forceEndingId}
+          onForceEnd={forceEndShift}
+          onClose={() => setLeaderboardModalOpen(false)}
+        />
+      )}
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}

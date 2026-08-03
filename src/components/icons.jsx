@@ -91,3 +91,50 @@ export function LogoutIcon(props) {
     </Icon>
   );
 }
+
+export function SearchIcon(props) {
+  return (
+    <Icon {...props}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M20 20l-4.8-4.8" />
+    </Icon>
+  );
+}
+
+export function CalendarIcon(props) {
+  return (
+    <Icon {...props}>
+      <rect x="3.5" y="4.5" width="17" height="16" rx="2" />
+      <path d="M3.5 9.5h17M8 2.5v4M16 2.5v4" />
+    </Icon>
+  );
+}
+
+export function TrophyIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4z" />
+      <path d="M7 5.5H4a1 1 0 0 0-1 1c0 2.5 1.8 4.2 4 4.6M17 5.5h3a1 1 0 0 1 1 1c0 2.5-1.8 4.2-4 4.6" />
+      <path d="M12 14v3.5M8.5 21.5h7M9.5 17.5h5l.6 4h-6.2l.6-4z" />
+    </Icon>
+  );
+}
+
+export function HistoryIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2" />
+      <path d="M3.5 4v4.5H8" />
+      <path d="M12 8v4.5l3 2" />
+    </Icon>
+  );
+}
+
+export function DoorExitIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M13.5 3.5H7a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h6.5" />
+      <path d="M15 8.5l4 3.5-4 3.5M19 12h-9.5" />
+    </Icon>
+  );
+}

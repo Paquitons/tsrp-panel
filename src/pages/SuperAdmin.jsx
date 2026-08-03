@@ -315,33 +315,45 @@ function EconomyControl() {
       <p className="muted">Give, take, or set anyone's balance directly. No limits or checks.</p>
       {error && <div className="error-banner">{error}</div>}
 
-      <form onSubmit={loadBalance} style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
-        <div style={{ flex: 1 }}>
+      <form onSubmit={loadBalance} className="form-inline-row">
+        <div className="form-inline-field">
           <label>Discord ID</label>
           <input value={discordId} onChange={e => setDiscordId(e.target.value)} placeholder="e.g. 1115356536160653444" />
         </div>
-        <button className="secondary" type="submit" disabled={loading}>{loading ? "Loading…" : "Look Up"}</button>
+        <div className="form-inline-field form-inline-field-btn">
+          <label aria-hidden="true">&nbsp;</label>
+          <button className="secondary" type="submit" disabled={loading}>{loading ? "Loading…" : "Look Up"}</button>
+        </div>
       </form>
 
       {balance !== null && (
         <>
           <p style={{ marginTop: 12 }}>Current balance: <strong>${balance.toLocaleString()}</strong></p>
 
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-end", marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
+          <div className="form-inline-row" style={{ marginTop: 8 }}>
+            <div className="form-inline-field">
               <label>Amount</label>
               <input type="number" min="1" value={amount} onChange={e => setAmount(e.target.value)} />
             </div>
-            <button className="primary" type="button" disabled={busy} onClick={() => adjust(1)}>Give</button>
-            <button className="btn-red" type="button" disabled={busy} onClick={() => adjust(-1)}>Take</button>
+            <div className="form-inline-field form-inline-field-btn">
+              <label aria-hidden="true">&nbsp;</label>
+              <button className="primary" type="button" disabled={busy} onClick={() => adjust(1)}>Give</button>
+            </div>
+            <div className="form-inline-field form-inline-field-btn">
+              <label aria-hidden="true">&nbsp;</label>
+              <button className="btn-red" type="button" disabled={busy} onClick={() => adjust(-1)}>Take</button>
+            </div>
           </div>
 
-          <form onSubmit={applySet} style={{ display: "flex", gap: 16, alignItems: "flex-end", marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
+          <form onSubmit={applySet} className="form-inline-row" style={{ marginTop: 8 }}>
+            <div className="form-inline-field">
               <label>Set Balance To</label>
               <input type="number" value={setAmountValue} onChange={e => setSetAmountValue(e.target.value)} />
             </div>
-            <button className="secondary" type="submit" disabled={busy}>Set</button>
+            <div className="form-inline-field form-inline-field-btn">
+              <label aria-hidden="true">&nbsp;</label>
+              <button className="secondary" type="submit" disabled={busy}>Set</button>
+            </div>
           </form>
         </>
       )}
