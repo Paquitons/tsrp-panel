@@ -1221,7 +1221,12 @@ code {
 
 .multi-col-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  /* .content caps out at 980px regardless of viewport width, so this
+     can't assume it ever gets more than ~916px to work with (980 minus
+     .content's own padding) -- 320px columns don't fit three-across in
+     that space and were silently overflowing past the card's right
+     edge on every screen wide enough to reach 3 columns at all. */
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
   gap: var(--space-4);
   align-items: start;
   flex: 1;
