@@ -823,21 +823,65 @@ tbody tr:hover { background: var(--surface-hover); }
   justify-content: center;
   height: 100vh;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-6);
+  padding: var(--space-5);
   background: radial-gradient(circle at 50% 30%, #171a24 0%, #0b0d12 70%);
 }
 
-.login-screen h1 {
-  font-size: 27px;
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-8) var(--space-6);
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
+}
+
+.login-card h1 {
+  font-size: 22px;
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
 }
 
+.login-card .muted {
+  margin: 0;
+}
+
+.login-card .error-banner {
+  width: 100%;
+}
+
 .login-logo {
-  width: 88px;
-  height: 88px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
+}
+
+.login-discord-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.login-discord-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.login-footer-link {
+  font-size: var(--text-sm);
 }
 
 .standalone-content {
