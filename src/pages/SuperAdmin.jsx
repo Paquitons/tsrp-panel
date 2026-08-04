@@ -4,7 +4,13 @@ import { useAuth } from "../context/AuthContext";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
+import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
+
+const TABS = [
+  { value: "shifts", label: "Shift Editor" },
+  { value: "economy", label: "Economy Control" },
+];
 
 /**
  * Unrestricted shift editing for one hardcoded Super Admin account --
@@ -15,6 +21,7 @@ import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../uti
  */
 export default function SuperAdmin() {
   const { user } = useAuth();
+  const [tab, setTab] = useState("shifts");
   const search = useStaffSearch();
   const [shifts, setShifts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -104,56 +111,64 @@ export default function SuperAdmin() {
     <div className="content">
       <div className="page-header">
         <h1>Super Admin</h1>
-        <p className="muted">Unrestricted shift editing for testing and administration. Changes here bypass all normal validation.</p>
+        <p className="muted">Unrestricted testing and administration tools. Changes here bypass all normal validation.</p>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
       <div className="card">
-        <h2>Pick a Staff Member</h2>
-        <div className="autocomplete-wrap">
-          <input
-            ref={search.inputRef}
-            autoComplete="off"
-            value={search.query}
-            onChange={e => search.onQueryChange(e.target.value)}
-            onFocus={() => search.suggestions.length > 0 && search.setShowSuggestions(true)}
-            placeholder="Search by username or nickname"
-          />
-          <PortalDropdown anchorRef={search.inputRef} open={search.showSuggestions} onClose={() => search.setShowSuggestions(false)} className="autocomplete-list-portal">
-            {search.suggestions.map(s => (
-              <div key={s.discordId} className="autocomplete-item" onClick={() => search.pick(s)}>
-                <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-              </div>
-            ))}
-          </PortalDropdown>
-        </div>
+        <Tabs tabs={TABS} active={tab} onChange={setTab} />
+
+        {tab === "shifts" && (
+          <>
+            <label>Staff Member</label>
+            <div className="autocomplete-wrap">
+              <input
+                ref={search.inputRef}
+                autoComplete="off"
+                value={search.query}
+                onChange={e => search.onQueryChange(e.target.value)}
+                onFocus={() => search.suggestions.length > 0 && search.setShowSuggestions(true)}
+                placeholder="Search by username or nickname"
+              />
+              <PortalDropdown anchorRef={search.inputRef} open={search.showSuggestions} onClose={() => search.setShowSuggestions(false)} className="autocomplete-list-portal">
+                {search.suggestions.map(s => (
+                  <div key={s.discordId} className="autocomplete-item" onClick={() => search.pick(s)}>
+                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                  </div>
+                ))}
+              </PortalDropdown>
+            </div>
+
+            {!search.target && <p className="muted">Pick a staff member to view and edit their shifts.</p>}
+          </>
+        )}
+
+        {tab === "economy" && <EconomyControl />}
       </div>
 
-      <EconomyControl />
-
-      {search.target && (
+      {tab === "shifts" && search.target && (
         <>
           <div className="card">
             <h2>Create Shift for {search.target.nickname ?? search.target.username}</h2>
             <form onSubmit={createShift}>
-              <div style={{ display: "flex", gap: 16 }}>
-                <div style={{ flex: 1 }}>
+              <div className="form-row">
+                <div>
                   <label>Started</label>
                   <input type="datetime-local" required value={newStart} onChange={e => setNewStart(e.target.value)} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                   <label>Ended (blank = active)</label>
                   <input type="datetime-local" value={newEnd} onChange={e => setNewEnd(e.target.value)} />
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 16 }}>
-                <div style={{ flex: 1 }}>
+              <div className="form-row">
+                <div>
                   <label>Break (minutes)</label>
                   <input type="number" min="0" value={newBreakMinutes} onChange={e => setNewBreakMinutes(e.target.value)} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                   <label>Shift Type</label>
                   <input value={newType} onChange={e => setNewType(e.target.value)} placeholder="Optional" />
                 </div>
@@ -209,25 +224,25 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
         <span className={`badge ${active ? "loa-status-approved" : ""}`}>{active ? "Active" : "Completed"}</span>
         <span className="muted" style={{ marginLeft: "auto" }}>{formatDuration(durationSeconds)}</span>
       </div>
-      <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
-        <div style={{ flex: 1 }}>
+      <div className="form-row" style={{ marginTop: 8 }}>
+        <div>
           <label>Started</label>
           <input type="datetime-local" value={startedAt} onChange={e => setStartedAt(e.target.value)} />
         </div>
-        <div style={{ flex: 1 }}>
+        <div>
           <label>Ended</label>
           <input type="datetime-local" value={endedAt} disabled={active} onChange={e => setEndedAt(e.target.value)} />
         </div>
       </div>
-      <label style={{ display: "flex", alignItems: "center", gap: 8, textTransform: "none", fontWeight: 500 }}>
+      <label className="checkbox-label">
         <input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> Currently active (no end time)
       </label>
-      <div style={{ display: "flex", gap: 16 }}>
-        <div style={{ flex: 1 }}>
+      <div className="form-row">
+        <div>
           <label>Break (minutes)</label>
           <input type="number" min="0" value={breakMinutes} onChange={e => setBreakMinutes(e.target.value)} />
         </div>
-        <div style={{ flex: 1 }}>
+        <div>
           <label>Type</label>
           <input value={shiftType} onChange={e => setShiftType(e.target.value)} />
         </div>
@@ -310,9 +325,8 @@ function EconomyControl() {
   }
 
   return (
-    <div className="card">
-      <h2>Economy Control</h2>
-      <p className="muted">Give, take, or set anyone's balance directly. No limits or checks.</p>
+    <>
+      <p className="muted card-subtitle">Give, take, or set anyone's balance directly. No limits or checks.</p>
       {error && <div className="error-banner">{error}</div>}
 
       <form onSubmit={loadBalance} className="form-inline-row">
@@ -357,6 +371,6 @@ function EconomyControl() {
           </form>
         </>
       )}
-    </div>
+    </>
   );
 }

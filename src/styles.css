@@ -558,6 +558,31 @@ label {
   visibility: hidden;
 }
 
+/* Side-by-side form fields (e.g. Started/Ended date pickers), replacing
+   repeated inline flex styles with one reusable class. */
+.form-row {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.form-row > * {
+  flex: 1;
+  min-width: 160px;
+}
+
+/* A checkbox with its label text inline, as a full sentence -- distinct
+   from a field label (which is uppercase/small and sits above an input). */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-transform: none;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
 /* ---------- Buttons ---------- */
 
 button {
