@@ -22,7 +22,9 @@ export async function apiFetch(path, { method = "GET", body, auth = true } = {})
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error(data.error || `Request failed with status ${res.status}`);
+    const error = new Error(data.error || `Request failed with status ${res.status}`);
+    Object.assign(error, data);
+    throw error;
   }
 
   return data;

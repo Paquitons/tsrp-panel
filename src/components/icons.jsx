@@ -157,6 +157,16 @@ export function MegaphoneIcon(props) {
   );
 }
 
+export function LinkIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M9.5 14.5l5-5" />
+      <path d="M8 16l-2 2a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5-0.5" />
+      <path d="M16 8l2-2a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0.5" />
+    </Icon>
+  );
+}
+
 // Filled mark (not the shared stroke Icon) -- this one represents a real
 // external brand, so its shape stays close to the recognizable silhouette
 // rather than being restyled into our line-icon language.

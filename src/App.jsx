@@ -8,6 +8,7 @@ import InternalAffairs from "./pages/InternalAffairs";
 import SuperAdmin from "./pages/SuperAdmin";
 import Changelog from "./pages/Changelog";
 import ChangelogEntry from "./pages/ChangelogEntry";
+import Verification from "./pages/Verification";
 import Strike3Prompt from "./components/Strike3Prompt";
 
 function AppShell() {
@@ -36,6 +37,7 @@ function AppShell() {
         <Route path="/internalaffairs" element={<InternalAffairs />} />
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
+        {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
       </Routes>
       <Strike3Prompt />

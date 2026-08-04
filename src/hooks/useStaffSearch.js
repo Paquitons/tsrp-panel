@@ -1,7 +1,11 @@
 import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 
-export function useStaffSearch() {
+/**
+ * @param {string} endpoint     Search endpoint (defaults to the staff table).
+ * @param {string} responseKey  Key holding the results array in the response.
+ */
+export function useStaffSearch(endpoint = "/staff/search", responseKey = "staff") {
   const [target, setTarget] = useState(null); // { discordId, username, avatarHash, nickname, rank }
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -20,9 +24,10 @@ export function useStaffSearch() {
     }
     debounceRef.current = setTimeout(async () => {
       try {
-        const { staff } = await apiFetch(`/staff/search?q=${encodeURIComponent(value)}`);
-        setSuggestions(staff);
-        setShowSuggestions(staff.length > 0);
+        const data = await apiFetch(`${endpoint}?q=${encodeURIComponent(value)}`);
+        const results = data[responseKey];
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
       } catch { setSuggestions([]); }
     }, 250);
   }
