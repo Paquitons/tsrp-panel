@@ -6,10 +6,16 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
+import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, LotteryPanel } from "./SuperAdminEconomy";
 
 const TABS = [
   { value: "shifts", label: "Shift Editor" },
-  { value: "economy", label: "Economy Control" },
+  { value: "economy", label: "Wallets" },
+  { value: "overview", label: "Economy Overview" },
+  { value: "econconfig", label: "Economy Config" },
+  { value: "businesses", label: "Businesses" },
+  { value: "casino", label: "Casino Controls" },
+  { value: "lottery", label: "Lottery" },
 ];
 
 /**
@@ -146,6 +152,11 @@ export default function SuperAdmin() {
         )}
 
         {tab === "economy" && <EconomyControl />}
+        {tab === "overview" && <EconomyOverviewPanel />}
+        {tab === "econconfig" && <EconomyConfigPanel />}
+        {tab === "businesses" && <BusinessesPanel />}
+        {tab === "casino" && <CasinoControlsPanel />}
+        {tab === "lottery" && <LotteryPanel />}
       </div>
 
       {tab === "shifts" && search.target && (
