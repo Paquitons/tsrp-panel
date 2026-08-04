@@ -1,5 +1,63 @@
 [
   {
+    "version": "1.3.0",
+    "slug": "v1-3-0",
+    "title": "TSRP Update",
+    "date": "2026-08-04",
+    "summary": "A full redesign of the staff panel to make everyday tasks faster and clearer, plus a new way to manually link Roblox accounts for players Bloxlink can't verify.",
+    "sections": [
+      {
+        "heading": "New: Manual Account Verification",
+        "items": [
+          "Added a new Account Verification page (Management and above) for linking a Discord member's Roblox account by hand, for the rare cases where Bloxlink can't verify someone.",
+          "Search for any member, then link their Roblox account by typing their username -- it looks up the real account and shows their avatar, display name, account age, and verification badge before you confirm.",
+          "The system checks for conflicts automatically -- if that Roblox account is already linked to someone else, or the member already has a different account linked, you'll get a warning before anything changes.",
+          "Linking or changing an account updates the member's server nickname and verified role automatically, so everything stays in sync.",
+          "Every link, change, and unlink is saved to a history log showing what changed, who did it, when, and why."
+        ]
+      },
+      {
+        "heading": "Dashboard",
+        "items": [
+          "Redesigned the Dashboard with a cleaner layout and quicker access to common actions.",
+          "Added a shift leaderboard you can open right from the Dashboard."
+        ]
+      },
+      {
+        "heading": "HR Panel",
+        "items": [
+          "Reorganized the HR Panel so related tools are grouped together and easier to find.",
+          "Fixed a layout bug where the LOA History card could overflow past the edge of the page on certain screen sizes."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "Simplified the Internal Affairs page so issuing strikes and suggesting promotions or demotions takes fewer steps."
+        ]
+      },
+      {
+        "heading": "Super Admin",
+        "items": [
+          "Reorganized the Super Admin page into clear tabs instead of one long scrolling page."
+        ]
+      },
+      {
+        "heading": "Login",
+        "items": [
+          "Refreshed the login page with a cleaner, more polished look."
+        ]
+      },
+      {
+        "heading": "General",
+        "items": [
+          "Improved spacing, sizing, and alignment across the panel so pages feel more consistent from one to the next.",
+          "The panel now works better on tablets and phones across the redesigned pages."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.2.0",
     "slug": "v1-2-0",
     "title": "TSRP Update",
