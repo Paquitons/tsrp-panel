@@ -106,7 +106,7 @@ export default function Verification() {
             value={search.query}
             onChange={e => search.onQueryChange(e.target.value)}
             onFocus={() => search.suggestions.length > 0 && search.setShowSuggestions(true)}
-            placeholder="Search by username or nickname"
+            placeholder="Search by username, nickname, or Discord user ID"
           />
           <PortalDropdown anchorRef={search.inputRef} open={search.showSuggestions} onClose={() => search.setShowSuggestions(false)} className="autocomplete-list-portal">
             {search.suggestions.map(s => (
