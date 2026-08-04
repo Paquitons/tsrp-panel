@@ -147,3 +147,12 @@ export function TerminalIcon(props) {
     </Icon>
   );
 }
+
+export function MegaphoneIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M3 10v4a1 1 0 0 0 1 1h2l4.5 3.5v-13L6 9H4a1 1 0 0 0-1 1z" />
+      <path d="M15.5 8.5a4 4 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" />
+    </Icon>
+  );
+}

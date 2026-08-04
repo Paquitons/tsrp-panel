@@ -13,7 +13,7 @@ import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
-import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon } from "../components/icons";
+import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon, MegaphoneIcon } from "../components/icons";
 
 const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -217,6 +217,29 @@ export default function Dashboard() {
       setCommandStatus({ ok: false, message: err.message });
     } finally {
       setCommandSending(false);
+    }
+  }
+
+  // ---------- Toolbox: Request Staff modal (IA+) -- moved here from
+  // Internal Affairs since calling for backup is time-sensitive and
+  // shouldn't require a page navigation to reach.
+  const [staffRequestModalOpen, setStaffRequestModalOpen] = useState(false);
+  const [staffRequestReason, setStaffRequestReason] = useState("");
+  const [staffRequestStatus, setStaffRequestStatus] = useState(null);
+  const [staffRequestSending, setStaffRequestSending] = useState(false);
+
+  async function sendStaffRequest(e) {
+    e.preventDefault();
+    setStaffRequestSending(true);
+    setStaffRequestStatus(null);
+    try {
+      await apiFetch("/staff-request", { method: "POST", body: { reason: staffRequestReason } });
+      setStaffRequestStatus({ ok: true, message: "Staff requested." });
+      setStaffRequestReason("");
+    } catch (err) {
+      setStaffRequestStatus({ ok: false, message: err.message });
+    } finally {
+      setStaffRequestSending(false);
     }
   }
 
@@ -458,6 +481,9 @@ export default function Dashboard() {
           <button className="quick-action" onClick={() => setLoaModalOpen(true)}><CalendarIcon />Manage LOA</button>
           <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
           <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
+          {(user?.tier === "ia" || user?.tier === "management" || user?.tier === "director") && (
+            <button className="quick-action" onClick={() => setStaffRequestModalOpen(true)}><MegaphoneIcon />Request Staff</button>
+          )}
           {(user?.tier === "management" || user?.tier === "director") && (
             <button className="quick-action" onClick={() => setCommandModalOpen(true)}><TerminalIcon />Run Command</button>
           )}
@@ -658,6 +684,24 @@ export default function Dashboard() {
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
+
+      {/* ---------- Request Staff modal (IA+) ---------- */}
+      {staffRequestModalOpen && (
+        <div className="modal-backdrop" onClick={() => setStaffRequestModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Request Staff</h2>
+            {staffRequestStatus && <div className={staffRequestStatus.ok ? "success-banner" : "error-banner"}>{staffRequestStatus.message}</div>}
+            <form onSubmit={sendStaffRequest}>
+              <label>Reason (optional)</label>
+              <AutoGrowTextarea value={staffRequestReason} onChange={e => setStaffRequestReason(e.target.value)} placeholder="Why do you need backup?" />
+              <div className="button-row">
+                <button className="primary" type="submit" disabled={staffRequestSending}>{staffRequestSending ? "Sending…" : "Request Staff"}</button>
+                <button className="secondary" type="button" onClick={() => setStaffRequestModalOpen(false)}>Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ---------- Run Command modal (Management+) ---------- */}
       {commandModalOpen && (

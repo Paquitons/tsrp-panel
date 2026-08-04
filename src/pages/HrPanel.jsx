@@ -333,7 +333,7 @@ export default function HrPanel() {
       </div>
 
       {/* ---------- Approvals: needs a decision now, always visible, zero clicks ---------- */}
-      <div className="hr-approvals-grid">
+      <div className="card-grid">
         {canReviewBigActions && (
           <div className="card">
             <h2>Pending Rank Changes ({pendingPromotions.length})</h2>

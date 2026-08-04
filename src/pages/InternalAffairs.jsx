@@ -11,26 +11,6 @@ export default function InternalAffairs() {
   const { user } = useAuth();
   const canAccess = user?.tier === "ia" || user?.tier === "management" || user?.tier === "director";
 
-  // ---------- Request Staff ----------
-  const [staffReason, setStaffReason] = useState("");
-  const [staffStatus, setStaffStatus] = useState(null);
-  const [staffSending, setStaffSending] = useState(false);
-
-  async function sendStaffRequest(e) {
-    e.preventDefault();
-    setStaffSending(true);
-    setStaffStatus(null);
-    try {
-      await apiFetch("/staff-request", { method: "POST", body: { reason: staffReason } });
-      setStaffStatus({ ok: true, message: "Staff requested." });
-      setStaffReason("");
-    } catch (err) {
-      setStaffStatus({ ok: false, message: err.message });
-    } finally {
-      setStaffSending(false);
-    }
-  }
-
   // ---------- Issue Strike ----------
   const strikeSearch = useStaffSearch();
   const [strikeReason, setStrikeReason] = useState("");
@@ -122,108 +102,95 @@ export default function InternalAffairs() {
   }
 
   return (
-    <div className="content dashboard-content">
+    <div className="content">
       <div className="page-header">
         <h1>Internal Affairs</h1>
-        <p className="muted">Issue strikes and suggest promotions.</p>
+        <p className="muted">Issue strikes and suggest promotions. Need backup right now? Use Request Staff from the Dashboard.</p>
       </div>
 
-      <div className="multi-col-grid">
-        <div className="dashboard-col">
-          <div className="card">
-            <h2>Request Staff</h2>
-            {staffStatus && <div className={staffStatus.ok ? "success-banner" : "error-banner"}>{staffStatus.message}</div>}
-            <form onSubmit={sendStaffRequest}>
-              <label>Reason (optional)</label>
-              <AutoGrowTextarea value={staffReason} onChange={e => setStaffReason(e.target.value)} placeholder="Why do you need backup?" />
-              <button className="primary" type="submit" disabled={staffSending}>{staffSending ? "Sending…" : "Request Staff"}</button>
-            </form>
-          </div>
-
-          <div className="card">
-            <h2>Issue a Strike</h2>
-            <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
-            {strikeError && <div className="error-banner">{strikeError}</div>}
-            {strikeSuccess && <div className="success-banner">Strike issued.</div>}
-            <form onSubmit={submitStrike}>
-              <label>Staff Member</label>
-              <div className="autocomplete-wrap">
-                <input
-                  ref={strikeSearch.inputRef}
-                  required
-                  autoComplete="off"
-                  value={strikeSearch.query}
-                  onChange={e => strikeSearch.onQueryChange(e.target.value)}
-                  onFocus={() => strikeSearch.suggestions.length > 0 && strikeSearch.setShowSuggestions(true)}
-                  placeholder="Search by username or nickname"
-                />
-                <PortalDropdown anchorRef={strikeSearch.inputRef} open={strikeSearch.showSuggestions} onClose={() => strikeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                  {strikeSearch.suggestions.map(s => (
-                    <div key={s.discordId} className="autocomplete-item" onClick={() => strikeSearch.pick(s)}>
-                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                    </div>
-                  ))}
-                </PortalDropdown>
-              </div>
-              <label>Reason</label>
-              <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
-              <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
-            </form>
-          </div>
+      <div className="card-grid">
+        <div className="card">
+          <h2>Issue a Strike</h2>
+          <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
+          {strikeError && <div className="error-banner">{strikeError}</div>}
+          {strikeSuccess && <div className="success-banner">Strike issued.</div>}
+          <form onSubmit={submitStrike}>
+            <label>Staff Member</label>
+            <div className="autocomplete-wrap">
+              <input
+                ref={strikeSearch.inputRef}
+                required
+                autoComplete="off"
+                value={strikeSearch.query}
+                onChange={e => strikeSearch.onQueryChange(e.target.value)}
+                onFocus={() => strikeSearch.suggestions.length > 0 && strikeSearch.setShowSuggestions(true)}
+                placeholder="Search by username or nickname"
+              />
+              <PortalDropdown anchorRef={strikeSearch.inputRef} open={strikeSearch.showSuggestions} onClose={() => strikeSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                {strikeSearch.suggestions.map(s => (
+                  <div key={s.discordId} className="autocomplete-item" onClick={() => strikeSearch.pick(s)}>
+                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                  </div>
+                ))}
+              </PortalDropdown>
+            </div>
+            <label>Reason</label>
+            <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
+            <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
+          </form>
         </div>
 
-        <div className="dashboard-col">
-          <div className="card">
-            <h2>Suggest a Rank Change</h2>
-            {promoError && <div className="error-banner">{promoError}</div>}
-            {promoSuccess && <div className="success-banner">Submitted.</div>}
-            <form onSubmit={submitPromotion}>
-              <label>Action</label>
-              <CustomSelect
-                value={promoAction}
-                onChange={setPromoAction}
-                options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+        <div className="card">
+          <h2>Suggest a Rank Change</h2>
+          <p className="muted card-subtitle">Goes to Management+ for approval.</p>
+          {promoError && <div className="error-banner">{promoError}</div>}
+          {promoSuccess && <div className="success-banner">Submitted.</div>}
+          <form onSubmit={submitPromotion}>
+            <label>Action</label>
+            <CustomSelect
+              value={promoAction}
+              onChange={setPromoAction}
+              options={[{ value: "promote", label: "Promote" }, { value: "demote", label: "Demote" }]}
+            />
+            <label style={{ marginTop: 12 }}>Staff Member</label>
+            <div className="autocomplete-wrap">
+              <input
+                ref={promoSearch.inputRef}
+                required
+                autoComplete="off"
+                value={promoSearch.query}
+                onChange={e => promoSearch.onQueryChange(e.target.value)}
+                onFocus={() => promoSearch.suggestions.length > 0 && promoSearch.setShowSuggestions(true)}
+                placeholder="Search by username or nickname"
               />
-              <label style={{ marginTop: 12 }}>Staff Member</label>
-              <div className="autocomplete-wrap">
-                <input
-                  ref={promoSearch.inputRef}
-                  required
-                  autoComplete="off"
-                  value={promoSearch.query}
-                  onChange={e => promoSearch.onQueryChange(e.target.value)}
-                  onFocus={() => promoSearch.suggestions.length > 0 && promoSearch.setShowSuggestions(true)}
-                  placeholder="Search by username or nickname"
-                />
-                <PortalDropdown anchorRef={promoSearch.inputRef} open={promoSearch.showSuggestions} onClose={() => promoSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
-                  {promoSearch.suggestions.map(s => (
-                    <div key={s.discordId} className="autocomplete-item" onClick={() => promoSearch.pick(s)}>
-                      <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                      <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                    </div>
-                  ))}
-                </PortalDropdown>
-              </div>
+              <PortalDropdown anchorRef={promoSearch.inputRef} open={promoSearch.showSuggestions} onClose={() => promoSearch.setShowSuggestions(false)} className="autocomplete-list-portal">
+                {promoSearch.suggestions.map(s => (
+                  <div key={s.discordId} className="autocomplete-item" onClick={() => promoSearch.pick(s)}>
+                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                  </div>
+                ))}
+              </PortalDropdown>
+            </div>
 
-              {promoSearch.target && (
-                <p className="muted field-hint">Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
-              )}
+            {promoSearch.target && (
+              <p className="muted field-hint">Current rank: {promoSearch.target.rankLabel ?? "Unknown"}</p>
+            )}
 
-              <label>New Rank</label>
-              {rankOptions.length > 0 ? (
-                <CustomSelect value={suggestedRank} onChange={setSuggestedRank} options={rankOptions} />
-              ) : (
-                <p className="muted field-hint">
-                  {promoSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
-                </p>
-              )}
+            <label>New Rank</label>
+            {rankOptions.length > 0 ? (
+              <CustomSelect value={suggestedRank} onChange={setSuggestedRank} options={rankOptions} />
+            ) : (
+              <p className="muted field-hint">
+                {promoSearch.target ? "No valid rank available for this action." : "Pick a staff member first."}
+              </p>
+            )}
 
-              <label style={{ marginTop: 12 }}>Reason</label>
-              <AutoGrowTextarea required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
-              <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Submit for Approval"}</button>
-            </form>
-          </div>
+            <label style={{ marginTop: 12 }}>Reason</label>
+            <AutoGrowTextarea required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
+            <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Submit for Approval"}</button>
+          </form>
         </div>
       </div>
     </div>

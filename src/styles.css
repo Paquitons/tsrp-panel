@@ -1233,7 +1233,9 @@ code {
   min-height: 0;
 }
 
-.hr-approvals-grid {
+/* Generic responsive card row -- collapses to fewer columns (down to 1)
+   instead of forcing a fixed count that could overflow its container. */
+.card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-4);
