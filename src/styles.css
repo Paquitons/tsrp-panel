@@ -1884,6 +1884,20 @@ code {
 }
 .stat-tile .muted { font-size: var(--text-sm); margin-bottom: 2px; }
 
+.stock-chart-tooltip {
+  position: absolute;
+  top: 8px;
+  background: var(--card-bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+}
+.stock-chart-tooltip-price { font-weight: 650; font-size: var(--text-sm); }
+.stock-chart-tooltip-time { font-size: var(--text-xs); }
+
 /* ---------- Activity Modal (popup with search + filters) ---------- */
 
 .activity-modal {

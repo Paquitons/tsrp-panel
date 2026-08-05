@@ -7,6 +7,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
 import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, LotteryPanel } from "./SuperAdminEconomy";
+import StockMarketAdmin from "./StockMarketAdmin";
 
 const TABS = [
   { value: "shifts", label: "Shift Editor" },
@@ -17,6 +18,7 @@ const TABS = [
   { value: "casino", label: "Casino Controls" },
   { value: "storefronts", label: "Storefronts" },
   { value: "lottery", label: "Lottery" },
+  { value: "stocks", label: "Stock Market" },
 ];
 
 /**
@@ -159,6 +161,7 @@ export default function SuperAdmin() {
         {tab === "casino" && <CasinoControlsPanel />}
         {tab === "storefronts" && <StorefrontsPanel />}
         {tab === "lottery" && <LotteryPanel />}
+        {tab === "stocks" && <StockMarketAdmin />}
       </div>
 
       {tab === "shifts" && search.target && (
