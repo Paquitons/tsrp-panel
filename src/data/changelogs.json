@@ -1,5 +1,21 @@
 [
   {
+    "version": "1.4.2",
+    "slug": "v1-4-2",
+    "title": "TSRP Update",
+    "date": "2026-08-05",
+    "summary": "Tickets now close automatically when the person who opened them leaves the server.",
+    "sections": [
+      {
+        "heading": "Ticket Cleanup",
+        "items": [
+          "If someone leaves the server while they still have an open ticket, it's now automatically closed for them.",
+          "The closure works exactly like a normal ticket close -- a full transcript is saved and the usual logs are posted, with the reason recorded as \"User left the server.\""
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.4.1",
     "slug": "v1-4-1",
     "title": "TSRP Update",
