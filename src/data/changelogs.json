@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.4.1",
+    "slug": "v1-4-1",
+    "title": "TSRP Update",
+    "date": "2026-08-05",
+    "summary": "Fixed a bug that could cause startup announcements and info panels to post multiple times instead of once.",
+    "sections": [
+      {
+        "heading": "Bug Fix: Duplicate Announcements & Panels",
+        "items": [
+          "Fixed a bug where running /startup could post the online announcement, and ping @everyone, more than once instead of exactly once.",
+          "Fixed persistent info panels (like Guidelines, Booster Perks, and the Department Hub) sometimes posting a brand new duplicate message instead of updating the existing one.",
+          "Both issues came from the same underlying cause, which is now fixed at the source rather than papered over."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.4.0",
     "slug": "v1-4-0",
     "title": "TSRP Update",
