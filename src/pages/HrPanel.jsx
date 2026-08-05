@@ -8,6 +8,7 @@ import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
+import HrAutomodOffenses from "./HrAutomodOffenses";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -319,6 +320,7 @@ export default function HrPanel() {
     ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
+    { value: "automod", label: "Automod Offenses" },
   ];
 
   return (
@@ -556,6 +558,8 @@ export default function HrPanel() {
             </form>
           </>
         )}
+
+        {actionTab === "automod" && <HrAutomodOffenses />}
       </div>
 
       {/* ---------- Reference: read-only, glance info ---------- */}
