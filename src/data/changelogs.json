@@ -1,5 +1,41 @@
 [
   {
+    "version": "1.4.0",
+    "slug": "v1-4-0",
+    "title": "TSRP Update",
+    "date": "2026-08-05",
+    "summary": "A brand new stock market, plus storefronts and a server-wide lottery -- new ways to earn, invest, and spend your money.",
+    "sections": [
+      {
+        "heading": "New: Stock Market",
+        "items": [
+          "Added a full stock market to the economy -- buy and sell shares of different companies, right from Discord.",
+          "Every stock has its own price, description, industry, and history -- check daily, weekly, and monthly performance before you buy.",
+          "Prices move on their own over time, and your own buying and selling nudges the price too -- it's a living market, not a fixed price list.",
+          "Keep a watchlist of stocks you're interested in, and get a DM when one of them makes a big move.",
+          "Some stocks pay out dividends automatically to anyone holding shares.",
+          "Track your full portfolio -- how much each stock is worth, your average cost, and both your realized and unrealized profit or loss.",
+          "Keep an eye on Market News for company announcements and bigger economic events that move prices."
+        ]
+      },
+      {
+        "heading": "New: Storefronts",
+        "items": [
+          "Player-owned businesses can now be Storefronts instead of a plain business with no purpose of its own.",
+          "Storefront owners can stock items with their own prices and quantities, and sell directly to other players -- earnings go straight into the business's treasury.",
+          "Owners can check their storefront's sales and revenue at any time."
+        ]
+      },
+      {
+        "heading": "New: Lottery",
+        "items": [
+          "Added a server-wide lottery -- buy tickets for a chance to win the entire pot.",
+          "The more tickets you buy, the better your odds when a winner is drawn."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.3.0",
     "slug": "v1-3-0",
     "title": "TSRP Update",
