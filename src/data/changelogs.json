@@ -1,5 +1,28 @@
 [
   {
+    "version": "1.4.3",
+    "slug": "v1-4-3",
+    "title": "TSRP Update",
+    "date": "2026-08-05",
+    "summary": "AutoMod offenses now fade over time instead of piling up forever, and HR staff can manage them directly.",
+    "sections": [
+      {
+        "heading": "Fairer AutoMod",
+        "items": [
+          "AutoMod offenses now expire automatically after a set time, so something from weeks ago won't push you into a harsher punishment today.",
+          "If you're kicked, banned, or manually cleared by HR, your AutoMod offense record resets.",
+          "If enough old offenses expire, the next punishment level automatically eases back up instead of staying maxed out."
+        ]
+      },
+      {
+        "heading": "HR Panel",
+        "items": [
+          "HR staff can now look up any member's AutoMod offenses, see their full history, and clear offenses when appropriate."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.4.2",
     "slug": "v1-4-2",
     "title": "TSRP Update",
