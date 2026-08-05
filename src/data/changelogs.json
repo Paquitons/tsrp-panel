@@ -1,5 +1,35 @@
 [
   {
+    "version": "1.4.4",
+    "slug": "v1-4-4",
+    "title": "TSRP Update",
+    "date": "2026-08-05",
+    "summary": "Routine economy actions are now public, lottery winners get a heads-up DM, and there's a new channel for economy news.",
+    "sections": [
+      {
+        "heading": "Public Economy Actions",
+        "items": [
+          "Buying/selling stocks, storefront purchases and listings, bank deposits/withdrawals, shop purchases, market listings, casino game toggles, quitting a job, investment trades, property buy/sell, and loan repayments now show up publicly in the channel instead of only to the person who ran the command.",
+          "Error messages, cooldown notices, and personal info (portfolios, watchlists, private business earnings, contract negotiations) still stay private."
+        ]
+      },
+      {
+        "heading": "Lottery Winner Notifications",
+        "items": [
+          "Winning the lottery now sends you a DM with your prize amount, which lottery you won, and your updated balance.",
+          "If your DMs are off, the lottery draw still completes normally -- you just won't get the DM."
+        ]
+      },
+      {
+        "heading": "Economy Announcements Channel",
+        "items": [
+          "A new channel now posts live news for the economy: major stock price swings, dividend payouts, and new businesses opening.",
+          "Keeps everyone in the loop on what's happening with the market and the economy without having to watch it manually."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.4.3",
     "slug": "v1-4-3",
     "title": "TSRP Update",
