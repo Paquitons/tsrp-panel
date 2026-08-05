@@ -264,7 +264,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
         <div className="form-row">
           <div>
             <label>Type</label>
-            <CustomSelect value={type} onChange={setType} options={[{ value: "generic", label: "Generic" }, { value: "casino", label: "Casino" }]} />
+            <CustomSelect value={type} onChange={setType} options={[{ value: "storefront", label: "Storefront" }, { value: "casino", label: "Casino" }]} />
           </div>
           <div>
             <label>Treasury</label>
@@ -651,6 +651,136 @@ export function LotteryPanel() {
           </div>
         </>
       )}
+    </>
+  );
+}
+
+// ==================================================================
+// Storefronts -- manage any player-owned storefront's items and prices.
+// ==================================================================
+export function StorefrontsPanel() {
+  const [storefronts, setStorefronts] = useState([]);
+  const [catalog, setCatalog] = useState({});
+  const [storefrontId, setStorefrontId] = useState("");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    apiFetch("/super-admin/storefronts").then(({ storefronts, catalog }) => {
+      setStorefronts(storefronts);
+      setCatalog(catalog);
+      if (storefronts.length > 0) setStorefrontId(String(storefronts[0].id));
+    }).catch(err => setError(err.message));
+  }, []);
+
+  const storefront = storefronts.find(s => String(s.id) === storefrontId);
+
+  return (
+    <>
+      <p className="muted card-subtitle">Stock items, set prices, and review sales for any player-owned storefront.</p>
+      {error && <div className="error-banner">{error}</div>}
+      {storefronts.length === 0 && !error && <p className="muted">No storefronts exist yet.</p>}
+
+      {storefronts.length > 0 && (
+        <>
+          <label>Storefront</label>
+          <CustomSelect
+            value={storefrontId}
+            onChange={setStorefrontId}
+            options={storefronts.map(s => ({ value: String(s.id), label: `${s.name} (owner: ${s.owner_username ?? s.owner_discord_id})` }))}
+          />
+        </>
+      )}
+
+      {storefront && <StorefrontListingsEditor key={storefront.id} storefront={storefront} catalog={catalog} />}
+    </>
+  );
+}
+
+function StorefrontListingsEditor({ storefront, catalog }) {
+  const [listings, setListings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [sales, setSales] = useState([]);
+  const [error, setError] = useState(null);
+
+  const [itemKey, setItemKey] = useState(Object.keys(catalog)[0] ?? "");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+
+  function loadAll() {
+    apiFetch(`/super-admin/storefronts/${storefront.id}/listings`).then(({ listings }) => setListings(listings));
+    apiFetch(`/super-admin/storefronts/${storefront.id}/sales`).then(({ stats, sales }) => { setStats(stats); setSales(sales); });
+  }
+  useEffect(loadAll, [storefront.id]);
+
+  async function addOrUpdateListing(e) {
+    e.preventDefault();
+    if (!itemKey || !price) return;
+    try {
+      const { listings } = await apiFetch(`/super-admin/storefronts/${storefront.id}/listings`, {
+        method: "POST",
+        body: { itemKey, price: Number(price), stock: stock === "" ? undefined : Number(stock) },
+      });
+      setListings(listings);
+      setPrice(""); setStock("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function removeListing(key) {
+    if (!confirm(`Stop selling ${catalog[key]?.label ?? key} here?`)) return;
+    await apiFetch(`/super-admin/storefronts/${storefront.id}/listings/${key}`, { method: "DELETE" });
+    setListings(listings.filter(l => l.item_key !== key));
+  }
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <h2 style={{ marginTop: 16 }}>Listings</h2>
+      <form onSubmit={addOrUpdateListing} className="form-row">
+        <div>
+          <label>Item</label>
+          <CustomSelect value={itemKey} onChange={setItemKey} options={Object.entries(catalog).map(([key, item]) => ({ value: key, label: item.label }))} />
+        </div>
+        <div><label>Price</label><input type="number" required min="1" value={price} onChange={e => setPrice(e.target.value)} /></div>
+        <div><label>Stock (blank = unlimited)</label><input type="number" min="0" value={stock} onChange={e => setStock(e.target.value)} /></div>
+        <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="secondary" type="submit">Save Listing</button></div>
+      </form>
+
+      <div className="loa-list">
+        {listings.map(l => (
+          <div className="loa-card loa-card-row" key={l.item_key}>
+            <span>{catalog[l.item_key]?.label ?? l.item_key}</span>
+            <span className="muted">{fmt(l.price)}{l.stock !== null ? ` -- ${l.stock} in stock` : " -- unlimited"}</span>
+            <button className="btn-red small" type="button" style={{ marginLeft: "auto" }} onClick={() => removeListing(l.item_key)}>Remove</button>
+          </div>
+        ))}
+        {listings.length === 0 && <p className="muted">Nothing for sale yet.</p>}
+      </div>
+
+      {stats && (
+        <>
+          <h2 style={{ marginTop: 20 }}>Sales</h2>
+          <div className="card-grid">
+            <div className="stat-tile"><div className="muted">Total Revenue</div><div className="verification-identity-name">{fmt(stats.revenue)}</div></div>
+            <div className="stat-tile"><div className="muted">Total Sales</div><div className="verification-identity-name">{stats.sales}</div></div>
+            <div className="stat-tile"><div className="muted">Unique Customers</div><div className="verification-identity-name">{stats.uniqueCustomers}</div></div>
+          </div>
+        </>
+      )}
+
+      <h2 style={{ marginTop: 20 }}>Recent Sales</h2>
+      <div className="loa-list">
+        {sales.map(s => (
+          <div className="loa-card loa-card-row" key={s.id}>
+            <NamedHolder discordId={s.discord_id} prefix="buyer" row={s} />
+            <span className="muted">{catalog[s.item_key]?.label ?? s.item_key} x{s.quantity}</span>
+            <span className="muted" style={{ marginLeft: "auto" }}>{fmt(s.total_price)}</span>
+          </div>
+        ))}
+        {sales.length === 0 && <p className="muted">No sales yet.</p>}
+      </div>
     </>
   );
 }
