@@ -44,6 +44,7 @@ export function EconomyOverviewPanel() {
         <div className="stat-tile"><div className="muted">In Savings</div><div className="verification-identity-name">{fmt(data.totalSavings)}</div></div>
         <div className="stat-tile"><div className="muted">In Business Treasuries</div><div className="verification-identity-name">{fmt(data.totalBusinessTreasury)} <span className="muted">({data.businessCount})</span></div></div>
         <div className="stat-tile"><div className="muted">Government Wallet</div><div className="verification-identity-name">{fmt(data.governmentBalance)}</div></div>
+        <div className="stat-tile"><div className="muted">Locked in Stock Market</div><div className="verification-identity-name">{fmt(data.stockMarketBalance)}</div></div>
       </div>
 
       <h2 style={{ marginTop: 20 }}>Top 10 Wallets</h2>

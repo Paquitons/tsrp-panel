@@ -62,8 +62,17 @@ export function discordAvatarUrl(discordId, avatarHash, size = 64) {
     const ext = avatarHash.startsWith("a_") ? "gif" : "png";
     return `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.${ext}?size=${cdnSize}`;
   }
-  // Discord's default avatar set (current formula: (id >> 22) % 6).
-  const index = discordId ? Number((BigInt(discordId) >> 22n) % 6n) : 0;
+  // Discord's default avatar set (current formula: (id >> 22) % 6). Wrapped
+  // because BigInt() throws on anything that isn't a clean integer string --
+  // a real Discord ID always is one, but a bad/synthetic ID (e.g. an
+  // internal system wallet ID leaking into a list of real users) should
+  // fall back to a placeholder avatar, not crash whatever rendered it.
+  let index = 0;
+  try {
+    index = discordId ? Number((BigInt(discordId) >> 22n) % 6n) : 0;
+  } catch {
+    index = 0;
+  }
   return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
 }
 
