@@ -7,11 +7,35 @@ import PublicNav from "../components/PublicNav";
 
 const STATUS_POLL_MS = 15_000;
 
-function StatusPill({ online }) {
+// ERLC's server API has no "is a live game session actually running"
+// field -- just config plus a player count (see api.erlc.gg/v2/server) --
+// so a reachable-but-empty private server and a truly offline one both
+// used to render as a flat "online"/"offline" boolean. That's how a 0/50
+// player count ended up sitting right under a green "Server Online" pill,
+// reading as a contradiction. Splitting into a third "empty" state (still
+// reachable, nobody in it right now) removes the mixed signal without
+// claiming information ERLC's API doesn't actually give us.
+function StatusPill({ online, players }) {
+  if (!online) {
+    return (
+      <span className="home-status-pill offline">
+        <span className="home-status-dot" />
+        Server Offline
+      </span>
+    );
+  }
+  if (players === 0) {
+    return (
+      <span className="home-status-pill empty">
+        <span className="home-status-dot" />
+        Server Online -- Empty
+      </span>
+    );
+  }
   return (
-    <span className={`home-status-pill ${online ? "online" : "offline"}`}>
+    <span className="home-status-pill online">
       <span className="home-status-dot" />
-      {online ? "Server Online" : "Server Offline"}
+      Server Online
     </span>
   );
 }
@@ -47,12 +71,12 @@ export default function Home() {
       <PublicNav />
 
       <section className="home-hero">
-        <StatusPill online={!!status?.online} />
+        <StatusPill online={!!status?.online} players={status?.players} />
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
-          A Roblox Emergency Response: Liberty County roleplay server. See who's
-          online right now, check the leaderboards, and catch up on the latest
-          updates.
+          The official website for Texas State Roleplay -- Liberty County's
+          premier ER:LC community. Track who's on duty, check the
+          leaderboards, and catch up on the latest server updates.
         </p>
       </section>
 
