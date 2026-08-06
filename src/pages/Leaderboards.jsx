@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PublicNav from "../components/PublicNav";
+import { usePublicBase } from "../hooks/usePublicBase";
 
 const CURRENCY = "$";
 
@@ -14,20 +16,24 @@ function pct(n) {
   return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 }
 
-function RankedRow({ rank, avatar, name, value, valueClass }) {
-  return (
-    <div className="board-row">
+function RankedRow({ rank, avatar, name, value, valueClass, to }) {
+  const content = (
+    <>
       <span className="board-rank">{rank}</span>
       {avatar}
       <span className="board-name">{name}</span>
       <span className={`board-value ${valueClass ?? ""}`}>{value}</span>
-    </div>
+    </>
   );
+  return to
+    ? <Link to={to} className="board-row board-row-link">{content}</Link>
+    : <div className="board-row">{content}</div>;
 }
 
 export default function Leaderboards() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const base = usePublicBase();
 
   useEffect(() => {
     apiFetch("/public/leaderboards", { auth: false }).then(setData).catch(err => setError(err.message));
@@ -75,7 +81,10 @@ export default function Leaderboards() {
           </section>
 
           <section className="board-card board-card-wide">
-            <h2>Stock Market</h2>
+            <div className="home-section-head">
+              <h2>Stock Market</h2>
+              <Link to={`${base}/stocks`} className="home-section-link">View all</Link>
+            </div>
             <p className="muted card-subtitle">
               {data.stocks.stockCount} stock{data.stocks.stockCount === 1 ? "" : "s"} listed &middot; {fmt(data.stocks.totalMarketCap)} total market cap
             </p>
@@ -91,6 +100,7 @@ export default function Leaderboards() {
                     name={s.name}
                     value={pct(s.dailyChangePercent)}
                     valueClass="positive"
+                    to={`${base}/stocks/${s.ticker}`}
                   />
                 ))}
               </div>
@@ -105,6 +115,7 @@ export default function Leaderboards() {
                     name={s.name}
                     value={pct(s.dailyChangePercent)}
                     valueClass="negative"
+                    to={`${base}/stocks/${s.ticker}`}
                   />
                 ))}
               </div>

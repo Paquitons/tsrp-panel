@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { usePublicBase } from "../hooks/usePublicBase";
 import { MenuIcon, CloseIcon } from "./icons";
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
@@ -20,7 +21,7 @@ const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/he
 export default function PublicNav() {
   const { user } = useAuth();
   const embedded = !!user;
-  const base = embedded ? "/site" : "";
+  const base = usePublicBase();
 
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,9 +31,10 @@ export default function PublicNav() {
   }, [location.pathname]);
 
   const links = [
+    { to: `${base}/economy`, label: "Economy" },
     { to: `${base}/leaderboards`, label: "Leaderboards" },
     { to: `${base}/roster`, label: "Staff Roster" },
-    { to: embedded ? "/changelog" : "/changelog", label: "Changelog" },
+    { to: "/changelog", label: "Changelog" },
   ];
 
   return (

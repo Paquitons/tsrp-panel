@@ -5,6 +5,10 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboards from "./pages/Leaderboards";
 import Roster from "./pages/Roster";
+import Economy from "./pages/Economy";
+import StockMarket from "./pages/StockMarket";
+import StockDetail from "./pages/StockDetail";
+import EconomyNews from "./pages/EconomyNews";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
@@ -13,6 +17,22 @@ import Changelog from "./pages/Changelog";
 import ChangelogEntry from "./pages/ChangelogEntry";
 import Verification from "./pages/Verification";
 import Strike3Prompt from "./components/Strike3Prompt";
+
+// Every page that exists both at its normal public URL AND, for a
+// logged-in staff member who followed "Back to Website," at the same
+// path under /site -- see the embeddedPublicSite branch below. Defined
+// once here instead of twice so the two never drift out of sync.
+const PUBLIC_PAGES = [
+  { path: "/", element: <Home /> },
+  { path: "/leaderboards", element: <Leaderboards /> },
+  { path: "/roster", element: <Roster /> },
+  { path: "/economy", element: <Economy /> },
+  { path: "/stocks", element: <StockMarket /> },
+  { path: "/stocks/:ticker", element: <StockDetail /> },
+  { path: "/economy/news", element: <EconomyNews /> },
+  { path: "/changelog", element: <Changelog standalone /> },
+  { path: "/changelog/:slug", element: <ChangelogEntry standalone /> },
+];
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -32,15 +52,13 @@ function AppShell() {
     return (
       <div className="public-shell">
         <Routes>
-          <Route path="/" element={<Home />} />
+          {PUBLIC_PAGES.map(({ path, element }) => (
+            <Route key={path} path={path} element={element} />
+          ))}
           <Route path="/login" element={<Login />} />
-          <Route path="/leaderboards" element={<Leaderboards />} />
-          <Route path="/roster" element={<Roster />} />
-          <Route path="/changelog" element={<Changelog standalone />} />
-          <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
-          <Route path="/site" element={<Home />} />
-          <Route path="/site/leaderboards" element={<Leaderboards />} />
-          <Route path="/site/roster" element={<Roster />} />
+          {PUBLIC_PAGES.map(({ path, element }) => (
+            <Route key={`site${path}`} path={path === "/" ? "/site" : `/site${path}`} element={element} />
+          ))}
           <Route path="*" element={user ? <Navigate to="/" replace /> : <Login />} />
         </Routes>
       </div>
