@@ -4,6 +4,7 @@ import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import DiscordAvatar from "../components/DiscordAvatar";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { changeClass } from "../utils";
 
 function fmt(n) {
   return `$${Number(n ?? 0).toLocaleString()}`;
@@ -15,10 +16,9 @@ function formatWhen(ts) {
 
 function NewsItem({ item, base }) {
   if (item.type === "stock") {
-    const positive = item.impactPercent === null || item.impactPercent === undefined ? null : item.impactPercent >= 0;
     return (
       <div className="news-row">
-        <span className={`news-dot ${positive === null ? "" : positive ? "positive" : "negative"}`} />
+        <span className={`news-dot ${changeClass(item.impactPercent)}`} />
         <div className="news-row-body">
           <p className="news-headline">
             {item.ticker && <Link to={`${base}/stocks/${item.ticker}`} className="news-ticker-tag">{item.ticker}</Link>}

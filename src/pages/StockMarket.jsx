@@ -3,11 +3,7 @@ import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import { usePublicBase } from "../hooks/usePublicBase";
-
-function pct(n) {
-  if (n === null || n === undefined) return "—";
-  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
-}
+import { pctChange, changeClass } from "../utils";
 
 export default function StockMarket() {
   const [stocks, setStocks] = useState(null);
@@ -41,8 +37,8 @@ export default function StockMarket() {
               <span className="roster-row-name">{s.name}</span>
               <span className="stock-row-category muted">{s.category}</span>
               <span className="stock-row-price">${s.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-              <span className={`board-value ${s.dailyChangePercent >= 0 ? "positive" : "negative"}`}>
-                {pct(s.dailyChangePercent)}
+              <span className={`board-value ${changeClass(s.dailyChangePercent)}`}>
+                {pctChange(s.dailyChangePercent)}
               </span>
             </Link>
           ))}

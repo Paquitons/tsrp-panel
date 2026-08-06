@@ -20,7 +20,10 @@ export default function Login() {
         </button>
       </div>
 
-      <Link to="/changelog" className="muted login-footer-link">View changelog</Link>
+      <div className="login-footer-links">
+        <Link to="/" className="muted login-footer-link">&larr; Back to Texas State RP</Link>
+        <Link to="/changelog" className="muted login-footer-link">View changelog</Link>
+      </div>
     </div>
   );
 }

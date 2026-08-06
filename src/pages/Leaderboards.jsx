@@ -4,16 +4,12 @@ import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PublicNav from "../components/PublicNav";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { pctChange } from "../utils";
 
 const CURRENCY = "$";
 
 function fmt(n) {
   return `${CURRENCY}${Number(n ?? 0).toLocaleString()}`;
-}
-
-function pct(n) {
-  if (n === null || n === undefined) return "—";
-  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 }
 
 function RankedRow({ rank, avatar, name, value, valueClass, to }) {
@@ -98,7 +94,7 @@ export default function Leaderboards() {
                     rank={s.ticker}
                     avatar={null}
                     name={s.name}
-                    value={pct(s.dailyChangePercent)}
+                    value={pctChange(s.dailyChangePercent)}
                     valueClass="positive"
                     to={`${base}/stocks/${s.ticker}`}
                   />
@@ -113,7 +109,7 @@ export default function Leaderboards() {
                     rank={s.ticker}
                     avatar={null}
                     name={s.name}
-                    value={pct(s.dailyChangePercent)}
+                    value={pctChange(s.dailyChangePercent)}
                     valueClass="negative"
                     to={`${base}/stocks/${s.ticker}`}
                   />

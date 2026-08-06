@@ -3,11 +3,7 @@ import { useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import PriceChart from "../components/PriceChart";
-
-function pct(n) {
-  if (n === null || n === undefined) return "—";
-  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
-}
+import { pctChange, changeClass } from "../utils";
 
 function fmt(n) {
   return `$${Number(n ?? 0).toLocaleString()}`;
@@ -48,8 +44,8 @@ export default function StockDetail() {
             </div>
             <div className="stock-detail-price">
               <span className="home-stat-value">${stock.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-              <span className={`board-value ${stock.performance.daily >= 0 ? "positive" : "negative"}`}>
-                {pct(stock.performance.daily)} today
+              <span className={`board-value ${changeClass(stock.performance.daily)}`}>
+                {pctChange(stock.performance.daily)} today
               </span>
             </div>
           </div>
@@ -61,15 +57,15 @@ export default function StockDetail() {
           <section className="econ-stats stock-perf-stats">
             <div className="home-stat-tile">
               <span className="home-stat-label">Daily</span>
-              <span className={`home-stat-value ${stock.performance.daily >= 0 ? "positive" : "negative"}`}>{pct(stock.performance.daily)}</span>
+              <span className={`home-stat-value ${changeClass(stock.performance.daily)}`}>{pctChange(stock.performance.daily)}</span>
             </div>
             <div className="home-stat-tile">
               <span className="home-stat-label">Weekly</span>
-              <span className={`home-stat-value ${stock.performance.weekly >= 0 ? "positive" : "negative"}`}>{pct(stock.performance.weekly)}</span>
+              <span className={`home-stat-value ${changeClass(stock.performance.weekly)}`}>{pctChange(stock.performance.weekly)}</span>
             </div>
             <div className="home-stat-tile">
               <span className="home-stat-label">Monthly</span>
-              <span className={`home-stat-value ${stock.performance.monthly >= 0 ? "positive" : "negative"}`}>{pct(stock.performance.monthly)}</span>
+              <span className={`home-stat-value ${changeClass(stock.performance.monthly)}`}>{pctChange(stock.performance.monthly)}</span>
             </div>
             <div className="home-stat-tile">
               <span className="home-stat-label">Market Cap</span>

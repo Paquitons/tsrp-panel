@@ -1,3 +1,21 @@
+/**
+ * Formats a percent change (or any signed delta) for display, and
+ * separately the CSS class that should color it. Kept as one function
+ * pair so "no data yet" (null/undefined) can never accidentally render as
+ * green -- `null >= 0` is true in JS, so any version of this that reused
+ * the >= 0 check directly against a possibly-null value colored a missing
+ * value as a gain.
+ */
+export function pctChange(n) {
+  if (n === null || n === undefined) return "—";
+  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
+}
+
+export function changeClass(n) {
+  if (n === null || n === undefined) return "";
+  return n >= 0 ? "positive" : "negative";
+}
+
 export function timeAgo(timestamp) {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
   if (seconds < 60) return "just now";
