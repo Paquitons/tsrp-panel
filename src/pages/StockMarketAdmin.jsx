@@ -4,11 +4,13 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import CustomSelect from "../components/CustomSelect";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import StockPriceChart from "../components/StockPriceChart";
+import { toDateTimeInputValue, parseDateTimeInput } from "../utils";
 
 const SUB_TABS = [
   { value: "overview", label: "Overview" },
   { value: "stocks", label: "Stocks" },
   { value: "controls", label: "Market Controls" },
+  { value: "events", label: "Market Events" },
   { value: "news", label: "News" },
   { value: "audit", label: "Audit Log" },
 ];
@@ -51,6 +53,7 @@ export default function StockMarketAdmin() {
       {subTab === "overview" && <OverviewTab />}
       {subTab === "stocks" && <StocksTab />}
       {subTab === "controls" && <MarketControlsTab />}
+      {subTab === "events" && <MarketEventsTab />}
       {subTab === "news" && <NewsTab />}
       {subTab === "audit" && <AuditLogTab />}
     </>
@@ -574,6 +577,280 @@ function MarketControlsTab() {
         </div>
       </div>
     </>
+  );
+}
+
+// ==================================================================
+// Market Events -- the configurable/approvable "living market" system.
+// Pending events need an explicit Approve before they touch a price;
+// approved-but-scheduled ones sit waiting for the backend's 30s poller;
+// applied ones can be reversed (restores the exact pre-event prices).
+// ==================================================================
+const EVENT_STATUS_FILTERS = [
+  { value: "", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Scheduled" },
+  { value: "applied", label: "Applied" },
+  { value: "rejected", label: "Rejected" },
+  { value: "reversed", label: "Reversed" },
+];
+
+const EVENT_TYPE_LABELS = { crash: "Crash", rally: "Rally", industry: "Industry", custom: "Custom" };
+
+function statusBadgeClass(status) {
+  if (status === "applied") return "loa-status-approved";
+  if (status === "pending") return "loa-status-pending";
+  if (status === "approved") return "loa-status-pending";
+  if (status === "rejected" || status === "reversed") return "loa-status-denied";
+  return "muted";
+}
+
+function targetSummary(event) {
+  if (event.targetTickers?.length) return event.targetTickers.join(", ");
+  if (event.category) return `${event.category} sector`;
+  return "Market-wide";
+}
+
+function MarketEventsTab() {
+  const [events, setEvents] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+
+  function load() {
+    const qs = statusFilter ? `?status=${statusFilter}` : "";
+    apiFetch(`/super-admin/market-events${qs}`).then(({ events }) => setEvents(events)).catch(err => setError(err.message));
+  }
+  useEffect(load, [statusFilter]);
+
+  function flash(msg) {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  }
+
+  async function act(id, action, body, successMsg) {
+    setError(null);
+    try {
+      await apiFetch(`/super-admin/market-events/${id}/${action}`, { method: "POST", body });
+      flash(successMsg);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <>
+      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {notice && <div className="success-banner">{notice}</div>}
+
+      <p className="muted card-subtitle" style={{ marginTop: 16 }}>
+        Draft a market event, adjust it, then approve it to apply immediately -- or schedule it for later and let it apply on its own.
+      </p>
+
+      <div className="button-row" style={{ marginTop: 8 }}>
+        <button className="primary" type="button" onClick={() => setShowCreate(true)}>New Market Event</button>
+      </div>
+
+      <div className="tabs" role="tablist" style={{ marginTop: 16 }}>
+        {EVENT_STATUS_FILTERS.map(f => (
+          <button key={f.value} type="button" className={`tab ${statusFilter === f.value ? "active" : ""}`} onClick={() => setStatusFilter(f.value)}>{f.label}</button>
+        ))}
+      </div>
+
+      <div className="loa-list" style={{ marginTop: 12 }}>
+        {events.map(ev => (
+          <MarketEventCard key={ev.id} event={ev} onAct={act} />
+        ))}
+        {events.length === 0 && <p className="muted">No events found.</p>}
+      </div>
+
+      {showCreate && (
+        <CreateMarketEventModal onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); load(); }} />
+      )}
+    </>
+  );
+}
+
+function MarketEventCard({ event, onAct }) {
+  const [editing, setEditing] = useState(false);
+
+  return (
+    <div className="loa-card">
+      <div className="loa-card-top loa-card-top-stack">
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <span className="badge loa-status-pending">{EVENT_TYPE_LABELS[event.type] ?? event.type}</span>
+          <span className={`badge ${statusBadgeClass(event.status)}`}>{event.status}</span>
+          <span className={pctClass(event.percent)}>{pct(event.percent)}</span>
+        </div>
+        <span className="muted">{new Date(event.createdAt).toLocaleString()}</span>
+      </div>
+
+      <div className="verification-identity-name" style={{ marginTop: 4 }}>{event.headline}</div>
+      {event.body && <div className="log-card-field muted">{event.body}</div>}
+      <div className="log-card-field"><span className="muted">Target:</span> {targetSummary(event)}</div>
+      <div className="log-card-field"><NamedHolder discordId={event.createdBy} prefix="creator" row={event} /></div>
+      {event.scheduledFor && event.status === "approved" && (
+        <div className="log-card-field"><span className="muted">Scheduled for:</span> {new Date(event.scheduledFor).toLocaleString()}</div>
+      )}
+      {event.appliedAt && <div className="log-card-field"><span className="muted">Applied:</span> {new Date(event.appliedAt).toLocaleString()}</div>}
+      {event.reason && <div className="log-card-field"><span className="muted">Reason:</span> {event.reason}</div>}
+
+      {editing && event.status === "pending" && (
+        <EditMarketEventForm event={event} onSaved={() => setEditing(false)} onCancel={() => setEditing(false)} />
+      )}
+
+      <div className="button-row" style={{ marginTop: 8 }}>
+        {event.status === "pending" && !editing && (
+          <>
+            <button className="primary" type="button" onClick={() => onAct(event.id, "approve", {}, "Event approved.")}>Approve</button>
+            <button className="secondary" type="button" onClick={() => setEditing(true)}>Edit</button>
+            <button className="btn-red" type="button" onClick={() => confirm("Reject this event?") && onAct(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event rejected.")}>Reject</button>
+          </>
+        )}
+        {event.status === "approved" && (
+          <button className="btn-red" type="button" onClick={() => confirm("Cancel this scheduled event before it applies?") && onAct(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event cancelled.")}>
+            Cancel
+          </button>
+        )}
+        {event.status === "applied" && (
+          <button className="btn-red" type="button" onClick={() => confirm(`Reverse "${event.headline}"? This restores every affected stock to its price right before this event.`) && onAct(event.id, "reverse", { reason: prompt("Reason (optional):") ?? undefined }, "Event reversed.")}>
+            Reverse
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EditMarketEventForm({ event, onSaved, onCancel }) {
+  const [headline, setHeadline] = useState(event.headline);
+  const [body, setBody] = useState(event.body ?? "");
+  const [percent, setPercent] = useState(event.percent);
+  const [category, setCategory] = useState(event.category ?? "");
+  const [tickers, setTickers] = useState(event.targetTickers?.join(", ") ?? "");
+  const [scheduledFor, setScheduledFor] = useState(event.scheduledFor ? toDateTimeInputValue(event.scheduledFor) : "");
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    try {
+      await apiFetch(`/super-admin/market-events/${event.id}`, {
+        method: "PATCH",
+        body: {
+          headline, body: body || undefined, percent: Number(percent),
+          category: category.trim() || null,
+          targetTickers: tickers.trim() ? tickers.split(",").map(t => t.trim()).filter(Boolean) : null,
+          scheduledFor: scheduledFor ? parseDateTimeInput(scheduledFor) : null,
+        },
+      });
+      onSaved();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border-subtle)" }}>
+      {error && <div className="error-banner">{error}</div>}
+      <label>Headline</label>
+      <input value={headline} onChange={e => setHeadline(e.target.value)} />
+      <label>Body (optional)</label>
+      <AutoGrowTextarea value={body} onChange={e => setBody(e.target.value)} />
+      <div className="form-row">
+        <div><label>Percent (+/-)</label><input type="number" value={percent} onChange={e => setPercent(e.target.value)} /></div>
+        <div><label>Category (blank = market-wide)</label><input value={category} onChange={e => { setCategory(e.target.value); setTickers(""); }} placeholder="e.g. Tech" /></div>
+      </div>
+      <label>Specific Tickers (comma-separated, overrides category)</label>
+      <input value={tickers} onChange={e => { setTickers(e.target.value); setCategory(""); }} placeholder="e.g. TSRP, PAW" />
+      <label>Scheduled For (blank = apply immediately once approved)</label>
+      <input type="datetime-local" value={scheduledFor} onChange={e => setScheduledFor(e.target.value)} />
+      <div className="button-row" style={{ marginTop: 8 }}>
+        <button className="primary" type="button" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save Changes"}</button>
+        <button className="secondary" type="button" onClick={onCancel}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function CreateMarketEventModal({ onClose, onCreated }) {
+  const [type, setType] = useState("custom");
+  const [headline, setHeadline] = useState("");
+  const [body, setBody] = useState("");
+  const [percent, setPercent] = useState("");
+  const [category, setCategory] = useState("");
+  const [tickers, setTickers] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [requireApproval, setRequireApproval] = useState(true);
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await apiFetch("/super-admin/market-events", {
+        method: "POST",
+        body: {
+          type, headline, body: body || undefined, percent: Number(percent),
+          category: category.trim() || undefined,
+          targetTickers: tickers.trim() ? tickers.split(",").map(t => t.trim()).filter(Boolean) : undefined,
+          scheduledFor: scheduledFor ? parseDateTimeInput(scheduledFor) : undefined,
+          autoApprove: !requireApproval,
+          reason: reason || undefined,
+        },
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <h2>New Market Event</h2>
+        {error && <div className="error-banner">{error}</div>}
+        <form onSubmit={submit}>
+          <label>Type</label>
+          <CustomSelect
+            value={type}
+            onChange={setType}
+            options={Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+          />
+          <label>Headline</label>
+          <input required value={headline} onChange={e => setHeadline(e.target.value)} placeholder='e.g. "Technology sector drops after major service outage"' />
+          <label>Body / Details (optional)</label>
+          <AutoGrowTextarea value={body} onChange={e => setBody(e.target.value)} />
+          <div className="form-row">
+            <div><label>Percent (+/-)</label><input required type="number" value={percent} onChange={e => setPercent(e.target.value)} placeholder="e.g. -8 or 12" /></div>
+            <div><label>Category (blank = market-wide)</label><input value={category} onChange={e => { setCategory(e.target.value); setTickers(""); }} placeholder="e.g. Tech" /></div>
+          </div>
+          <label>Specific Tickers (comma-separated, overrides category)</label>
+          <input value={tickers} onChange={e => { setTickers(e.target.value); setCategory(""); }} placeholder="e.g. TSRP, PAW" />
+          <label>Schedule For (blank = apply as soon as approved)</label>
+          <input type="datetime-local" value={scheduledFor} onChange={e => setScheduledFor(e.target.value)} />
+          <label>Internal Reason / Notes (optional)</label>
+          <input value={reason} onChange={e => setReason(e.target.value)} />
+          <label style={{ marginTop: 8, display: "block" }}>
+            <input type="checkbox" checked={requireApproval} onChange={e => setRequireApproval(e.target.checked)} /> Require a separate approval before this can apply
+          </label>
+          <div className="button-row" style={{ marginTop: 16 }}>
+            <button className="primary" type="submit" disabled={saving}>{saving ? "Creating…" : requireApproval ? "Create (Pending Approval)" : "Create & Approve"}</button>
+            <button className="secondary" type="button" onClick={onClose}>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
