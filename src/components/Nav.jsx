@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DiscordAvatar from "./DiscordAvatar";
-import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon } from "./icons";
+import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon } from "./icons";
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 
@@ -73,6 +73,11 @@ export default function Nav() {
             </NavLink>
           ))}
         </nav>
+
+        <NavLink to="/site" className="sidebar-exit-link">
+          <DoorExitIcon className="sidebar-link-icon" />
+          <span>Back to Website</span>
+        </NavLink>
 
         <div className="sidebar-profile">
           <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatarHash} size={36} className="sidebar-profile-avatar" />

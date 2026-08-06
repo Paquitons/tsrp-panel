@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { CHANGELOGS } from "../data/changelogs";
 import { colorForIndex } from "../data/changelogColors";
+import PublicNav from "../components/PublicNav";
 
 export default function Changelog({ standalone = false }) {
   return (
-    <div className={`content changelog-page ${standalone ? "standalone-content" : ""}`}>
+    <div className={standalone ? "home-page" : "content changelog-page"}>
+      {standalone && <PublicNav />}
       <div className="page-header">
         <h1>Changelog</h1>
         <p className="muted">Everything shipped on TSRP, most recent first.</p>

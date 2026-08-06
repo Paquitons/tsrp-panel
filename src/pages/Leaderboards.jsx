@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
+import PublicNav from "../components/PublicNav";
 
 const CURRENCY = "$";
 
@@ -35,8 +35,8 @@ export default function Leaderboards() {
 
   return (
     <div className="home-page">
+      <PublicNav />
       <div className="board-header">
-        <Link to="/" className="board-back">&larr; Texas State RP</Link>
         <h1>Leaderboards</h1>
         <p className="muted">Where the money in TSRP actually is right now.</p>
       </div>

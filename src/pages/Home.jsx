@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import { CHANGELOGS } from "../data/changelogs";
 import { colorForIndex } from "../data/changelogColors";
-import { MenuIcon, CloseIcon } from "../components/icons";
+import PublicNav from "../components/PublicNav";
 
-const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 const STATUS_POLL_MS = 15_000;
 
 function StatusPill({ online }) {
@@ -17,16 +16,8 @@ function StatusPill({ online }) {
   );
 }
 
-const NAV_LINKS = [
-  { to: "#status", label: "Status", anchor: true },
-  { to: "/leaderboards", label: "Leaderboards" },
-  { to: "/roster", label: "Staff Roster" },
-  { to: "/changelog", label: "Changelog" },
-];
-
 export default function Home() {
   const [status, setStatus] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,41 +44,7 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      <header className="home-topbar">
-        <div className="home-brand">
-          <img src={LOGO_URL} alt="" className="home-brand-mark" />
-          <span>Texas State RP</span>
-        </div>
-
-        <nav className="home-topbar-nav">
-          {NAV_LINKS.map(({ to, label, anchor }) =>
-            anchor
-              ? <a key={to} href={to}>{label}</a>
-              : <Link key={to} to={to}>{label}</Link>
-          )}
-          <Link to="/login" className="home-staff-btn">Staff Panel</Link>
-        </nav>
-
-        <button
-          className="home-menu-btn"
-          onClick={() => setMenuOpen(o => !o)}
-          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? <CloseIcon /> : <MenuIcon />}
-        </button>
-      </header>
-
-      {menuOpen && (
-        <nav className="home-mobile-menu">
-          {NAV_LINKS.map(({ to, label, anchor }) =>
-            anchor
-              ? <a key={to} href={to} onClick={() => setMenuOpen(false)}>{label}</a>
-              : <Link key={to} to={to} onClick={() => setMenuOpen(false)}>{label}</Link>
-          )}
-          <Link to="/login" className="home-staff-btn" onClick={() => setMenuOpen(false)}>Staff Panel</Link>
-        </nav>
-      )}
+      <PublicNav />
 
       <section className="home-hero">
         <StatusPill online={!!status?.online} />
@@ -99,7 +56,7 @@ export default function Home() {
         </p>
       </section>
 
-      <section id="status" className="home-stats">
+      <section className="home-stats">
         <div className="home-stat-tile">
           <span className="home-stat-label">Players</span>
           <span className="home-stat-value">
@@ -138,7 +95,7 @@ export default function Home() {
 
       <footer className="home-footer">
         <span>Texas State RP</span>
-        <Link to="/login" className="muted">Staff Panel</Link>
+        <Link to="/changelog" className="muted">Changelog</Link>
       </footer>
     </div>
   );

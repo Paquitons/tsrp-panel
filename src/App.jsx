@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
@@ -16,12 +16,19 @@ import Strike3Prompt from "./components/Strike3Prompt";
 
 function AppShell() {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <div className="login-screen">Loading...</div>;
   }
 
-  if (!user) {
+  // A logged-in staff member can still browse the public site (see the
+  // "Back to Website" sidebar link in Nav.jsx) without logging out --
+  // those live at /site/* so they don't collide with the authenticated
+  // routes below ("/" is Dashboard once logged in, for instance).
+  const embeddedPublicSite = !!user && location.pathname.startsWith("/site");
+
+  if (!user || embeddedPublicSite) {
     return (
       <div className="public-shell">
         <Routes>
@@ -31,7 +38,10 @@ function AppShell() {
           <Route path="/roster" element={<Roster />} />
           <Route path="/changelog" element={<Changelog standalone />} />
           <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
-          <Route path="*" element={<Login />} />
+          <Route path="/site" element={<Home />} />
+          <Route path="/site/leaderboards" element={<Leaderboards />} />
+          <Route path="/site/roster" element={<Roster />} />
+          <Route path="*" element={user ? <Navigate to="/" replace /> : <Login />} />
         </Routes>
       </div>
     );

@@ -1,16 +1,18 @@
 import { Link, useParams } from "react-router-dom";
 import { CHANGELOGS } from "../data/changelogs";
 import { colorForIndex } from "../data/changelogColors";
+import PublicNav from "../components/PublicNav";
 
 export default function ChangelogEntry({ standalone = false }) {
   const { slug } = useParams();
   const index = CHANGELOGS.findIndex(e => e.slug === slug);
   const entry = CHANGELOGS[index];
-  const wrapClass = `content changelog-page changelog-entry-page ${standalone ? "standalone-content" : ""}`;
+  const wrapClass = standalone ? "home-page" : "content changelog-entry-page";
 
   if (!entry) {
     return (
       <div className={wrapClass}>
+        {standalone && <PublicNav />}
         <p>That changelog entry doesn't exist.</p>
         <Link to="/changelog">&larr; Back to changelog</Link>
       </div>
@@ -19,6 +21,7 @@ export default function ChangelogEntry({ standalone = false }) {
 
   return (
     <div className={wrapClass}>
+      {standalone && <PublicNav />}
       <Link to="/changelog" className="muted changelog-back-link">&larr; All changelog posts</Link>
 
       <div className="changelog-entry-banner" style={{ background: colorForIndex(index) }}>

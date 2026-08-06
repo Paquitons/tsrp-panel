@@ -289,6 +289,27 @@ html, body, #root {
   color: var(--btn-blue-1);
 }
 
+.sidebar-exit-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 var(--space-3) var(--space-2);
+  padding: 10px var(--space-3);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--text-base);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+  margin-top: var(--space-2);
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+.sidebar-exit-link:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
 .sidebar-profile {
   display: flex;
   align-items: center;
@@ -951,13 +972,6 @@ tbody tr:hover { background: var(--surface-hover); }
   font-size: var(--text-sm);
 }
 
-.standalone-content {
-  max-width: 980px;
-  margin: 0 auto;
-  padding-top: var(--space-8);
-  height: auto;
-  overflow-y: visible;
-}
 
 .changelog-grid {
   display: grid;
@@ -2483,31 +2497,142 @@ code {
 .board-substack-head.positive { color: var(--success); }
 .board-substack-head.negative { color: var(--danger); }
 
-.roster-group {
+/* ---------- Roster toolbar: search + department jump nav ---------- */
+.roster-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
   margin-bottom: var(--space-8);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.roster-group h2 {
-  font-size: var(--text-md);
+
+.roster-search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  height: var(--control-h-md);
+  padding: 0 var(--space-4);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+}
+.roster-search::placeholder { color: var(--text-faint); }
+.roster-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.roster-jumpnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.roster-jumpnav a {
+  font-size: var(--text-sm);
+  font-weight: 550;
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+.roster-jumpnav a:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  background: var(--surface-hover);
+}
+
+/* ---------- Departments ---------- */
+.roster-tier {
+  margin-bottom: var(--space-10);
+  scroll-margin-top: var(--space-6);
+}
+
+.roster-tier-head {
+  font-size: var(--text-sm);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--text-faint);
   margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.roster-grid {
+/* Leadership: few people, high visual weight */
+.roster-leadership-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-4);
 }
 
-.roster-card {
+.roster-leader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-3);
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.roster-leader-name {
+  font-size: var(--text-md);
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.roster-leader-rank {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Everyone else: compact, scannable rows -- a grid of boxes doesn't scale
+   past a handful of people, a list does. */
+.roster-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.roster-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-4);
   background: var(--card-bg);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+}
+.roster-row:not(:first-child) {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.roster-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--text-base);
   color: var(--text-primary);
+}
+
+.roster-row-rank {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .roster-row-rank { display: none; }
 }
