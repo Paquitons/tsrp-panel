@@ -2086,3 +2086,235 @@ code {
 
 /* ---------- Activity dot (replaces icon-bubble glyphs) ---------- */
 /* (defined above, kept as one rule -- duplicate section header removed) */
+
+/* ============================================================
+   PUBLIC HOMEPAGE (tsrp.online) -- the only page an unauthenticated
+   visitor lands on. Built from the same token scale as the rest of the
+   app (no new colors introduced) so it reads as one site, not a bolted-on
+   marketing page.
+   ============================================================ */
+.home-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-10);
+}
+
+.home-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 650;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+}
+
+.home-brand-mark {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.home-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: 550;
+}
+
+.home-topbar-nav a { color: var(--text-secondary); }
+.home-topbar-nav a:hover { color: var(--text-primary); }
+
+.home-staff-btn {
+  color: var(--text-primary) !important;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  transition: border-color var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease);
+}
+.home-staff-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.home-hero {
+  text-align: center;
+  padding: var(--space-8) 0 var(--space-6);
+  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
+}
+
+.home-hero h1 {
+  font-size: clamp(32px, 5vw, 44px);
+  margin: var(--space-4) 0 var(--space-3);
+}
+
+.home-hero-sub {
+  max-width: 52ch;
+  margin: 0 auto;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+}
+
+.home-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+.home-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.home-status-pill.online {
+  color: var(--success);
+  border-color: rgba(46, 230, 160, 0.28);
+  background: rgba(46, 230, 160, 0.08);
+}
+.home-status-pill.online .home-status-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(46, 230, 160, 0.18);
+  animation: pulse 2s var(--ease) infinite;
+}
+
+.home-status-pill.offline {
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.28);
+  background: rgba(255, 107, 107, 0.08);
+}
+.home-status-pill.offline .home-status-dot {
+  background: var(--danger);
+}
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin: 0 0 var(--space-10);
+}
+
+.home-stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: center;
+  text-align: center;
+  padding: var(--space-5) var(--space-4);
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-stat-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.home-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+@media (max-width: 620px) {
+  .home-stats { grid-template-columns: 1fr; }
+  .home-topbar-nav { gap: var(--space-4); }
+}
+
+.home-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.home-section-head h2 {
+  font-size: var(--text-xl);
+  margin: 0;
+}
+
+.home-section-link {
+  font-size: var(--text-sm);
+  font-weight: 550;
+}
+
+.home-updates-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+@media (max-width: 780px) {
+  .home-updates-grid { grid-template-columns: 1fr; }
+}
+
+.home-update-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--duration-base) var(--ease), transform var(--duration-base) var(--ease);
+}
+.home-update-card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-2px);
+}
+
+.home-update-thumb {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-update-thumb span {
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.home-update-body { padding: var(--space-4); }
+.home-update-body h3 { margin: 0 0 var(--space-1); font-size: var(--text-md); }
+.home-update-body p { margin: 0; font-size: var(--text-sm); }
+
+.home-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-10);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}

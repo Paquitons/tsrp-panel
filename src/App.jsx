@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
@@ -21,6 +22,8 @@ function AppShell() {
   if (!user) {
     return (
       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/changelog" element={<Changelog standalone />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
         <Route path="*" element={<Login />} />
