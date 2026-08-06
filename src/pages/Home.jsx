@@ -93,9 +93,9 @@ export default function Home() {
         <StatusPill online={!!status?.online} />
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
-          A Roblox Emergency Response: Liberty County community &mdash; live server
-          status, the latest updates, and everything else you need to know,
-          all in one place.
+          A Roblox Emergency Response: Liberty County roleplay server. See who's
+          online right now, check the leaderboards, and catch up on the latest
+          updates.
         </p>
       </section>
 
