@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Leaderboards from "./pages/Leaderboards";
+import Roster from "./pages/Roster";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
@@ -21,13 +23,17 @@ function AppShell() {
 
   if (!user) {
     return (
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/changelog" element={<Changelog standalone />} />
-        <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
-        <Route path="*" element={<Login />} />
-      </Routes>
+      <div className="public-shell">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/leaderboards" element={<Leaderboards />} />
+          <Route path="/roster" element={<Roster />} />
+          <Route path="/changelog" element={<Changelog standalone />} />
+          <Route path="/changelog/:slug" element={<ChangelogEntry standalone />} />
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </div>
     );
   }
 

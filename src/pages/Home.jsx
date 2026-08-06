@@ -19,6 +19,8 @@ function StatusPill({ online }) {
 
 const NAV_LINKS = [
   { to: "#status", label: "Status", anchor: true },
+  { to: "/leaderboards", label: "Leaderboards" },
+  { to: "/roster", label: "Staff Roster" },
   { to: "/changelog", label: "Changelog" },
 ];
 

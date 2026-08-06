@@ -144,6 +144,19 @@ html, body, #root {
   height: 100dvh;
 }
 
+/* Scrolling container for every unauthenticated public page (Home,
+   Leaderboards, Roster, Changelog). Without this, the page itself grows
+   past one viewport and body's own box (height:100% per the html/body/#root
+   rule above) stops covering it -- background-attachment:fixed then only
+   paints the first screenful, and anything scrolled past that shows through
+   to a blank white default background. Mirrors how .content scrolls inside
+   the authenticated .layout for the same reason. */
+.public-shell {
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+}
+
 /* ---------- Sidebar ---------- */
 
 .mobile-topbar {
@@ -2370,4 +2383,131 @@ code {
   border-top: 1px solid var(--border-subtle);
   font-size: var(--text-sm);
   color: var(--text-faint);
+}
+
+/* ============================================================
+   PUBLIC LEADERBOARDS + ROSTER
+   ============================================================ */
+.board-header {
+  margin-bottom: var(--space-8);
+}
+
+.board-back {
+  display: inline-block;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  margin-bottom: var(--space-4);
+}
+.board-back:hover { color: var(--text-secondary); }
+
+.board-header h1 { margin: 0 0 var(--space-1); }
+
+.board-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.board-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+.board-card h2 {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-4);
+}
+
+.board-card-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .board-grid { grid-template-columns: 1fr; }
+}
+
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+.board-row:first-child { border-top: none; padding-top: 0; }
+
+.board-rank {
+  min-width: 22px;
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.board-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.board-value {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.board-value.positive { color: var(--success); }
+.board-value.negative { color: var(--danger); }
+
+.board-stocks-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+@media (max-width: 560px) {
+  .board-stocks-split { grid-template-columns: 1fr; }
+}
+
+.board-substack-head {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-2);
+}
+.board-substack-head.positive { color: var(--success); }
+.board-substack-head.negative { color: var(--danger); }
+
+.roster-group {
+  margin-bottom: var(--space-8);
+}
+.roster-group h2 {
+  font-size: var(--text-md);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  margin: 0 0 var(--space-4);
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.roster-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  color: var(--text-primary);
 }
