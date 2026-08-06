@@ -2294,18 +2294,6 @@ code {
   background: var(--danger);
 }
 
-/* Reachable, just nobody in it right now -- neither a problem (offline)
-   nor "come join, it's active" (online), so it gets its own neutral color
-   rather than borrowing red or green. */
-.home-status-pill.empty {
-  color: var(--warning);
-  border-color: rgba(255, 182, 72, 0.28);
-  background: rgba(255, 182, 72, 0.08);
-}
-.home-status-pill.empty .home-status-dot {
-  background: var(--warning);
-}
-
 .home-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

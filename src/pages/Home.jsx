@@ -7,35 +7,17 @@ import PublicNav from "../components/PublicNav";
 
 const STATUS_POLL_MS = 15_000;
 
-// ERLC's server API has no "is a live game session actually running"
-// field -- just config plus a player count (see api.erlc.gg/v2/server) --
-// so a reachable-but-empty private server and a truly offline one both
-// used to render as a flat "online"/"offline" boolean. That's how a 0/50
-// player count ended up sitting right under a green "Server Online" pill,
-// reading as a contradiction. Splitting into a third "empty" state (still
-// reachable, nobody in it right now) removes the mixed signal without
-// claiming information ERLC's API doesn't actually give us.
-function StatusPill({ online, players }) {
-  if (!online) {
-    return (
-      <span className="home-status-pill offline">
-        <span className="home-status-dot" />
-        Server Offline
-      </span>
-    );
-  }
-  if (players === 0) {
-    return (
-      <span className="home-status-pill empty">
-        <span className="home-status-dot" />
-        Server Online -- Empty
-      </span>
-    );
-  }
+// `online` here is the staff-declared "is a session actually open" flag
+// (set by /startup and /shutdown -- see highrock-bot's serverState.js and
+// tsrp-panel-api's erlcCache.getSessionState), not something inferred
+// from ERLC's server API or the current player count. A session can be
+// open with nobody in it yet and this correctly still says Online; it's
+// only Offline once staff actually run /shutdown.
+function StatusPill({ online }) {
   return (
-    <span className="home-status-pill online">
+    <span className={`home-status-pill ${online ? "online" : "offline"}`}>
       <span className="home-status-dot" />
-      Server Online
+      {online ? "Server Online" : "Server Offline"}
     </span>
   );
 }
@@ -71,7 +53,7 @@ export default function Home() {
       <PublicNav />
 
       <section className="home-hero">
-        <StatusPill online={!!status?.online} players={status?.players} />
+        <StatusPill online={!!status?.online} />
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
           The official website for Texas State Roleplay -- Liberty County's
