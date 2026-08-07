@@ -19,6 +19,7 @@ const SUB_TABS = [
   { value: "controls", label: "Market Controls" },
   { value: "events", label: "Market Events" },
   { value: "news", label: "News" },
+  { value: "insights", label: "Market Insights" },
   { value: "audit", label: "Audit Log" },
 ];
 
@@ -62,6 +63,7 @@ export default function StockMarketAdmin() {
       {subTab === "controls" && <MarketControlsTab />}
       {subTab === "events" && <MarketEventsTab />}
       {subTab === "news" && <NewsTab />}
+      {subTab === "insights" && <InsightsTab />}
       {subTab === "audit" && <AuditLogTab />}
     </>
   );
@@ -957,6 +959,162 @@ function NewsTab() {
 // ==================================================================
 // Audit Log
 // ==================================================================
+// Private to the one Super Admin -- see marketInsightsShared.js on the
+// API. Nothing here ever reaches the public site or Discord except the
+// DM itself, so this tab is the only place any of it is visible at all.
+function InsightsTab() {
+  const [config, setConfig] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [log, setLog] = useState([]);
+  const [ticker, setTicker] = useState("");
+  const [targetPrice, setTargetPrice] = useState("");
+  const [direction, setDirection] = useState("above");
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+
+  function load() {
+    apiFetch("/super-admin/economy-config").then(c => setConfig(c.marketInsights)).catch(err => setError(err.message));
+    apiFetch("/super-admin/market-insights/price-alerts").then(({ alerts }) => setAlerts(alerts)).catch(err => setError(err.message));
+    apiFetch("/super-admin/market-insights/log").then(({ log }) => setLog(log)).catch(err => setError(err.message));
+  }
+  // Safe to poll even with `config` being edited below -- it's only ever
+  // written back explicitly via Save, same useState-from-fetch pattern as
+  // every other admin form on this page.
+  usePolling(load, ADMIN_POLL_MS);
+
+  function flash(msg) {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  }
+
+  async function saveConfig() {
+    setSaving(true);
+    setError(null);
+    try {
+      const { marketInsights } = await apiFetch("/super-admin/economy-config", { method: "PATCH", body: { marketInsights: config } });
+      setConfig(marketInsights);
+      flash("Saved.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function sendNow() {
+    setSending(true);
+    setError(null);
+    try {
+      const { delivered } = await apiFetch("/super-admin/market-insights/send-now", { method: "POST" });
+      flash(delivered ? "Sent." : "Generated, but the DM didn't deliver (DMs may be closed).");
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function addAlert(e) {
+    e.preventDefault();
+    if (!ticker.trim() || !targetPrice) return;
+    setError(null);
+    try {
+      await apiFetch("/super-admin/market-insights/price-alerts", {
+        method: "POST",
+        body: { ticker: ticker.toUpperCase(), targetPrice: Number(targetPrice), direction, note: note || undefined },
+      });
+      setTicker(""); setTargetPrice(""); setNote("");
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function removeAlert(id) {
+    if (!confirm("Delete this price alert?")) return;
+    await apiFetch(`/super-admin/market-insights/price-alerts/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  if (!config) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+
+  return (
+    <>
+      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {notice && <div className="success-banner">{notice}</div>}
+
+      <p className="muted card-subtitle" style={{ marginTop: 16 }}>
+        A private DM digest -- trending stocks, buy/sell reads, risk, unusual activity, upcoming events, your
+        portfolio, and a market health score. Sent only to you, on the schedule below.
+      </p>
+
+      <label className="checkbox-label">
+        <input type="checkbox" checked={config.enabled} onChange={e => setConfig({ ...config, enabled: e.target.checked })} />
+        Enabled
+      </label>
+      <label style={{ marginTop: 12 }}>Send Interval (minutes)</label>
+      <input type="number" min="5" value={config.intervalMinutes} onChange={e => setConfig({ ...config, intervalMinutes: Number(e.target.value) })} />
+
+      <div className="button-row" style={{ marginTop: 16 }}>
+        <button className="primary" type="button" disabled={saving} onClick={saveConfig}>{saving ? "Saving…" : "Save Changes"}</button>
+        <button className="secondary" type="button" disabled={sending} onClick={sendNow}>{sending ? "Sending…" : "Send Now"}</button>
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Price Target Alerts</h2>
+      <p className="muted card-subtitle">Get flagged in the next digest the moment a ticker crosses a price you're watching.</p>
+      <form onSubmit={addAlert} className="button-row" style={{ flexWrap: "wrap", alignItems: "flex-end" }}>
+        <div>
+          <label>Ticker</label>
+          <input required value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} placeholder="e.g. TSRP" style={{ width: 100 }} />
+        </div>
+        <div>
+          <label>Direction</label>
+          <CustomSelect value={direction} onChange={setDirection} options={[{ value: "above", label: "Rises above" }, { value: "below", label: "Falls below" }]} />
+        </div>
+        <div>
+          <label>Target Price</label>
+          <input required type="number" step="0.01" min="0.01" value={targetPrice} onChange={e => setTargetPrice(e.target.value)} style={{ width: 120 }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <label>Note (optional)</label>
+          <input value={note} onChange={e => setNote(e.target.value)} />
+        </div>
+        <button className="primary" type="submit">Add</button>
+      </form>
+
+      <div className="loa-list" style={{ marginTop: 12 }}>
+        {alerts.map(a => (
+          <div className="loa-card loa-card-row" key={a.id}>
+            <span>
+              <strong>{a.ticker}</strong> {a.direction === "above" ? "rises above" : "falls below"} {money(a.target_price)}
+              {a.note && <span className="muted"> -- {a.note}</span>}
+            </span>
+            {a.triggered_at
+              ? <span className="badge loa-status-approved">Triggered {new Date(a.triggered_at).toLocaleDateString()}</span>
+              : <button className="danger" type="button" onClick={() => removeAlert(a.id)}>Delete</button>}
+          </div>
+        ))}
+        {alerts.length === 0 && <p className="muted">No price alerts set.</p>}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Recent Sends</h2>
+      <div className="loa-list">
+        {log.map(entry => (
+          <div className="loa-card loa-card-row" key={entry.id}>
+            <span>{entry.summary}</span>
+            <span className="muted">{new Date(entry.sent_at).toLocaleString()} -- {entry.delivered ? "delivered" : "not delivered"}</span>
+          </div>
+        ))}
+        {log.length === 0 && <p className="muted">Nothing sent yet.</p>}
+      </div>
+    </>
+  );
+}
+
 function AuditLogTab() {
   const [log, setLog] = useState([]);
   const [error, setError] = useState(null);
