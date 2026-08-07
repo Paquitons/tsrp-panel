@@ -98,15 +98,26 @@ export default function BotSettings() {
                   <div className="muted">{entry.label}</div>
                   <p className="muted" style={{ fontSize: "var(--text-xs)", margin: "2px 0 8px" }}>{entry.description}</p>
                   <div className="button-row" style={{ alignItems: "center" }}>
-                    <input
-                      type="number"
-                      step="any"
-                      min={entry.min}
-                      max={entry.max}
-                      value={value}
-                      onChange={e => setPending(p => ({ ...p, [entry.key]: e.target.value }))}
-                      style={{ width: 110 }}
-                    />
+                    {entry.type === "boolean" ? (
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={value}
+                          onChange={e => setPending(p => ({ ...p, [entry.key]: e.target.checked }))}
+                        />
+                        {value ? "Enabled" : "Disabled"}
+                      </label>
+                    ) : (
+                      <input
+                        type="number"
+                        step="any"
+                        min={entry.min}
+                        max={entry.max}
+                        value={value}
+                        onChange={e => setPending(p => ({ ...p, [entry.key]: e.target.value }))}
+                        style={{ width: 110 }}
+                      />
+                    )}
                     <button className="primary" type="button" disabled={!editing || saving === entry.key} onClick={() => save(entry)}>
                       {saving === entry.key ? "…" : "Save"}
                     </button>

@@ -33,23 +33,83 @@ function NamedHolder({ discordId, prefix, row }) {
 export function EconomyOverviewPanel() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [printAmount, setPrintAmount] = useState("");
+  const [printReason, setPrintReason] = useState("");
+  const [printing, setPrinting] = useState(false);
 
   usePolling(() => apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
-  if (error) return <div className="error-banner">{error}</div>;
+  function flash(msg) {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  }
+
+  async function printMoney(e) {
+    e.preventDefault();
+    const amount = Math.trunc(Number(printAmount));
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (!confirm(`Print ${fmt(amount)} into the Government reserve? This permanently grows the money supply.`)) return;
+    setPrinting(true);
+    setError(null);
+    try {
+      const next = await apiFetch("/super-admin/economy-overview/print-money", { method: "POST", body: { amount, reason: printReason || undefined } });
+      setData(next);
+      setPrintAmount(""); setPrintReason("");
+      flash(`Printed ${fmt(amount)}.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPrinting(false);
+    }
+  }
+
+  if (error && !data) return <div className="error-banner">{error}</div>;
   if (!data) return <p className="muted">Loading…</p>;
+
+  const capPercent = data.moneySupplyCap ? Math.min(100, (data.totalMoneySupply / data.moneySupplyCap) * 100) : 0;
 
   return (
     <>
       <p className="muted card-subtitle">A live snapshot of the entire economy, updating automatically.</p>
+      {error && <div className="error-banner">{error}</div>}
+      {notice && <div className="success-banner">{notice}</div>}
       <div className="card-grid">
         <div className="stat-tile"><div className="muted">Total Money Supply</div><div className="verification-identity-name">{fmt(data.totalMoneySupply)}</div></div>
         <div className="stat-tile"><div className="muted">In Player Wallets</div><div className="verification-identity-name">{fmt(data.totalWalletBalance)} <span className="muted">({data.walletCount})</span></div></div>
         <div className="stat-tile"><div className="muted">In Savings</div><div className="verification-identity-name">{fmt(data.totalSavings)}</div></div>
         <div className="stat-tile"><div className="muted">In Business Treasuries</div><div className="verification-identity-name">{fmt(data.totalBusinessTreasury)} <span className="muted">({data.businessCount})</span></div></div>
-        <div className="stat-tile"><div className="muted">Government Wallet</div><div className="verification-identity-name">{fmt(data.governmentBalance)}</div></div>
+        <div className="stat-tile"><div className="muted">Government Reserve</div><div className="verification-identity-name">{fmt(data.governmentBalance)}</div></div>
         <div className="stat-tile"><div className="muted">Locked in Stock Market</div><div className="verification-identity-name">{fmt(data.stockMarketBalance)}</div></div>
+        <div className="stat-tile"><div className="muted">In Lottery Pots</div><div className="verification-identity-name">{fmt(data.lotteryPotTotal)}</div></div>
       </div>
+
+      <h2 style={{ marginTop: 20 }}>Money Supply Cap</h2>
+      <p className="muted card-subtitle">
+        {data.moneySupplyCapEnabled
+          ? `Enabled -- once total supply reaches ${fmt(data.moneySupplyCap)}, /work, /daily, crime rewards, new loans, and stock dividends stop minting and draw from the Government Reserve instead. Change the cap or turn it off from Bot Settings.`
+          : "Disabled -- the economy is currently free to grow without limit. Enable it from Bot Settings."}
+      </p>
+      {data.moneySupplyCapEnabled && (
+        <div style={{ background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", height: 10, overflow: "hidden", marginBottom: 8 }}>
+          <div style={{ width: `${capPercent}%`, height: "100%", background: capPercent >= 100 ? "var(--danger)" : "var(--accent)" }} />
+        </div>
+      )}
+      <p className="muted">{fmt(data.totalMoneySupply)} / {fmt(data.moneySupplyCap)} ({capPercent.toFixed(1)}%)</p>
+
+      <h2 style={{ marginTop: 20 }}>Print Money</h2>
+      <p className="muted card-subtitle">Intentionally grows the money supply by minting directly into the Government Reserve. The only other way new money enters the economy is through /work, /daily, crime rewards, new loans, and stock dividends (and only up to the cap above).</p>
+      <form onSubmit={printMoney} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
+        <div>
+          <label>Amount</label>
+          <input type="number" min="1" value={printAmount} onChange={e => setPrintAmount(e.target.value)} style={{ width: 150 }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <label>Reason (optional)</label>
+          <input value={printReason} onChange={e => setPrintReason(e.target.value)} />
+        </div>
+        <button className="primary" type="submit" disabled={printing}>{printing ? "Printing…" : "Print Money"}</button>
+      </form>
 
       <h2 style={{ marginTop: 20 }}>Top 10 Wallets</h2>
       <div className="loa-list">
