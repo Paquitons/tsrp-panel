@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.7.0",
+    "slug": "v1-7-0",
+    "title": "TSRP Update",
+    "date": "2026-08-07",
+    "summary": "A real debt system, smarter payments, and a faster /work.",
+    "sections": [
+      {
+        "heading": "New: Loans & Debt",
+        "items": [
+          "Borrow with /loan across four types -- Personal, Business, Emergency, and High-Risk -- each with its own rate, limit, and repayment term.",
+          "Financial reputation now tracks your repayment history: pay early or on time and future loans get cheaper and bigger; default and they get worse. Check it anytime with /loan status."
+        ]
+      },
+      {
+        "heading": "Smarter Payments",
+        "items": [
+          "If you don't have enough cash for something, the bot now automatically covers the rest from your bank savings instead of just failing.",
+          "Mandatory costs (fines, taxes, upkeep) always go through in full, even if it means going into debt -- no more dodging a penalty by keeping your cash low."
+        ]
+      },
+      {
+        "heading": "Faster /work",
+        "items": [
+          "The cooldown on /work is down to 30 minutes (from 2 hours) while we tune the economy."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.6.0",
     "slug": "v1-6-0",
     "title": "TSRP Update",
