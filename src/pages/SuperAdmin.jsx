@@ -8,6 +8,7 @@ import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
 import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, LotteryPanel, DebtPanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
+import BotSettings from "./BotSettings";
 
 const TABS = [
   { value: "shifts", label: "Shift Editor" },
@@ -20,6 +21,7 @@ const TABS = [
   { value: "lottery", label: "Lottery" },
   { value: "stocks", label: "Stock Market" },
   { value: "debt", label: "Debt & Loans" },
+  { value: "botsettings", label: "Bot Settings" },
 ];
 
 /**
@@ -164,6 +166,7 @@ export default function SuperAdmin() {
         {tab === "lottery" && <LotteryPanel />}
         {tab === "stocks" && <StockMarketAdmin />}
         {tab === "debt" && <DebtPanel />}
+        {tab === "botsettings" && <BotSettings />}
       </div>
 
       {tab === "shifts" && search.target && (
