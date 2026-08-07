@@ -1,7 +1,7 @@
 [
   {
-    "version": "1.4.5",
-    "slug": "v1-4-5",
+    "version": "1.5.0",
+    "slug": "v1-5-0",
     "title": "TSRP Update",
     "date": "2026-08-07",
     "summary": "The whole site now updates live as things happen, plus a real online/offline status, market events, smarter economy news, and a batch of visual fixes.",
@@ -31,14 +31,14 @@
       {
         "heading": "Market Events",
         "items": [
-          "Super Admins can now create market events (crashes, booms, sector-specific shocks) that move stock prices on a schedule, with the option to reverse them cleanly later.",
+          "Behind the scenes, staff can now schedule market events (crashes, booms, sector-specific shocks) that move stock prices, with the option to reverse them cleanly later.",
           "Events can target specific tickers, a whole category, or the entire market."
         ]
       },
       {
         "heading": "Smarter Economy News",
         "items": [
-          "Economy news now has importance levels (notable vs. major) and Super Admins can control which categories get posted and how sensitive the feed is.",
+          "Economy news now has importance levels (notable vs. major) and how sensitive the feed is can be tuned behind the scenes.",
           "New stock listings, large trades, market freezes, and lottery wins can now trigger an announcement automatically."
         ]
       },
