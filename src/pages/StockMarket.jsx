@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
+import Breadcrumbs from "../components/Breadcrumbs";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { usePolling } from "../hooks/usePolling";
 import { pctChange, changeClass } from "../utils";
@@ -20,6 +21,8 @@ export default function StockMarket() {
   return (
     <div className="home-page">
       <PublicNav />
+
+      <Breadcrumbs trail={[{ label: "Economy", to: `${base}/economy` }, { label: "Stock Market" }]} />
 
       <div className="board-header">
         <h1>Stock Market</h1>

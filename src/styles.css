@@ -2429,12 +2429,14 @@ code {
 }
 
 .board-back {
-  display: inline-block;
+  display: block;
   font-size: var(--text-sm);
   color: var(--text-faint);
   margin-bottom: var(--space-4);
 }
-.board-back:hover { color: var(--text-secondary); }
+.board-back a { color: var(--text-faint); }
+.board-back a:hover { color: var(--text-secondary); }
+.board-back-sep { margin: 0 var(--space-1); }
 
 .board-header h1 { margin: 0 0 var(--space-1); }
 

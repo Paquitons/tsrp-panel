@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
+import Breadcrumbs from "../components/Breadcrumbs";
 import PriceChart from "../components/PriceChart";
 import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
+import { usePublicBase } from "../hooks/usePublicBase";
 import { pctChange, changeClass, CHART_RANGE_OPTIONS } from "../utils";
 
 const STOCK_DETAIL_POLL_MS = 5_000; // "highly active" tier -- live price + chart
@@ -15,6 +17,7 @@ function fmt(n) {
 
 export default function StockDetail() {
   const { ticker } = useParams();
+  const base = usePublicBase();
   const [stock, setStock] = useState(null);
   const [error, setError] = useState(null);
   const [range, setRange] = useState(CHART_RANGE_OPTIONS[0].value);
@@ -34,6 +37,8 @@ export default function StockDetail() {
   return (
     <div className="home-page">
       <PublicNav />
+
+      <Breadcrumbs trail={[{ label: "Economy", to: `${base}/economy` }, { label: "Stock Market", to: `${base}/stocks` }, { label: ticker }]} />
 
       {error && (
         <div className="board-header">
