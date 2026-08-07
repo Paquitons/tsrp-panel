@@ -6,7 +6,7 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
-import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, LotteryPanel } from "./SuperAdminEconomy";
+import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, LotteryPanel, DebtPanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
 
 const TABS = [
@@ -19,6 +19,7 @@ const TABS = [
   { value: "storefronts", label: "Storefronts" },
   { value: "lottery", label: "Lottery" },
   { value: "stocks", label: "Stock Market" },
+  { value: "debt", label: "Debt & Loans" },
 ];
 
 /**
@@ -162,6 +163,7 @@ export default function SuperAdmin() {
         {tab === "storefronts" && <StorefrontsPanel />}
         {tab === "lottery" && <LotteryPanel />}
         {tab === "stocks" && <StockMarketAdmin />}
+        {tab === "debt" && <DebtPanel />}
       </div>
 
       {tab === "shifts" && search.target && (

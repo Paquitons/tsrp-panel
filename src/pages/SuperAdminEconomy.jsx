@@ -238,12 +238,91 @@ export function EconomyConfigPanel() {
         </div>
       ))}
 
+      <h2 style={{ marginTop: 20 }}>Debt System</h2>
+      <p className="muted card-subtitle">
+        Loan types, rates, and limits (see /loan). Financial reputation (0-1000, 500 neutral) then scales the actual
+        rate/limit a player is offered on top of these base numbers -- the swings below control by how much.
+      </p>
+      {Object.entries(DEBT_LOAN_TYPE_LABELS).map(([key, label]) => (
+        <div key={key} style={{ marginBottom: 16 }}>
+          <label className="checkbox-label" style={{ marginBottom: 4 }}>
+            <strong>{label}</strong>{config.debt.loanTypes[key].requiresBusiness && <span className="muted"> (requires owning a business)</span>}
+          </label>
+          <div className="form-row">
+            <div>
+              <label>Base Interest Rate (%)</label>
+              <input type="number" step="0.1" min="0" value={config.debt.loanTypes[key].baseInterestRate * 100}
+                onChange={e => setConfig({ ...config, debt: { ...config.debt, loanTypes: { ...config.debt.loanTypes, [key]: { ...config.debt.loanTypes[key], baseInterestRate: Number(e.target.value) / 100 } } } })} />
+            </div>
+            <div>
+              <label>Limit Multiplier</label>
+              <input type="number" step="0.1" min="0" value={config.debt.loanTypes[key].limitMultiplier}
+                onChange={e => setConfig({ ...config, debt: { ...config.debt, loanTypes: { ...config.debt.loanTypes, [key]: { ...config.debt.loanTypes[key], limitMultiplier: Number(e.target.value) } } } })} />
+            </div>
+            <div>
+              <label>Min Reputation Required</label>
+              <input type="number" min="0" max="1000" value={config.debt.loanTypes[key].minReputation}
+                onChange={e => setConfig({ ...config, debt: { ...config.debt, loanTypes: { ...config.debt.loanTypes, [key]: { ...config.debt.loanTypes[key], minReputation: Number(e.target.value) } } } })} />
+            </div>
+            <div>
+              <label>Term Options (days, comma-separated)</label>
+              <input value={config.debt.loanTypes[key].termOptionsDays.join(", ")}
+                onChange={e => setConfig({
+                  ...config,
+                  debt: { ...config.debt, loanTypes: { ...config.debt.loanTypes, [key]: {
+                    ...config.debt.loanTypes[key],
+                    termOptionsDays: e.target.value.split(",").map(s => Number(s.trim())).filter(n => Number.isFinite(n) && n > 0),
+                  } } },
+                })} />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <h3 style={{ marginTop: 16 }}>Financial Reputation Effects</h3>
+      <div className="form-row">
+        <div>
+          <label>Rate Swing (+/- percentage points at min/max reputation)</label>
+          <input type="number" step="0.1" min="0" value={config.debt.reputationRateSwing * 100}
+            onChange={e => setConfig({ ...config, debt: { ...config.debt, reputationRateSwing: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Limit Swing (+/- fraction at min/max reputation)</label>
+          <input type="number" step="0.1" min="0" value={config.debt.reputationLimitSwing}
+            onChange={e => setConfig({ ...config, debt: { ...config.debt, reputationLimitSwing: Number(e.target.value) } })} />
+        </div>
+      </div>
+      <div className="form-row">
+        <div>
+          <label>Reputation Gain: Early Repayment</label>
+          <input type="number" value={config.debt.reputationChanges.earlyRepay}
+            onChange={e => setConfig({ ...config, debt: { ...config.debt, reputationChanges: { ...config.debt.reputationChanges, earlyRepay: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Reputation Gain: On-Time Repayment</label>
+          <input type="number" value={config.debt.reputationChanges.onTimeRepay}
+            onChange={e => setConfig({ ...config, debt: { ...config.debt, reputationChanges: { ...config.debt.reputationChanges, onTimeRepay: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Reputation Loss: Default</label>
+          <input type="number" value={config.debt.reputationChanges.default}
+            onChange={e => setConfig({ ...config, debt: { ...config.debt, reputationChanges: { ...config.debt.reputationChanges, default: Number(e.target.value) } } })} />
+        </div>
+      </div>
+
       <div className="button-row" style={{ marginTop: 16 }}>
         <button className="primary" type="button" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save Changes"}</button>
       </div>
     </>
   );
 }
+
+const DEBT_LOAN_TYPE_LABELS = {
+  personal: "Personal",
+  business: "Business",
+  emergency: "Emergency",
+  highRisk: "High-Risk",
+};
 
 const CRIME_LABELS = {
   bank: "Bank Robbery",
@@ -882,6 +961,213 @@ function StorefrontListingsEditor({ storefront, catalog }) {
           </div>
         ))}
         {sales.length === 0 && <p className="muted">No sales yet.</p>}
+      </div>
+    </>
+  );
+}
+
+// ==================================================================
+// Debt & Loans -- oversight for the player-driven /loan system. Loan
+// issuing/repayment itself always happens in Discord; everything here is
+// correction (edit/forgive), the two leaderboards, reputation lookup, and
+// the bulk "economy-wide debt event" action.
+// ==================================================================
+const LOAN_STATUS_LABELS = { active: "Active", defaulted: "Defaulted", repaid: "Repaid", forgiven: "Forgiven" };
+
+export function DebtPanel() {
+  const [loans, setLoans] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+
+  const [lookupId, setLookupId] = useState("");
+  const [reputation, setReputation] = useState(null);
+  const [newReputation, setNewReputation] = useState("");
+
+  const [eventPercent, setEventPercent] = useState("");
+  const [eventReason, setEventReason] = useState("");
+  const [applyingEvent, setApplyingEvent] = useState(false);
+
+  function load() {
+    const qs = statusFilter ? `?status=${statusFilter}` : "";
+    apiFetch(`/super-admin/debt/loans${qs}`).then(({ loans }) => setLoans(loans)).catch(err => setError(err.message));
+    apiFetch("/super-admin/debt/leaderboard").then(setLeaderboard).catch(err => setError(err.message));
+  }
+  usePolling(load, ADMIN_POLL_MS, [statusFilter]);
+
+  function flash(msg) {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  }
+
+  async function editBalance(loan) {
+    const amountOwed = prompt(`New amount owed for this ${loan.loan_type} loan (currently ${fmt(loan.amount_owed)}):`, loan.amount_owed);
+    if (amountOwed === null) return;
+    const reason = prompt("Reason (optional):") ?? undefined;
+    try {
+      await apiFetch(`/super-admin/debt/loans/${loan.id}`, { method: "PATCH", body: { amountOwed: Number(amountOwed), reason } });
+      flash("Balance updated.");
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function forgive(loan) {
+    if (!confirm(`Forgive this ${loan.loan_type} loan (${fmt(loan.amount_owed)} owed)? This can't be undone.`)) return;
+    const reason = prompt("Reason (optional):") ?? undefined;
+    try {
+      await apiFetch(`/super-admin/debt/loans/${loan.id}/forgive`, { method: "POST", body: { reason } });
+      flash("Loan forgiven.");
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function lookupReputation(e) {
+    e.preventDefault();
+    if (!lookupId.trim()) return;
+    try {
+      const { score } = await apiFetch(`/super-admin/debt/reputation/${lookupId.trim()}`);
+      setReputation(score);
+      setNewReputation(String(score));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function saveReputation() {
+    const score = Number(newReputation);
+    if (!Number.isFinite(score)) return;
+    const reason = prompt("Reason (optional):") ?? undefined;
+    try {
+      const result = await apiFetch(`/super-admin/debt/reputation/${lookupId.trim()}`, { method: "PATCH", body: { score, reason } });
+      setReputation(result.score);
+      flash("Reputation updated.");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function applyEvent(e) {
+    e.preventDefault();
+    const percent = Number(eventPercent);
+    if (!Number.isFinite(percent) || percent === 0) return;
+    if (!confirm(`Apply a ${percent > 0 ? "+" : ""}${percent}% adjustment to every open loan's balance? This affects every player with an active or defaulted loan.`)) return;
+    setApplyingEvent(true);
+    setError(null);
+    try {
+      const result = await apiFetch("/super-admin/debt/event", { method: "POST", body: { percent, reason: eventReason || undefined } });
+      flash(`Applied to ${result.loansAffected} loan(s), total balance change ${fmt(result.totalDelta)}.`);
+      setEventPercent(""); setEventReason("");
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setApplyingEvent(false);
+    }
+  }
+
+  return (
+    <>
+      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {notice && <div className="success-banner">{notice}</div>}
+
+      {leaderboard && (
+        <div className="card-grid" style={{ marginTop: 16 }}>
+          <div>
+            <h2>Richest Players</h2>
+            <div className="loa-list">
+              {leaderboard.richest.map(w => (
+                <div className="loa-card loa-card-row" key={w.discord_id}>
+                  <NamedHolder discordId={w.discord_id} prefix="player" row={w} />
+                  <span className="muted" style={{ marginLeft: "auto" }}>{fmt(w.netWorth)}</span>
+                </div>
+              ))}
+              {leaderboard.richest.length === 0 && <p className="muted">No wallets yet.</p>}
+            </div>
+          </div>
+          <div>
+            <h2>Most Indebted</h2>
+            <div className="loa-list">
+              {leaderboard.mostIndebted.map(w => (
+                <div className="loa-card loa-card-row" key={w.discord_id}>
+                  <NamedHolder discordId={w.discord_id} prefix="player" row={w} />
+                  <span className="muted" style={{ marginLeft: "auto" }}>{fmt(w.totalOwed)} ({w.openLoans})</span>
+                </div>
+              ))}
+              {leaderboard.mostIndebted.length === 0 && <p className="muted">No open loans.</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h2 style={{ marginTop: 20 }}>Financial Reputation Lookup</h2>
+      <form onSubmit={lookupReputation} className="button-row" style={{ alignItems: "flex-end" }}>
+        <div>
+          <label>Discord ID</label>
+          <input value={lookupId} onChange={e => setLookupId(e.target.value)} placeholder="Discord ID" style={{ width: 220 }} />
+        </div>
+        <button className="secondary" type="submit">Look Up</button>
+      </form>
+      {reputation !== null && (
+        <div className="button-row" style={{ marginTop: 8, alignItems: "flex-end" }}>
+          <div>
+            <label>Score (0-1000)</label>
+            <input type="number" min="0" max="1000" value={newReputation} onChange={e => setNewReputation(e.target.value)} style={{ width: 120 }} />
+          </div>
+          <button className="primary" type="button" onClick={saveReputation}>Save</button>
+        </div>
+      )}
+
+      <h2 style={{ marginTop: 20 }}>Economy-Wide Debt Event</h2>
+      <p className="muted card-subtitle">Bulk-adjusts every active or defaulted loan's remaining balance by a percentage -- e.g. -20% for broad relief, or +10% to simulate a rate hike.</p>
+      <form onSubmit={applyEvent} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
+        <div>
+          <label>Percent (e.g. -20 or 10)</label>
+          <input type="number" step="1" value={eventPercent} onChange={e => setEventPercent(e.target.value)} style={{ width: 120 }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <label>Reason (optional)</label>
+          <input value={eventReason} onChange={e => setEventReason(e.target.value)} />
+        </div>
+        <button className="primary" type="submit" disabled={applyingEvent}>{applyingEvent ? "Applying…" : "Apply Event"}</button>
+      </form>
+
+      <div className="modal-title-row" style={{ marginTop: 20, marginBottom: 8 }}>
+        <h2 style={{ margin: 0 }}>All Loans</h2>
+        <CustomSelect
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[{ value: "", label: "All" }, ...Object.entries(LOAN_STATUS_LABELS).map(([value, label]) => ({ value, label }))]}
+        />
+      </div>
+      <div className="loa-list">
+        {loans.map(l => (
+          <div className="loa-card" key={l.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <NamedHolder discordId={l.discord_id} prefix="borrower" row={l} />
+              <span className={`badge ${l.status === "repaid" ? "loa-status-approved" : l.status === "defaulted" ? "loa-status-denied" : "loa-status-pending"}`}>
+                {LOAN_STATUS_LABELS[l.status] ?? l.status}
+              </span>
+            </div>
+            <div className="log-card-field">
+              {DEBT_LOAN_TYPE_LABELS[l.loan_type] ?? l.loan_type} -- {fmt(l.principal)} borrowed, {fmt(l.amount_owed)} owed, {(l.interest_rate * 100).toFixed(1)}% interest
+            </div>
+            <div className="log-card-field muted">
+              Issued {new Date(l.issued_at).toLocaleString()} -- Due {new Date(l.due_at).toLocaleString()}
+            </div>
+            {(l.status === "active" || l.status === "defaulted") && (
+              <div className="button-row" style={{ marginTop: 8 }}>
+                <button className="secondary" type="button" onClick={() => editBalance(l)}>Edit Balance</button>
+                <button className="danger" type="button" onClick={() => forgive(l)}>Forgive</button>
+              </div>
+            )}
+          </div>
+        ))}
+        {loans.length === 0 && <p className="muted">No loans found.</p>}
       </div>
     </>
   );
