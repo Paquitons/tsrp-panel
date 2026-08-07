@@ -6,8 +6,15 @@ const PAD_X = 8;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 28;
 
-function formatDate(ts) {
-  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+// Below ~2 days, a date alone ("Aug 7") can't distinguish two points from
+// the same day, so short ranges (the new 5-hour default) also show a time.
+const SHOW_TIME_BELOW_MS = 2 * 24 * 60 * 60 * 1000;
+
+function formatDate(ts, spanMs) {
+  const d = new Date(ts);
+  return spanMs < SHOW_TIME_BELOW_MS
+    ? d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 /**
@@ -42,6 +49,7 @@ export default function PriceChart({ history }) {
     return <div className="price-chart-empty muted">Not enough price history yet.</div>;
   }
 
+  const spanMs = points[points.length - 1].timestamp - points[0].timestamp;
   const rising = points[points.length - 1].price >= points[0].price;
   const lineColor = rising ? "var(--success)" : "var(--danger)";
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
@@ -95,8 +103,8 @@ export default function PriceChart({ history }) {
       </svg>
 
       <div className="price-chart-axis">
-        <span>{formatDate(points[0].timestamp)}</span>
-        <span>{formatDate(points[points.length - 1].timestamp)}</span>
+        <span>{formatDate(points[0].timestamp, spanMs)}</span>
+        <span>{formatDate(points[points.length - 1].timestamp, spanMs)}</span>
       </div>
 
       {hovered && (
@@ -105,7 +113,7 @@ export default function PriceChart({ history }) {
           style={{ left: `${(hovered.x / WIDTH) * 100}%` }}
         >
           <div className="price-chart-tooltip-price">${hovered.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-          <div className="price-chart-tooltip-date">{formatDate(hovered.timestamp)}</div>
+          <div className="price-chart-tooltip-date">{formatDate(hovered.timestamp, spanMs)}</div>
         </div>
       )}
     </div>

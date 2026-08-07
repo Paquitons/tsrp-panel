@@ -6,6 +6,19 @@
  * the >= 0 check directly against a possibly-null value colored a missing
  * value as a gain.
  */
+// Shared "chart range" options for every price-history chart (public
+// StockDetail and the Super Admin stock detail page) -- one definition so
+// the two stay in sync, ms-based since that's what both APIs' `since`
+// query param expects. Default (5 hours) is the first entry so callers
+// can do CHART_RANGE_OPTIONS[0].value for the initial useState.
+export const CHART_RANGE_OPTIONS = [
+  { value: String(5 * 60 * 60 * 1000), label: "5 hours" },
+  { value: String(24 * 60 * 60 * 1000), label: "1 day" },
+  { value: String(3 * 24 * 60 * 60 * 1000), label: "3 days" },
+  { value: String(7 * 24 * 60 * 60 * 1000), label: "7 days" },
+  { value: String(30 * 24 * 60 * 60 * 1000), label: "1 month" },
+];
+
 export function pctChange(n) {
   if (n === null || n === undefined) return "—";
   return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;

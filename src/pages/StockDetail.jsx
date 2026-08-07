@@ -3,8 +3,9 @@ import { useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import PriceChart from "../components/PriceChart";
+import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
-import { pctChange, changeClass } from "../utils";
+import { pctChange, changeClass, CHART_RANGE_OPTIONS } from "../utils";
 
 const STOCK_DETAIL_POLL_MS = 5_000; // "highly active" tier -- live price + chart
 
@@ -16,6 +17,7 @@ export default function StockDetail() {
   const { ticker } = useParams();
   const [stock, setStock] = useState(null);
   const [error, setError] = useState(null);
+  const [range, setRange] = useState(CHART_RANGE_OPTIONS[0].value);
 
   // Reset immediately on navigation (don't show the previous ticker's
   // stale data while the new one loads) -- separate from the poll itself
@@ -25,9 +27,9 @@ export default function StockDetail() {
     setError(null);
   }, [ticker]);
 
-  usePolling(() => apiFetch(`/public/stocks/${ticker}`, { auth: false })
+  usePolling(() => apiFetch(`/public/stocks/${ticker}?since=${Date.now() - Number(range)}`, { auth: false })
     .then(setStock)
-    .catch(err => setError(err.message)), STOCK_DETAIL_POLL_MS, [ticker]);
+    .catch(err => setError(err.message)), STOCK_DETAIL_POLL_MS, [ticker, range]);
 
   return (
     <div className="home-page">
@@ -58,6 +60,10 @@ export default function StockDetail() {
           </div>
 
           <section className="board-card">
+            <div className="modal-title-row" style={{ marginBottom: 8 }}>
+              <h2 style={{ margin: 0 }}>Price History</h2>
+              <CustomSelect value={range} onChange={setRange} options={CHART_RANGE_OPTIONS} />
+            </div>
             <PriceChart history={stock.history} />
           </section>
 

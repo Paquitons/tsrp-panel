@@ -5,7 +5,7 @@ import CustomSelect from "../components/CustomSelect";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import StockPriceChart from "../components/StockPriceChart";
 import { usePolling } from "../hooks/usePolling";
-import { toDateTimeInputValue, parseDateTimeInput } from "../utils";
+import { toDateTimeInputValue, parseDateTimeInput, CHART_RANGE_OPTIONS } from "../utils";
 
 // Read-only list/log views poll at the "moderately active" tier; anything
 // with editable fields (stock detail, market controls) deliberately does
@@ -252,7 +252,7 @@ function StockDetail({ ticker, onBack }) {
   const [stock, setStock] = useState(null);
   const [performance, setPerformance] = useState(null);
   const [history, setHistory] = useState([]);
-  const [range, setRange] = useState(30 * 24 * 60 * 60 * 1000);
+  const [range, setRange] = useState(CHART_RANGE_OPTIONS[0].value);
   const [transactions, setTransactions] = useState([]);
   const [holders, setHolders] = useState([]);
   const [error, setError] = useState(null);
@@ -269,7 +269,7 @@ function StockDetail({ ticker, onBack }) {
   // performance/holder list here never overwrites an in-progress edit.
   usePolling(load, ADMIN_POLL_MS, [ticker]);
 
-  usePolling(() => apiFetch(`/super-admin/stocks/${ticker}/price-history?since=${Date.now() - range}`).then(({ history }) => setHistory(history)), ADMIN_POLL_MS, [ticker, range]);
+  usePolling(() => apiFetch(`/super-admin/stocks/${ticker}/price-history?since=${Date.now() - Number(range)}`).then(({ history }) => setHistory(history)), ADMIN_POLL_MS, [ticker, range]);
 
   function flash(msg) {
     setNotice(msg);
@@ -334,15 +334,7 @@ function StockDetail({ ticker, onBack }) {
 
       <div className="modal-title-row" style={{ marginTop: 16, marginBottom: 8 }}>
         <h2 style={{ margin: 0 }}>Price History</h2>
-        <CustomSelect
-          value={String(range)}
-          onChange={v => setRange(Number(v))}
-          options={[
-            { value: String(7 * 24 * 60 * 60 * 1000), label: "7 days" },
-            { value: String(30 * 24 * 60 * 60 * 1000), label: "30 days" },
-            { value: String(90 * 24 * 60 * 60 * 1000), label: "90 days" },
-          ]}
-        />
+        <CustomSelect value={String(range)} onChange={setRange} options={CHART_RANGE_OPTIONS} />
       </div>
       <div className="card" style={{ padding: 16 }}>
         <StockPriceChart history={history} />
