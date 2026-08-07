@@ -1,5 +1,58 @@
 [
   {
+    "version": "1.4.5",
+    "slug": "v1-4-5",
+    "title": "TSRP Update",
+    "date": "2026-08-07",
+    "summary": "The whole site now updates live as things happen, plus a real online/offline status, market events, smarter economy news, and a batch of visual fixes.",
+    "sections": [
+      {
+        "heading": "The Site Feels Live Now",
+        "items": [
+          "Player count, server status, stock prices, and activity feeds refresh every few seconds without reloading the page.",
+          "Economy stats, leaderboards, staff roster, and the stock/economy admin panels refresh automatically too, just less often since they change less often.",
+          "Changes made anywhere -- the bot, the staff panel, or the public site -- now show up everywhere else on their own."
+        ]
+      },
+      {
+        "heading": "Accurate Online/Offline Status",
+        "items": [
+          "The site's Online/Offline badge now reflects the actual /startup and /shutdown status set by staff, instead of guessing from server activity.",
+          "Fixes the badge previously showing \"Online\" with 0 players, 0 in queue, and 0 staff on duty."
+        ]
+      },
+      {
+        "heading": "Stock Price Charts",
+        "items": [
+          "Charts now default to a 5-hour window and can be expanded to 1 day, 3 days, 7 days, or 1 month.",
+          "Short ranges now show the time of day on the chart, not just the date."
+        ]
+      },
+      {
+        "heading": "Market Events",
+        "items": [
+          "Super Admins can now create market events (crashes, booms, sector-specific shocks) that move stock prices on a schedule, with the option to reverse them cleanly later.",
+          "Events can target specific tickers, a whole category, or the entire market."
+        ]
+      },
+      {
+        "heading": "Smarter Economy News",
+        "items": [
+          "Economy news now has importance levels (notable vs. major) and Super Admins can control which categories get posted and how sensitive the feed is.",
+          "New stock listings, large trades, market freezes, and lottery wins can now trigger an announcement automatically."
+        ]
+      },
+      {
+        "heading": "Site Fixes",
+        "items": [
+          "Fixed the mobile menu button being invisible (and causing a sliver of horizontal scroll) on small screens.",
+          "The browser tab now shows \"Texas State RP\" with the TSRP logo instead of the generic staff panel title and placeholder icon.",
+          "Updated the homepage intro to be brand-specific instead of generic ER:LC boilerplate."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.4.4",
     "slug": "v1-4-4",
     "title": "TSRP Update",
