@@ -198,12 +198,59 @@ export function EconomyConfigPanel() {
         ))}
       </div>
 
+      <h2 style={{ marginTop: 20 }}>Crime System</h2>
+      <p className="muted card-subtitle">
+        Bank/ATM/store robbery and pickpocket -- optional high-risk ways to earn money. Keep these below what
+        jobs/business/investing/casino can pay so crime stays a side activity, not the best strategy.
+      </p>
+      {Object.entries(CRIME_LABELS).map(([key, label]) => (
+        <div key={key} style={{ marginBottom: 16 }}>
+          <label className="checkbox-label" style={{ marginBottom: 4 }}><strong>{label}</strong></label>
+          <div className="form-row">
+            <div>
+              <label>Success Chance (%)</label>
+              <input type="number" step="1" min="0" max="100" value={Math.round(config.crime[key].successChance * 100)}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], successChance: Number(e.target.value) / 100 } } })} />
+            </div>
+            <div>
+              <label>Cooldown (minutes)</label>
+              <input type="number" min="0" value={config.crime[key].cooldownMinutes}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], cooldownMinutes: Number(e.target.value) } } })} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div>
+              <label>Min Payout</label>
+              <input type="number" min="0" value={config.crime[key].minPayout}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], minPayout: Number(e.target.value) } } })} />
+            </div>
+            <div>
+              <label>Max Payout</label>
+              <input type="number" min="0" value={config.crime[key].maxPayout}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], maxPayout: Number(e.target.value) } } })} />
+            </div>
+            <div>
+              <label>Fine on Failure</label>
+              <input type="number" min="0" value={config.crime[key].fine}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], fine: Number(e.target.value) } } })} />
+            </div>
+          </div>
+        </div>
+      ))}
+
       <div className="button-row" style={{ marginTop: 16 }}>
         <button className="primary" type="button" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save Changes"}</button>
       </div>
     </>
   );
 }
+
+const CRIME_LABELS = {
+  bank: "Bank Robbery",
+  atm: "ATM Robbery",
+  store: "Store Robbery",
+  pickpocket: "Pickpocket",
+};
 
 // ==================================================================
 // Businesses -- search, view, and unrestricted edit (including
