@@ -56,9 +56,9 @@ export default function Home() {
         <StatusPill online={!!status?.online} />
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
-          The official website for Texas State Roleplay -- Liberty County's
-          premier ER:LC community. Track who's on duty, check the
-          leaderboards, and catch up on the latest server updates.
+          The official website for Texas State Roleplay | Track who's on
+          duty, check the leaderboards, and catch up on the latest server
+          updates.
         </p>
       </section>
 

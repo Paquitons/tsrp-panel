@@ -2202,6 +2202,17 @@ code {
   color: var(--text-primary);
 }
 
+/* Without an explicit size, this SVG falls back to its browser-default
+   intrinsic box (300x150) instead of scaling to the 38px button -- which
+   both hides the icon (only a sliver of the 0-24 viewBox paths lands
+   inside the visible button) and can widen the page enough to cause a
+   horizontal overflow sliver at the viewport edge. Same fix already
+   applied to the authenticated sidebar's .mobile-menu-btn svg. */
+.home-menu-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 .home-mobile-menu {
   display: none;
   flex-direction: column;
