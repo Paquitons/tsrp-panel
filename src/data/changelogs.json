@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.6.0",
+    "slug": "v1-6-0",
+    "title": "TSRP Update",
+    "date": "2026-08-07",
+    "summary": "Two brand new ways to make (or lose) money -- Poker and Crime -- plus easier navigation across the site.",
+    "sections": [
+      {
+        "heading": "New: Poker",
+        "items": [
+          "Challenge another player to a hand of heads-up Texas Hold'em with /poker -- they can accept or decline before anything's on the line.",
+          "Full betting rounds (check, call, bet, raise, all-in, fold), private hole cards, and automatic hand evaluation and payout at showdown."
+        ]
+      },
+      {
+        "heading": "New: Crime System",
+        "items": [
+          "Rob a bank, an ATM, or a store with /crime for a chance at a quick payout -- higher reward comes with higher risk and a longer cooldown.",
+          "Pickpocket another player for a small amount of cash. Every attempt has a chance of getting caught and fined."
+        ]
+      },
+      {
+        "heading": "Easier Navigation",
+        "items": [
+          "Added a trail of links (e.g. Economy / Stock Market / TSRP) to pages that were more than one click from the main menu, so you're never stuck using the browser's back button."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.5.0",
     "slug": "v1-5-0",
     "title": "TSRP Update",
