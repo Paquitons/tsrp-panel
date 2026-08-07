@@ -101,6 +101,16 @@ export function EconomyConfigPanel() {
     lottery: "Lottery",
   };
 
+  const NEWS_CATEGORY_LABELS = {
+    daily_change: "Notable Daily Changes",
+    new_high: "New Highs",
+    new_low: "New Lows",
+    large_trade: "Large Trades",
+    new_listing: "New Stock Listings",
+    lottery_win: "Lottery Wins",
+    market_warning: "Market Warnings",
+  };
+
   return (
     <>
       <p className="muted card-subtitle">Applies live -- no restart needed. Every player faucet and sink can be paused independently for testing or an event.</p>
@@ -143,6 +153,43 @@ export function EconomyConfigPanel() {
               onChange={e => setConfig({ ...config, systems: { ...config.systems, [key]: e.target.checked } })}
             />
             {SYSTEM_LABELS[key]}
+          </label>
+        ))}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Economy News Sensitivity</h2>
+      <p className="muted card-subtitle">
+        Controls the automated news system (daily-change sweeps, new highs/lows, large trades, new listings,
+        lottery wins, market warnings) -- not the manual crash/rally/event tools, which always post.
+      </p>
+      <label>Minimum Importance to Post to Discord</label>
+      <CustomSelect
+        value={config.newsSensitivity.minImportanceToPost}
+        onChange={v => setConfig({ ...config, newsSensitivity: { ...config.newsSensitivity, minImportanceToPost: v } })}
+        options={[
+          { value: "minor", label: "Minor and up (everything)" },
+          { value: "notable", label: "Notable and up (default)" },
+          { value: "major", label: "Major only" },
+        ]}
+      />
+      <p className="muted" style={{ marginTop: 4, marginBottom: 12 }}>
+        The website's news feed always shows every category regardless of this setting -- it only gates the Discord channel.
+      </p>
+      <div className="card-grid">
+        {Object.entries(NEWS_CATEGORY_LABELS).map(([key, label]) => (
+          <label className="checkbox-label" key={key}>
+            <input
+              type="checkbox"
+              checked={config.newsSensitivity.enabledCategories[key] !== false}
+              onChange={e => setConfig({
+                ...config,
+                newsSensitivity: {
+                  ...config.newsSensitivity,
+                  enabledCategories: { ...config.newsSensitivity.enabledCategories, [key]: e.target.checked },
+                },
+              })}
+            />
+            {label}
           </label>
         ))}
       </div>

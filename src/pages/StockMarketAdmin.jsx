@@ -857,8 +857,19 @@ function CreateMarketEventModal({ onClose, onCreated }) {
 // ==================================================================
 // News
 // ==================================================================
+const ANNOUNCEMENT_CATEGORY_LABELS = {
+  daily_change: "Daily Change",
+  new_high: "New High",
+  new_low: "New Low",
+  large_trade: "Large Trade",
+  new_listing: "New Listing",
+  lottery_win: "Lottery",
+  market_warning: "Market Warning",
+};
+
 function NewsTab() {
   const [news, setNews] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [headline, setHeadline] = useState("");
   const [body, setBody] = useState("");
   const [ticker, setTicker] = useState("");
@@ -866,6 +877,7 @@ function NewsTab() {
 
   function load() {
     apiFetch("/super-admin/stock-market/news").then(({ news }) => setNews(news)).catch(err => setError(err.message));
+    apiFetch("/super-admin/economy-news").then(({ announcements }) => setAnnouncements(announcements)).catch(err => setError(err.message));
   }
   useEffect(load, []);
 
@@ -908,6 +920,30 @@ function NewsTab() {
           </div>
         ))}
         {news.length === 0 && <p className="muted">No news yet.</p>}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Automated Announcements</h2>
+      <p className="muted card-subtitle">
+        Every event the news sensitivity system generated -- daily-change sweeps, new highs/lows, large trades,
+        new listings, lottery wins, market warnings -- whether or not it actually met the Discord posting floor.
+      </p>
+      <div className="loa-list">
+        {announcements.map(a => (
+          <div className="loa-card" key={a.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span className="badge loa-status-pending">{ANNOUNCEMENT_CATEGORY_LABELS[a.category] ?? a.category}</span>
+                {a.ticker && <span className="muted">{a.ticker}</span>}
+                <span className={a.discord_posted ? "loa-status-approved" : "muted"}>{a.discord_posted ? "Posted" : "Website only"}</span>
+              </div>
+              <span className="muted">{new Date(a.created_at).toLocaleString()}</span>
+            </div>
+            <div className="log-card-field">{a.headline}</div>
+            {a.body && <div className="log-card-field muted">{a.body}</div>}
+            {a.impact_percent !== null && <div className={pctClass(a.impact_percent)}>{pct(a.impact_percent)}</div>}
+          </div>
+        ))}
+        {announcements.length === 0 && <p className="muted">No automated announcements yet.</p>}
       </div>
     </>
   );

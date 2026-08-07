@@ -31,6 +31,23 @@ function NewsItem({ item, base }) {
     );
   }
 
+  if (item.type === "announcement") {
+    return (
+      <div className="news-row">
+        <span className={`news-dot ${item.impactPercent !== null ? changeClass(item.impactPercent) : ""} ${item.importance === "major" ? "major" : ""}`} />
+        <div className="news-row-body">
+          <p className="news-headline">
+            {item.ticker && <Link to={`${base}/stocks/${item.ticker}`} className="news-ticker-tag">{item.ticker}</Link>}
+            {item.importance === "major" && <span className="news-major-tag">Major</span>}
+            {item.headline}
+          </p>
+          {item.body && <p className="muted news-subtext">{item.body}</p>}
+        </div>
+        <span className="muted news-timestamp">{formatWhen(item.timestamp)}</span>
+      </div>
+    );
+  }
+
   if (item.type === "lottery") {
     return (
       <div className="news-row">
