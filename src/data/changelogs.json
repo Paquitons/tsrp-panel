@@ -31,15 +31,15 @@
       {
         "heading": "Market Events",
         "items": [
-          "Behind the scenes, staff can now schedule market events (crashes, booms, sector-specific shocks) that move stock prices, with the option to reverse them cleanly later.",
-          "Events can target specific tickers, a whole category, or the entire market."
+          "The market can now go through real events -- crashes, booms, and sector-specific shocks that move stock prices.",
+          "Events can hit specific tickers, a whole category, or the entire market at once."
         ]
       },
       {
         "heading": "Smarter Economy News",
         "items": [
-          "Economy news now has importance levels (notable vs. major) and how sensitive the feed is can be tuned behind the scenes.",
-          "New stock listings, large trades, market freezes, and lottery wins can now trigger an announcement automatically."
+          "Economy news now has importance levels (notable vs. major), so bigger stories stand out from routine updates.",
+          "New stock listings, large trades, market freezes, and lottery wins now show up in the news automatically."
         ]
       },
       {
