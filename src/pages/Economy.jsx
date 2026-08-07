@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import MoneyBreakdown from "../components/MoneyBreakdown";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { usePolling } from "../hooks/usePolling";
+
+const ECONOMY_POLL_MS = 20_000; // "moderately active" tier -- aggregate stats, not a tight loop
 
 function fmt(n) {
   return `$${Number(n ?? 0).toLocaleString()}`;
@@ -14,9 +17,7 @@ export default function Economy() {
   const [error, setError] = useState(null);
   const base = usePublicBase();
 
-  useEffect(() => {
-    apiFetch("/public/economy", { auth: false }).then(setData).catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/public/economy", { auth: false }).then(setData).catch(err => setError(err.message)), ECONOMY_POLL_MS);
 
   return (
     <div className="home-page">

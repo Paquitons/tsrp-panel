@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import CustomSelect from "../components/CustomSelect";
+import { usePolling } from "../hooks/usePolling";
 
 const CURRENCY = "$";
 const GAMES = ["slots", "roulette", "blackjack"];
 const GAME_LABELS = { slots: "Slots", roulette: "Roulette", blackjack: "Blackjack" };
+// Read-only views poll at the "moderately active" tier. Panels with
+// editable fields bound directly to the fetched state (EconomyConfigPanel)
+// deliberately don't -- unlike StockMarketAdmin's pattern, there's no
+// separate child-component state to protect it from being overwritten.
+const ADMIN_POLL_MS = 15_000;
 
 function fmt(n) {
   return `${CURRENCY}${Number(n ?? 0).toLocaleString()}`;
@@ -28,16 +34,14 @@ export function EconomyOverviewPanel() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   if (error) return <div className="error-banner">{error}</div>;
   if (!data) return <p className="muted">Loading…</p>;
 
   return (
     <>
-      <p className="muted card-subtitle">A snapshot of the entire economy -- refresh the page for the latest numbers.</p>
+      <p className="muted card-subtitle">A live snapshot of the entire economy, updating automatically.</p>
       <div className="card-grid">
         <div className="stat-tile"><div className="muted">Total Money Supply</div><div className="verification-identity-name">{fmt(data.totalMoneySupply)}</div></div>
         <div className="stat-tile"><div className="muted">In Player Wallets</div><div className="verification-identity-name">{fmt(data.totalWalletBalance)} <span className="muted">({data.walletCount})</span></div></div>
@@ -215,7 +219,10 @@ export function BusinessesPanel() {
     e?.preventDefault();
     apiFetch(`/super-admin/businesses?q=${encodeURIComponent(query)}`).then(({ businesses }) => setBusinesses(businesses)).catch(err => setError(err.message));
   }
-  useEffect(search, []);
+  // `selected` (the edit modal below) is a snapshot captured on click, not
+  // derived from `businesses` -- refreshing the list in the background
+  // never touches whatever's currently open for editing.
+  usePolling(search, ADMIN_POLL_MS);
 
   return (
     <>
@@ -608,7 +615,7 @@ export function LotteryPanel() {
   function load() {
     apiFetch("/super-admin/lottery").then(setData).catch(err => setError(err.message));
   }
-  useEffect(load, []);
+  usePolling(load, ADMIN_POLL_MS);
 
   async function create(e) {
     e.preventDefault();

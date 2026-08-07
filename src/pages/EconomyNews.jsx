@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import DiscordAvatar from "../components/DiscordAvatar";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { usePolling } from "../hooks/usePolling";
 import { changeClass } from "../utils";
+
+const NEWS_POLL_MS = 15_000; // "moderately active" -- new items land unpredictably, not continuously
 
 function fmt(n) {
   return `$${Number(n ?? 0).toLocaleString()}`;
@@ -81,11 +84,9 @@ export default function EconomyNews() {
   const [error, setError] = useState(null);
   const base = usePublicBase();
 
-  useEffect(() => {
-    apiFetch("/public/economy/news", { auth: false })
-      .then(data => setNews(data.news))
-      .catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/public/economy/news", { auth: false })
+    .then(data => setNews(data.news))
+    .catch(err => setError(err.message)), NEWS_POLL_MS);
 
   return (
     <div className="home-page">

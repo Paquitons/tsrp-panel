@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PublicNav from "../components/PublicNav";
+import { usePolling } from "../hooks/usePolling";
 
 const LEADERSHIP_TIER = "leadership";
+const ROSTER_POLL_MS = 30_000; // "moderately active" tier -- staffCache itself only refreshes every 5min server-side, this just picks that up promptly
 
 export default function Roster() {
   const [staff, setStaff] = useState(null);
@@ -11,14 +13,12 @@ export default function Roster() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
 
-  useEffect(() => {
-    apiFetch("/public/staff", { auth: false })
-      .then(data => {
-        setStaff(data.staff);
-        setTiers(data.tiers);
-      })
-      .catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/public/staff", { auth: false })
+    .then(data => {
+      setStaff(data.staff);
+      setTiers(data.tiers);
+    })
+    .catch(err => setError(err.message)), ROSTER_POLL_MS);
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(() => {

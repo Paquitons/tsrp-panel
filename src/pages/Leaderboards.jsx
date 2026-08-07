@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PublicNav from "../components/PublicNav";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { usePolling } from "../hooks/usePolling";
 import { pctChange } from "../utils";
 
 const CURRENCY = "$";
+const LEADERBOARDS_POLL_MS = 20_000; // "moderately active" tier
 
 function fmt(n) {
   return `${CURRENCY}${Number(n ?? 0).toLocaleString()}`;
@@ -31,9 +33,7 @@ export default function Leaderboards() {
   const [error, setError] = useState(null);
   const base = usePublicBase();
 
-  useEffect(() => {
-    apiFetch("/public/leaderboards", { auth: false }).then(setData).catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/public/leaderboards", { auth: false }).then(setData).catch(err => setError(err.message)), LEADERBOARDS_POLL_MS);
 
   return (
     <div className="home-page">

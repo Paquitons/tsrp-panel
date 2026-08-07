@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import { usePublicBase } from "../hooks/usePublicBase";
+import { usePolling } from "../hooks/usePolling";
 import { pctChange, changeClass } from "../utils";
+
+const STOCKS_POLL_MS = 5_000; // "highly active" tier -- live prices
 
 export default function StockMarket() {
   const [stocks, setStocks] = useState(null);
   const [error, setError] = useState(null);
   const base = usePublicBase();
 
-  useEffect(() => {
-    apiFetch("/public/stocks", { auth: false })
-      .then(data => setStocks(data.stocks))
-      .catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/public/stocks", { auth: false })
+    .then(data => setStocks(data.stocks))
+    .catch(err => setError(err.message)), STOCKS_POLL_MS);
 
   return (
     <div className="home-page">

@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api";
 import { CHANGELOGS } from "../data/changelogs";
 import { colorForIndex } from "../data/changelogColors";
 import PublicNav from "../components/PublicNav";
+import { usePolling } from "../hooks/usePolling";
 
-const STATUS_POLL_MS = 15_000;
+// "Highly active" tier -- player count, queue, and server status are all
+// exactly the kind of thing Phase 3 wants to feel live (see usePolling).
+const STATUS_POLL_MS = 5_000;
 
 // `online` here is the staff-declared "is a session actually open" flag
 // (set by /startup and /shutdown -- see highrock-bot's serverState.js and
@@ -25,26 +28,15 @@ function StatusPill({ online }) {
 export default function Home() {
   const [status, setStatus] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function poll() {
-      try {
-        const data = await apiFetch("/public/status", { auth: false });
-        if (!cancelled) setStatus(data);
-      } catch {
-        // Best-effort -- the stats row just keeps showing its last known
-        // values (or the loading state) rather than breaking the page.
-      }
+  usePolling(async () => {
+    try {
+      const data = await apiFetch("/public/status", { auth: false });
+      setStatus(data);
+    } catch {
+      // Best-effort -- the stats row just keeps showing its last known
+      // values (or the loading state) rather than breaking the page.
     }
-
-    poll();
-    const interval = setInterval(poll, STATUS_POLL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
+  }, STATUS_POLL_MS);
 
   const recentUpdates = CHANGELOGS.slice(0, 3);
 

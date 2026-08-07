@@ -3,7 +3,10 @@ import { useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 import PublicNav from "../components/PublicNav";
 import PriceChart from "../components/PriceChart";
+import { usePolling } from "../hooks/usePolling";
 import { pctChange, changeClass } from "../utils";
+
+const STOCK_DETAIL_POLL_MS = 5_000; // "highly active" tier -- live price + chart
 
 function fmt(n) {
   return `$${Number(n ?? 0).toLocaleString()}`;
@@ -14,13 +17,17 @@ export default function StockDetail() {
   const [stock, setStock] = useState(null);
   const [error, setError] = useState(null);
 
+  // Reset immediately on navigation (don't show the previous ticker's
+  // stale data while the new one loads) -- separate from the poll itself
+  // since this is a one-time reset per ticker, not something to repeat.
   useEffect(() => {
     setStock(null);
     setError(null);
-    apiFetch(`/public/stocks/${ticker}`, { auth: false })
-      .then(setStock)
-      .catch(err => setError(err.message));
   }, [ticker]);
+
+  usePolling(() => apiFetch(`/public/stocks/${ticker}`, { auth: false })
+    .then(setStock)
+    .catch(err => setError(err.message)), STOCK_DETAIL_POLL_MS, [ticker]);
 
   return (
     <div className="home-page">

@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import CustomSelect from "../components/CustomSelect";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import StockPriceChart from "../components/StockPriceChart";
+import { usePolling } from "../hooks/usePolling";
 import { toDateTimeInputValue, parseDateTimeInput } from "../utils";
+
+// Read-only list/log views poll at the "moderately active" tier; anything
+// with editable fields (stock detail, market controls) deliberately does
+// NOT poll -- overwriting an admin's in-progress edit out from under them
+// would be a real bug, not a live-data win.
+const ADMIN_POLL_MS = 15_000;
 
 const SUB_TABS = [
   { value: "overview", label: "Overview" },
@@ -82,9 +89,7 @@ function OverviewTab() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    apiFetch("/super-admin/stock-market/overview").then(setData).catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/super-admin/stock-market/overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   if (error) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
   if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
@@ -145,7 +150,10 @@ function StocksTab() {
   function load() {
     apiFetch("/super-admin/stocks").then(({ stocks }) => setStocks(stocks)).catch(err => setError(err.message));
   }
-  useEffect(load, []);
+  // Paused (not just slow) while a stock is open for editing below --
+  // this list isn't shown then, and there's no reason to keep hitting the
+  // endpoint in the background.
+  usePolling(load, selectedTicker ? null : ADMIN_POLL_MS);
 
   const filtered = stocks.filter(s => !query.trim() || s.ticker.includes(query.toUpperCase()) || s.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -255,11 +263,13 @@ function StockDetail({ ticker, onBack }) {
     apiFetch(`/super-admin/stocks/${ticker}/transactions`).then(({ transactions }) => setTransactions(transactions));
     apiFetch(`/super-admin/stocks/${ticker}/holders`).then(({ holders }) => setHolders(holders));
   }
-  useEffect(load, [ticker]);
+  // Safe to poll even with editable fields below (StockAdminControls) --
+  // those are useState-initialized once from the `stock` prop with no
+  // effect syncing later prop changes back in, so a refreshed price/
+  // performance/holder list here never overwrites an in-progress edit.
+  usePolling(load, ADMIN_POLL_MS, [ticker]);
 
-  useEffect(() => {
-    apiFetch(`/super-admin/stocks/${ticker}/price-history?since=${Date.now() - range}`).then(({ history }) => setHistory(history));
-  }, [ticker, range]);
+  usePolling(() => apiFetch(`/super-admin/stocks/${ticker}/price-history?since=${Date.now() - range}`).then(({ history }) => setHistory(history)), ADMIN_POLL_MS, [ticker, range]);
 
   function flash(msg) {
     setNotice(msg);
@@ -493,7 +503,7 @@ function MarketControlsTab() {
   function load() {
     apiFetch("/super-admin/stock-market/config").then(setConfig).catch(err => setError(err.message));
   }
-  useEffect(load, []);
+  usePolling(load, ADMIN_POLL_MS);
 
   function flash(msg) {
     setNotice(msg);
@@ -622,7 +632,10 @@ function MarketEventsTab() {
     const qs = statusFilter ? `?status=${statusFilter}` : "";
     apiFetch(`/super-admin/market-events${qs}`).then(({ events }) => setEvents(events)).catch(err => setError(err.message));
   }
-  useEffect(load, [statusFilter]);
+  // Safe with an event open for editing below (EditMarketEventForm) for
+  // the same reason as the stock detail view above -- its fields are
+  // useState-initialized once from the event prop, never re-synced.
+  usePolling(load, ADMIN_POLL_MS, [statusFilter]);
 
   function flash(msg) {
     setNotice(msg);
@@ -879,7 +892,7 @@ function NewsTab() {
     apiFetch("/super-admin/stock-market/news").then(({ news }) => setNews(news)).catch(err => setError(err.message));
     apiFetch("/super-admin/economy-news").then(({ announcements }) => setAnnouncements(announcements)).catch(err => setError(err.message));
   }
-  useEffect(load, []);
+  usePolling(load, ADMIN_POLL_MS);
 
   async function post(e) {
     e.preventDefault();
@@ -956,9 +969,7 @@ function AuditLogTab() {
   const [log, setLog] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    apiFetch("/super-admin/stock-market/audit-log").then(({ log }) => setLog(log)).catch(err => setError(err.message));
-  }, []);
+  usePolling(() => apiFetch("/super-admin/stock-market/audit-log").then(({ log }) => setLog(log)).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   return (
     <>
