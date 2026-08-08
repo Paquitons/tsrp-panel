@@ -1868,6 +1868,40 @@ code {
   line-height: 1;
 }
 
+/* ---------- DiscordIdentity "row" variant ----------
+   Nickname and @username/ID stack on separate lines instead of being
+   flattened into one string -- a long nickname truncating on its own
+   line no longer eats the @username/ID that came after it in the same
+   line, which is what silently dropped the ID on narrow log/LOA cards. */
+.discord-identity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.discord-identity-text {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.discord-identity-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discord-identity-sub {
+  font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .leaderboard-end-btn {
   grid-column: 1 / -1;
   justify-self: end;

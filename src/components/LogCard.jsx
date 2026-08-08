@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "./Avatar";
 import DiscordAvatar from "./DiscordAvatar";
-import { discordDisplayName } from "./DiscordIdentity";
+import DiscordIdentity, { discordDisplayName } from "./DiscordIdentity";
 import CustomSelect from "./CustomSelect";
 import PortalDropdown from "./PortalDropdown";
 
@@ -86,14 +86,16 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   return (
     <div className={`log-card ${isActiveBolo ? "bolo-active" : ""}`}>
       <div className="log-card-issuer-row">
-        <DiscordAvatar discordId={log.issuer_discord_id} avatarHash={log.issuer_avatar_hash} size={28} />
-        <span
-          className={issuerClickable ? "log-card-issuer-name log-card-clickable-name" : "log-card-issuer-name"}
-          style={issuerClickable ? { cursor: "pointer" } : undefined}
-          onClick={() => issuerClickable && onIssuerClick(log.issuer_discord_id)}
-        >
-          {discordDisplayName(log.issuer_nickname, log.issuer_username, log.issuer_discord_id)}
-        </span>
+        <DiscordIdentity
+          variant="row"
+          nickname={log.issuer_nickname}
+          username={log.issuer_username}
+          discordId={log.issuer_discord_id}
+          avatarHash={log.issuer_avatar_hash}
+          size={28}
+          primaryClassName={issuerClickable ? "log-card-clickable-name" : ""}
+          onPrimaryClick={issuerClickable ? () => onIssuerClick(log.issuer_discord_id) : undefined}
+        />
 
         <div className="log-card-menu">
           <button ref={menuTriggerRef} className="log-card-menu-trigger" onClick={() => setMenuOpen(o => !o)} disabled={busy}>⋮</button>

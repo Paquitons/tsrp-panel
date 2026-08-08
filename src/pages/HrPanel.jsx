@@ -6,7 +6,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
-import { discordDisplayName } from "../components/DiscordIdentity";
+import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
 import HrAutomodOffenses from "./HrAutomodOffenses";
@@ -347,8 +347,14 @@ export default function HrPanel() {
                 {pendingPromotions.map(s => (
                   <div className="loa-card" key={s.id}>
                     <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
-                      <DiscordAvatar discordId={s.target_discord_id} avatarHash={s.target_avatar_hash} size={26} />
-                      <span className="log-card-username">{discordDisplayName(s.target_nickname, s.target_username, s.target_discord_id)}</span>
+                      <DiscordIdentity
+                        variant="row"
+                        nickname={s.target_nickname}
+                        username={s.target_username}
+                        discordId={s.target_discord_id}
+                        avatarHash={s.target_avatar_hash}
+                        size={26}
+                      />
                       <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
                     </div>
                     <div className="log-card-field"><span className="muted">Current rank:</span> {s.old_rank_label ?? "Unknown"}</div>
@@ -356,8 +362,14 @@ export default function HrPanel() {
                     <div className="log-card-field" style={{ marginBottom: 8 }}><span className="muted">Reason:</span> {s.reason}</div>
                     <div className="log-card-issuer-row" style={{ marginBottom: 8 }}>
                       <span className="muted" style={{ fontSize: 12.5 }}>Requested by</span>
-                      <DiscordAvatar discordId={s.requested_by} avatarHash={s.requester_avatar_hash} size={18} />
-                      <span style={{ fontSize: 12.5 }}>{discordDisplayName(s.requester_nickname, s.requester_username, s.requested_by)}</span>
+                      <DiscordIdentity
+                        variant="row"
+                        nickname={s.requester_nickname}
+                        username={s.requester_username}
+                        discordId={s.requested_by}
+                        avatarHash={s.requester_avatar_hash}
+                        size={18}
+                      />
                     </div>
                     <div className="button-row">
                       <button className="btn-green small" onClick={() => reviewRankChange(s.id, "approved")}>Approve</button>
@@ -380,8 +392,14 @@ export default function HrPanel() {
                 <div className="loa-card" key={r.id}>
                   <div className="loa-card-top loa-card-top-stack">
                     <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                      <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
-                      <span className="log-card-username">{discordDisplayName(r.requester_nickname, r.requester_username, r.discord_id)}</span>
+                      <DiscordIdentity
+                        variant="row"
+                        nickname={r.requester_nickname}
+                        username={r.requester_username}
+                        discordId={r.discord_id}
+                        avatarHash={r.requester_avatar_hash}
+                        size={22}
+                      />
                     </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
                   </div>
@@ -574,8 +592,14 @@ export default function HrPanel() {
               {groupedStrikes.map(([discordId, strikes]) => (
                 <div className="log-card" key={discordId}>
                   <div className="log-card-issuer-row">
-                    <DiscordAvatar discordId={discordId} avatarHash={strikes[0].target_avatar_hash} size={28} />
-                    <span className="log-card-issuer-name">{discordDisplayName(strikes[0].target_nickname, strikes[0].target_username, discordId)}</span>
+                    <DiscordIdentity
+                      variant="row"
+                      nickname={strikes[0].target_nickname}
+                      username={strikes[0].target_username}
+                      discordId={discordId}
+                      avatarHash={strikes[0].target_avatar_hash}
+                      size={28}
+                    />
                     <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
                   </div>
                   <div className="log-card-body">
@@ -606,8 +630,14 @@ export default function HrPanel() {
                   <div className="loa-card" key={r.id}>
                     <div className="loa-card-top loa-card-top-stack">
                       <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
-                        <span className="log-card-username">{discordDisplayName(r.requester_nickname, r.requester_username, r.discord_id)}</span>
+                        <DiscordIdentity
+                          variant="row"
+                          nickname={r.requester_nickname}
+                          username={r.requester_username}
+                          discordId={r.discord_id}
+                          avatarHash={r.requester_avatar_hash}
+                          size={22}
+                        />
                       </span>
                       <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
                     </div>
@@ -634,8 +664,14 @@ export default function HrPanel() {
                   <div className="loa-card" key={r.id}>
                     <div className="loa-card-top loa-card-top-stack">
                       <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
-                        <DiscordAvatar discordId={r.discord_id} avatarHash={r.requester_avatar_hash} size={22} />
-                        <span className="log-card-username">{discordDisplayName(r.requester_nickname, r.requester_username, r.discord_id)}</span>
+                        <DiscordIdentity
+                          variant="row"
+                          nickname={r.requester_nickname}
+                          username={r.requester_username}
+                          discordId={r.discord_id}
+                          avatarHash={r.requester_avatar_hash}
+                          size={22}
+                        />
                       </span>
                       <span className={r.returned_early ? "loa-status-approved" : "muted"}>
                         {r.returned_early ? "Returned early" : "Completed"} {new Date(r.ended_at).toLocaleDateString()}

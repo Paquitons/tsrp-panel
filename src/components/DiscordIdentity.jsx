@@ -36,6 +36,7 @@ export function discordDisplayName(nickname, username, discordId) {
 export default function DiscordIdentity({
   nickname, username, discordId, avatarHash,
   variant = "text", size = 22, showId = true, showAvatar = true, className = "",
+  onPrimaryClick, primaryClassName = "",
 }) {
   const primary = nickname || username || (discordId ? "Unknown Member" : "Unknown");
   const secondary = [];
@@ -44,11 +45,17 @@ export default function DiscordIdentity({
 
   if (variant === "row") {
     return (
-      <div className={`discord-identity-row ${className}`.trim()} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className={`discord-identity-row ${className}`.trim()}>
         {showAvatar && discordId && <DiscordAvatar discordId={discordId} avatarHash={avatarHash} size={size} />}
-        <div>
-          <div>{primary}</div>
-          {secondary.length > 0 && <div className="muted" style={{ fontSize: "var(--text-xs)" }}>{secondary.join(" · ")}</div>}
+        <div className="discord-identity-text">
+          <div
+            className={`discord-identity-name ${primaryClassName}`.trim()}
+            style={onPrimaryClick ? { cursor: "pointer" } : undefined}
+            onClick={onPrimaryClick}
+          >
+            {primary}
+          </div>
+          {secondary.length > 0 && <div className="discord-identity-sub muted">{secondary.join(" · ")}</div>}
         </div>
       </div>
     );
