@@ -138,6 +138,7 @@ export default function Verification() {
                         <DiscordIdentity
                           nickname={profile.link.linkedBy_nickname} username={profile.link.linkedBy_username}
                           discordId={profile.link.linkedBy} avatarHash={profile.link.linkedBy_avatar_hash} size={16}
+                          showId={false}
                         />
                       </>
                     )}
@@ -179,6 +180,7 @@ export default function Verification() {
                       <DiscordIdentity
                         nickname={h.performed_by_nickname} username={h.performed_by_username}
                         discordId={h.performed_by} avatarHash={h.performed_by_avatar_hash} size={16}
+                        showId={false}
                       />
                     </div>
                     {h.reason && <div className="log-card-field"><span className="muted">Reason:</span> {h.reason}</div>}

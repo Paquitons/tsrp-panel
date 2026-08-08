@@ -120,18 +120,18 @@ export default function TicketTranscript() {
       <div className="card-grid" style={{ marginBottom: 20 }}>
         <div className="stat-tile">
           <div className="muted">Opened By</div>
-          <DiscordIdentity nickname={ticket.opener_nickname} username={ticket.opener_username} discordId={ticket.opener_discord_id} avatarHash={ticket.opener_avatar_hash} showAvatar={false} />
+          <DiscordIdentity nickname={ticket.opener_nickname} username={ticket.opener_username} discordId={ticket.opener_discord_id} avatarHash={ticket.opener_avatar_hash} showAvatar={false} showId={false} />
         </div>
         <div className="stat-tile">
           <div className="muted">Claimed By</div>
           {ticket.claimed_by
-            ? <DiscordIdentity nickname={ticket.claimer_nickname} username={ticket.claimer_username} discordId={ticket.claimed_by} avatarHash={ticket.claimer_avatar_hash} showAvatar={false} />
+            ? <DiscordIdentity nickname={ticket.claimer_nickname} username={ticket.claimer_username} discordId={ticket.claimed_by} avatarHash={ticket.claimer_avatar_hash} showAvatar={false} showId={false} />
             : <div>Unclaimed</div>}
         </div>
         <div className="stat-tile">
           <div className="muted">Closed By</div>
           {ticket.closed_by
-            ? <DiscordIdentity nickname={ticket.closer_nickname} username={ticket.closer_username} discordId={ticket.closed_by} avatarHash={ticket.closer_avatar_hash} showAvatar={false} />
+            ? <DiscordIdentity nickname={ticket.closer_nickname} username={ticket.closer_username} discordId={ticket.closed_by} avatarHash={ticket.closer_avatar_hash} showAvatar={false} showId={false} />
             : <div>Automatic</div>}
         </div>
         <div className="stat-tile"><div className="muted">Close Reason</div><div>{ticket.close_reason || "--"}</div></div>

@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
-import { discordDisplayName } from "../components/DiscordIdentity";
 import PortalDropdown from "../components/PortalDropdown";
 
 function fmtTime(ts) {
@@ -154,7 +153,7 @@ export default function HrAutomodOffenses() {
                       {o.cleared_by && (
                         <>
                           {" "}by <DiscordAvatar discordId={o.cleared_by} avatarHash={o.clearedBy_avatar_hash} size={16} style={{ verticalAlign: "middle", margin: "0 4px" }} />
-                          {discordDisplayName(o.clearedBy_nickname, o.clearedBy_username, o.cleared_by)}
+                          {o.clearedBy_nickname || o.clearedBy_username || "Unknown Member"}
                         </>
                       )}
                     </div>

@@ -78,7 +78,7 @@ export default function Tickets() {
                 Opened by{" "}
                 <DiscordIdentity
                   nickname={t.opener_nickname} username={t.opener_username} discordId={t.opener_discord_id}
-                  avatarHash={t.opener_avatar_hash} showAvatar={false}
+                  avatarHash={t.opener_avatar_hash} showAvatar={false} showId={false}
                 />
                 {" "}-- closed {formatDate(t.closed_at)}
               </div>

@@ -500,7 +500,7 @@ export function BusinessesPanel() {
             <div>
               <div className="verification-identity-name">{b.name} <span className="badge loa-status-pending">{b.type}</span></div>
               <div className="muted">
-                Owner: <DiscordIdentity nickname={b.owner_nickname} username={b.owner_username} discordId={b.owner_discord_id} showAvatar={false} />
+                Owner: <DiscordIdentity nickname={b.owner_nickname} username={b.owner_username} discordId={b.owner_discord_id} showAvatar={false} showId={false} />
               </div>
             </div>
             <span className="muted" style={{ marginLeft: "auto" }}>{fmt(b.treasury)}</span>
@@ -609,11 +609,11 @@ function BusinessEditModal({ business, onClose, onSaved }) {
 
         <label style={{ marginTop: 12 }}>Owner</label>
         <div className="button-row" style={{ alignItems: "center", marginBottom: 4 }}>
-          <DiscordIdentity variant="row" nickname={business.owner_nickname} username={business.owner_username} discordId={business.owner_discord_id} avatarHash={business.owner_avatar_hash} />
+          <DiscordIdentity variant="row" nickname={business.owner_nickname} username={business.owner_username} discordId={business.owner_discord_id} avatarHash={business.owner_avatar_hash} showId={false} />
         </div>
         <AccountPicker
           placeholder="Search to transfer ownership to someone else..."
-          onSelect={m => { setOwnerDiscordId(m.discordId); setNewOwnerLabel(discordDisplayName(m.nickname, m.username, m.discordId)); }}
+          onSelect={m => { setOwnerDiscordId(m.discordId); setNewOwnerLabel(m.nickname || m.username || "Unknown Member"); }}
         />
         {ownerDiscordId !== business.owner_discord_id && (
           <p className="muted field-hint">New owner: {newOwnerLabel}. This will override ownership -- confirmation required on save.</p>
@@ -658,7 +658,7 @@ export function CasinoControlsPanel() {
           <CustomSelect
             value={casinoId}
             onChange={setCasinoId}
-            options={casinos.map(c => ({ value: String(c.id), label: `${c.name} (owner: ${c.owner_nickname || c.owner_username || c.owner_discord_id})` }))}
+            options={casinos.map(c => ({ value: String(c.id), label: `${c.name} (owner: ${c.owner_nickname || c.owner_username || "Unknown Member"})` }))}
           />
         </>
       )}
@@ -1006,7 +1006,7 @@ export function StorefrontsPanel() {
           <CustomSelect
             value={storefrontId}
             onChange={setStorefrontId}
-            options={storefronts.map(s => ({ value: String(s.id), label: `${s.name} (owner: ${s.owner_nickname || s.owner_username || s.owner_discord_id})` }))}
+            options={storefronts.map(s => ({ value: String(s.id), label: `${s.name} (owner: ${s.owner_nickname || s.owner_username || "Unknown Member"})` }))}
           />
         </>
       )}
@@ -1169,7 +1169,7 @@ export function DebtPanel() {
 
   async function lookupReputation(member) {
     setLookupId(member.discordId);
-    setLookupLabel(discordDisplayName(member.nickname, member.username, member.discordId));
+    setLookupLabel(member.nickname || member.username || "Unknown Member");
     try {
       const { score } = await apiFetch(`/super-admin/debt/reputation/${member.discordId}`);
       setReputation(score);

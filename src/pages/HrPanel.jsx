@@ -6,7 +6,7 @@ import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
-import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdentity";
+import DiscordIdentity from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
 import HrAutomodOffenses from "./HrAutomodOffenses";
@@ -370,6 +370,7 @@ export default function HrPanel() {
                         discordId={s.requested_by}
                         avatarHash={s.requester_avatar_hash}
                         size={18}
+                        showId={false}
                       />
                     </div>
                     <div className="button-row">
@@ -610,7 +611,7 @@ export default function HrPanel() {
                       <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                         <span>
                           <span className="muted">Strike {s.role_slot}:</span> {s.reason}
-                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {discordDisplayName(s.issuer_nickname, s.issuer_username, s.issued_by)} {timeAgo(s.created_at)})</span>
+                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_nickname || s.issuer_username || "Unknown Member"} {timeAgo(s.created_at)})</span>
                         </span>
                         <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
                       </div>
