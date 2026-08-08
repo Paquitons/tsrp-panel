@@ -63,6 +63,63 @@ function renderContent(content, mentions) {
   return parts;
 }
 
+/**
+ * Same mention resolution as renderContent, but as plain text (e.g.
+ * "@wellidontplaythis" instead of a styled span) -- used for the
+ * copy/download export, which can't carry React elements or CSS.
+ */
+function mentionsToPlainText(content, mentions) {
+  if (!content) return "";
+  return content.replace(MENTION_RE, (full, userId, roleId, channelId) => {
+    if (userId) {
+      const user = mentions.users?.[userId];
+      return `@${user?.nickname || user?.username || "deleted-user"}`;
+    }
+    if (roleId) return `@${mentions.roles?.[roleId]?.name ?? "deleted-role"}`;
+    if (channelId) return `#${mentions.channels?.[channelId]?.name ?? "deleted-channel"}`;
+    return full; // @everyone / @here read fine as-is
+  });
+}
+
+function identityLabel(nickname, username, fallback) {
+  return nickname || username || fallback;
+}
+
+/**
+ * Builds a plain-text export of the whole transcript -- ticket metadata,
+ * then every message as "[timestamp] Name: content", with mentions
+ * resolved to real names and attachments listed by filename. Used for
+ * both the copy-to-clipboard and download actions, so those two always
+ * produce identical text.
+ */
+function buildTranscriptText(ticket, messages, mentions) {
+  const lines = [
+    `Ticket #${ticket.ticket_number}`,
+    `Opened by: ${identityLabel(ticket.opener_nickname, ticket.opener_username, "Unknown Member")}`,
+    `Claimed by: ${ticket.claimed_by ? identityLabel(ticket.claimer_nickname, ticket.claimer_username, "Unknown Member") : "Unclaimed"}`,
+    `Closed by: ${ticket.closed_by ? identityLabel(ticket.closer_nickname, ticket.closer_username, "Unknown Member") : "Automatic"}`,
+    `Close reason: ${ticket.close_reason || "--"}`,
+    `Opened: ${new Date(ticket.opened_at).toLocaleString()}`,
+    `Closed: ${ticket.closed_at ? new Date(ticket.closed_at).toLocaleString() : "--"}`,
+    "",
+    "----------------------------------------",
+    "",
+  ];
+
+  for (const m of messages) {
+    const name = m.authorNickname || m.authorUsername || m.authorTag;
+    lines.push(`[${new Date(m.createdAt).toLocaleString()}] ${name}:`);
+    if (m.content) lines.push(mentionsToPlainText(m.content, mentions));
+    if (m.isEmbed && !m.content) lines.push("[embed]");
+    for (const a of m.attachments) {
+      lines.push(a.status === "ok" ? `[Attachment: ${a.filename}]` : `[Attachment: ${a.filename} -- ${a.status === "too_large" ? "too large to archive" : "failed to archive"}]`);
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
 function formatBytes(n) {
   if (!Number.isFinite(n)) return "";
   if (n < 1024) return `${n} B`;
@@ -148,12 +205,35 @@ export default function TicketTranscript() {
   const { ticketNumber } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   usePolling(
     () => apiFetch(`/tickets/${ticketNumber}`).then(d => { setData(d); setError(null); }).catch(err => setError(err.message)),
     POLL_MS,
     [ticketNumber]
   );
+
+  async function copyTranscript() {
+    const text = buildTranscriptText(data.ticket, data.messages, data.mentions);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      alert("Couldn't copy to clipboard -- your browser may be blocking it.");
+    }
+  }
+
+  function downloadTranscript() {
+    const text = buildTranscriptText(data.ticket, data.messages, data.mentions);
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ticket-${data.ticket.ticket_number}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (error && !data) {
     return (
@@ -176,8 +256,12 @@ export default function TicketTranscript() {
 
   return (
     <div className="content">
-      <div className="button-row">
+      <div className="button-row" style={{ justifyContent: "space-between", flexWrap: "wrap" }}>
         <Link to="/tickets" className="secondary" style={{ padding: "6px 12px", borderRadius: "var(--radius-sm)" }}>&larr; Back to Tickets</Link>
+        <div className="button-row">
+          <button className="secondary small" type="button" onClick={copyTranscript}>{copied ? "Copied!" : "Copy Transcript"}</button>
+          <button className="secondary small" type="button" onClick={downloadTranscript}>Download Transcript</button>
+        </div>
       </div>
       <div className="page-header" style={{ marginTop: 12 }}>
         <h1>Ticket #{ticket.ticket_number}</h1>
