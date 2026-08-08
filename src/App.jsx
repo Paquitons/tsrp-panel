@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
@@ -18,6 +18,7 @@ import ChangelogEntry from "./pages/ChangelogEntry";
 import Verification from "./pages/Verification";
 import Tickets from "./pages/Tickets";
 import TicketTranscript from "./pages/TicketTranscript";
+import NotFound, { PublicNotFound } from "./pages/NotFound";
 import Strike3Prompt from "./components/Strike3Prompt";
 
 // Every page that exists both at its normal public URL AND, for a
@@ -61,7 +62,7 @@ function AppShell() {
           {PUBLIC_PAGES.map(({ path, element }) => (
             <Route key={`site${path}`} path={path === "/" ? "/site" : `/site${path}`} element={element} />
           ))}
-          <Route path="*" element={user ? <Navigate to="/" replace /> : <Login />} />
+          <Route path="*" element={<PublicNotFound />} />
         </Routes>
       </div>
     );
@@ -80,6 +81,7 @@ function AppShell() {
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
         {user?.isSupportStaff && <Route path="/tickets" element={<Tickets />} />}
         {user?.isSupportStaff && <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Strike3Prompt />
     </div>
