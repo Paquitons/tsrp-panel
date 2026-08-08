@@ -1,6 +1,6 @@
 import DiscordAvatar from "./DiscordAvatar";
 import { discordDisplayName } from "./DiscordIdentity";
-import { formatDuration } from "../utils";
+import { formatDuration, dutyFlagLabel } from "../utils";
 
 export default function ShiftLeaderboardModal({
   leaderboard,
@@ -37,14 +37,22 @@ export default function ShiftLeaderboardModal({
         ) : (
           <div className="leaderboard-list">
             {leaderboard.map((row, idx) => {
-              const isActive = onDutyStaff.some(s => s.discordId === row.discord_id);
+              const activeEntry = onDutyStaff.find(s => s.discordId === row.discord_id);
+              const isActive = !!activeEntry;
               const name = discordDisplayName(row.staff_nickname, row.staff_username, row.discord_id);
               const canEnd = canManage && isActive;
               return (
                 <div key={row.discord_id} className="leaderboard-row">
                   <span className="leaderboard-rank">#{idx + 1}</span>
                   <DiscordAvatar discordId={row.discord_id} avatarHash={row.staff_avatar_hash} size={28} />
-                  <span className="leaderboard-name">{name}</span>
+                  <span className="leaderboard-name">
+                    <span className="leaderboard-name-text">{name}</span>
+                    {activeEntry?.flaggedReason && (
+                      <span className="duty-flag-badge" title={dutyFlagLabel(activeEntry.flaggedReason)}>
+                        ⚠️ Flagged
+                      </span>
+                    )}
+                  </span>
                   <span className="leaderboard-stat muted">
                     {formatDuration(row.totalSeconds)} · {row.shiftCount} shift{row.shiftCount === 1 ? "" : "s"}
                   </span>

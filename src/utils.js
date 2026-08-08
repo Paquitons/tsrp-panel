@@ -167,6 +167,18 @@ export function parseDateTimeInput(value) {
   return new Date(value).getTime();
 }
 
+// Keys written by highrock-bot's dutyStatusMonitor.js -- kept as short
+// machine keys in the DB so the copy shown here can change without a
+// migration.
+export const DUTY_FLAG_LABELS = {
+  not_in_server: "Marked On Duty but not currently in the ERLC server",
+  server_shutdown: "Marked On Duty while the server is Shutdown",
+};
+
+export function dutyFlagLabel(reason) {
+  return DUTY_FLAG_LABELS[reason] ?? "Marked On Duty but flagged for review";
+}
+
 export const TYPE_LABELS = {
   warning: "Warning",
   kick: "Kick",

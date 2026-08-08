@@ -1826,6 +1826,13 @@ code {
 }
 
 .leaderboard-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.leaderboard-name-text {
   font-weight: 600;
   color: var(--text-primary);
   min-width: 0;
@@ -1837,6 +1844,28 @@ code {
 .leaderboard-stat {
   font-size: var(--text-sm);
   white-space: nowrap;
+}
+
+/* ---------- Duty status monitoring flags ---------- */
+
+.duty-flag-badge {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--warning);
+  background: rgba(255, 182, 72, 0.14);
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.on-duty-flag-icon {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .leaderboard-end-btn {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { formatClockTime, formatDurationWithSeconds, TYPE_LABELS } from "../utils";
+import { formatClockTime, formatDurationWithSeconds, TYPE_LABELS, dutyFlagLabel } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
 import { discordDisplayName } from "../components/DiscordIdentity";
@@ -463,12 +463,13 @@ export default function Dashboard() {
                 <div
                   className="on-duty-avatar"
                   key={s.discordId}
-                  title={`${discordDisplayName(s.nickname, s.username, s.discordId)}${s.onBreak ? " (on break)" : ""}`}
+                  title={`${discordDisplayName(s.nickname, s.username, s.discordId)}${s.onBreak ? " (on break)" : ""}${s.flaggedReason ? ` — ${dutyFlagLabel(s.flaggedReason)}` : ""}`}
                   onClick={() => openUserByDiscord(s.discordId)}
                   style={{ cursor: "pointer" }}
                 >
                   <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={30} />
                   <span className={`on-duty-dot ${s.onBreak ? "on-duty-break" : "on-duty-active"}`} />
+                  {s.flaggedReason && <span className="on-duty-flag-icon">⚠️</span>}
                 </div>
               ))}
             </div>
