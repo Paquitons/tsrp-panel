@@ -1,5 +1,53 @@
 [
   {
+    "version": "1.8.0",
+    "slug": "v1-8-0",
+    "title": "TSRP Update",
+    "date": "2026-08-08",
+    "summary": "Ticket transcripts now look like real conversations, duty status gets watched automatically, and a big pass on cleaning up how Discord accounts are shown across the site.",
+    "sections": [
+      {
+        "heading": "Ticket Transcripts, Rebuilt",
+        "items": [
+          "Transcripts now render like an actual Discord conversation -- real avatars next to each message instead of a flat text export.",
+          "Mentions are readable again: @user, @role (with the role's real color), and #channel all show their actual name instead of raw code, and still work correctly on old transcripts.",
+          "Added Copy Transcript and Download Transcript buttons for grabbing a plain-text copy of the whole conversation."
+        ]
+      },
+      {
+        "heading": "New: Duty Status Monitoring",
+        "items": [
+          "The system now automatically flags a staff member's shift if they're marked On Duty but aren't actually in the server, or if the server is Shutdown while they're clocked in.",
+          "Flags never end a shift automatically -- they just alert management and show a warning badge on the panel so it can be reviewed by a person."
+        ]
+      },
+      {
+        "heading": "Cleaner Discord Account Display",
+        "items": [
+          "Discord IDs no longer show up as the main thing you see anywhere in the panel -- names and usernames are front and center, with the ID only surfacing where you're actually searching for someone.",
+          "Every account search box across the panel (Economy Control, ownership transfers, etc.) now uses the same real search-and-pick tool instead of requiring a raw Discord ID."
+        ]
+      },
+      {
+        "heading": "/players Redesign",
+        "items": [
+          "Cleaner, less cluttered layout for the server's live player roster.",
+          "New \"View Staff In-Game\" button shows exactly which staff are currently in the server, their rank, and their live duty status."
+        ]
+      },
+      {
+        "heading": "Other Fixes",
+        "items": [
+          "Fixed several places where a message would ping someone twice, or ping when it shouldn't have.",
+          "Fixed rank/duty tags (like \"ChM |\") sometimes leaking into places they shouldn't, like the public leaderboard.",
+          "Fixed a bug where a Discord lookup hiccup could get someone stuck showing as \"Player #1234\" for several minutes.",
+          "Added a proper 404 page instead of a blank screen on a bad link.",
+          "Removed the shift type field from Start Shift -- one less thing to fill in."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.7.0",
     "slug": "v1-7-0",
     "title": "TSRP Update",
