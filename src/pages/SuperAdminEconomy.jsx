@@ -37,6 +37,9 @@ export function EconomyOverviewPanel() {
   const [printAmount, setPrintAmount] = useState("");
   const [printReason, setPrintReason] = useState("");
   const [printing, setPrinting] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawReason, setWithdrawReason] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
 
   usePolling(() => apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
@@ -61,6 +64,25 @@ export function EconomyOverviewPanel() {
       setError(err.message);
     } finally {
       setPrinting(false);
+    }
+  }
+
+  async function withdrawMoney(e) {
+    e.preventDefault();
+    const amount = Math.trunc(Number(withdrawAmount));
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (!confirm(`Withdraw ${fmt(amount)} from the Government reserve? This permanently removes it from the economy.`)) return;
+    setWithdrawing(true);
+    setError(null);
+    try {
+      const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, reason: withdrawReason || undefined } });
+      setData(next);
+      setWithdrawAmount(""); setWithdrawReason("");
+      flash(`Withdrew ${fmt(amount)}.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setWithdrawing(false);
     }
   }
 
@@ -109,6 +131,20 @@ export function EconomyOverviewPanel() {
           <input value={printReason} onChange={e => setPrintReason(e.target.value)} />
         </div>
         <button className="primary" type="submit" disabled={printing}>{printing ? "Printing…" : "Print Money"}</button>
+      </form>
+
+      <h2 style={{ marginTop: 20 }}>Withdraw Money</h2>
+      <p className="muted card-subtitle">The reverse of printing -- permanently removes money from the Government Reserve (and the economy entirely), instead of moving it anywhere else. Capped at whatever's currently in the reserve.</p>
+      <form onSubmit={withdrawMoney} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
+        <div>
+          <label>Amount</label>
+          <input type="number" min="1" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} style={{ width: 150 }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <label>Reason (optional)</label>
+          <input value={withdrawReason} onChange={e => setWithdrawReason(e.target.value)} />
+        </div>
+        <button className="secondary" type="submit" disabled={withdrawing}>{withdrawing ? "Withdrawing…" : "Withdraw Money"}</button>
       </form>
 
       <h2 style={{ marginTop: 20 }}>Top 10 Wallets</h2>
