@@ -28,8 +28,22 @@ export default function Tickets() {
 
   usePolling(() => apiFetch("/tickets?limit=100").then(setData).catch(err => setError(err.message)), LIST_POLL_MS);
 
-  if (error && !data) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
-  if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (error && !data) {
+    return (
+      <div className="content">
+        <div className="page-header"><h1>Ticket Transcripts</h1></div>
+        <div className="error-banner">{error}</div>
+      </div>
+    );
+  }
+  if (!data) {
+    return (
+      <div className="content">
+        <div className="page-header"><h1>Ticket Transcripts</h1></div>
+        <p className="muted">Loading…</p>
+      </div>
+    );
+  }
 
   const filtered = search.trim()
     ? data.tickets.filter(t =>
@@ -40,19 +54,15 @@ export default function Tickets() {
     : data.tickets;
 
   return (
-    <>
-      <h1>Ticket Transcripts</h1>
-      <p className="muted card-subtitle">
-        Every closed support ticket, with attachments preserved permanently -- images render inline, other files
-        download -- so a transcript stays fully reviewable even after the original Discord message is gone.
-      </p>
+    <div className="content">
+      <div className="page-header"><h1>Ticket Transcripts</h1></div>
       {error && <div className="error-banner">{error}</div>}
 
       <input
         placeholder="Search by ticket #, opener, or close reason..."
         value={search}
         onChange={e => setSearch(e.target.value)}
-        style={{ marginBottom: 16, maxWidth: 400 }}
+        style={{ marginBottom: 16, maxWidth: 400, width: "100%" }}
       />
 
       <div className="loa-list">
@@ -61,7 +71,7 @@ export default function Tickets() {
           <div
             className="loa-card loa-card-row"
             key={t.id}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", flexWrap: "wrap", gap: 4 }}
             onClick={() => navigate(`/transcripts/${t.ticket_number}`)}
           >
             <div>
@@ -76,6 +86,6 @@ export default function Tickets() {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }

@@ -46,7 +46,14 @@ function AttachmentView({ attachment }) {
   }
 
   return (
-    <a href={url} download={attachment.filename} className="badge" style={{ display: "inline-block", marginTop: 4 }}>
+    <a
+      href={url}
+      download={attachment.filename}
+      style={{
+        display: "inline-block", marginTop: 4, padding: "4px 10px", borderRadius: "var(--radius-full)",
+        background: "var(--surface-sunken)", border: "1px solid var(--border-subtle)", fontSize: "var(--text-xs)",
+      }}
+    >
       📎 {attachment.filename} {attachment.sizeBytes ? `(${formatBytes(attachment.sizeBytes)})` : ""}
     </a>
   );
@@ -81,17 +88,33 @@ export default function TicketTranscript() {
     [ticketNumber]
   );
 
-  if (error) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
-  if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (error) {
+    return (
+      <div className="content">
+        <div className="page-header"><h1>Ticket Transcript</h1></div>
+        <div className="error-banner">{error}</div>
+      </div>
+    );
+  }
+  if (!data) {
+    return (
+      <div className="content">
+        <div className="page-header"><h1>Ticket Transcript</h1></div>
+        <p className="muted">Loading…</p>
+      </div>
+    );
+  }
 
   const { ticket, messages } = data;
 
   return (
-    <>
-      <div className="button-row" style={{ marginTop: 16 }}>
+    <div className="content">
+      <div className="button-row">
         <Link to="/tickets" className="secondary" style={{ padding: "6px 12px", borderRadius: "var(--radius-sm)" }}>&larr; Back to Tickets</Link>
       </div>
-      <h1 style={{ marginTop: 12 }}>Ticket #{ticket.ticket_number}</h1>
+      <div className="page-header" style={{ marginTop: 12 }}>
+        <h1>Ticket #{ticket.ticket_number}</h1>
+      </div>
       <div className="card-grid" style={{ marginBottom: 20 }}>
         <div className="stat-tile"><div className="muted">Opened By</div><div>{ticket.opener_username ?? ticket.opener_discord_id}</div></div>
         <div className="stat-tile"><div className="muted">Claimed By</div><div>{ticket.claimer_username ?? (ticket.claimed_by ? ticket.claimed_by : "Unclaimed")}</div></div>
@@ -104,6 +127,6 @@ export default function TicketTranscript() {
       <h2>Messages ({messages.length})</h2>
       {messages.length === 0 && <p className="muted">No messages were recorded for this ticket.</p>}
       {messages.map(m => <MessageRow key={m.id} message={m} />)}
-    </>
+    </div>
   );
 }

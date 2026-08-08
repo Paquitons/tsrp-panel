@@ -27,7 +27,7 @@ const NAV_ITEMS = [
     show: user => user?.isManagementOrAbove,
   },
   { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
-  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon },
+  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon, show: user => user?.isSupportStaff },
   { to: "/changelog", label: "Changelog", icon: ScrollIcon },
 ];
 

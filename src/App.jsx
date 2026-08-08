@@ -78,8 +78,8 @@ function AppShell() {
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
-        <Route path="/tickets" element={<Tickets />} />
-        <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />
+        {user?.isSupportStaff && <Route path="/tickets" element={<Tickets />} />}
+        {user?.isSupportStaff && <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />}
       </Routes>
       <Strike3Prompt />
     </div>
