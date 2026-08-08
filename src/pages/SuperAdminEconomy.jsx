@@ -38,6 +38,7 @@ export function EconomyOverviewPanel() {
   const [printReason, setPrintReason] = useState("");
   const [printing, setPrinting] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawTarget, setWithdrawTarget] = useState("");
   const [withdrawReason, setWithdrawReason] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
 
@@ -70,15 +71,15 @@ export function EconomyOverviewPanel() {
   async function withdrawMoney(e) {
     e.preventDefault();
     const amount = Math.trunc(Number(withdrawAmount));
-    if (!Number.isFinite(amount) || amount <= 0) return;
-    if (!confirm(`Withdraw ${fmt(amount)} from the Government reserve? This permanently removes it from the economy.`)) return;
+    if (!Number.isFinite(amount) || amount <= 0 || !withdrawTarget.trim()) return;
+    if (!confirm(`Withdraw ${fmt(amount)} from the Government reserve into account ${withdrawTarget.trim()}?`)) return;
     setWithdrawing(true);
     setError(null);
     try {
-      const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, reason: withdrawReason || undefined } });
+      const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, targetDiscordId: withdrawTarget.trim(), reason: withdrawReason || undefined } });
       setData(next);
-      setWithdrawAmount(""); setWithdrawReason("");
-      flash(`Withdrew ${fmt(amount)}.`);
+      setWithdrawAmount(""); setWithdrawTarget(""); setWithdrawReason("");
+      flash(`Withdrew ${fmt(amount)} to ${withdrawTarget.trim()}.`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -134,11 +135,15 @@ export function EconomyOverviewPanel() {
       </form>
 
       <h2 style={{ marginTop: 20 }}>Withdraw Money</h2>
-      <p className="muted card-subtitle">The reverse of printing -- permanently removes money from the Government Reserve (and the economy entirely), instead of moving it anywhere else. Capped at whatever's currently in the reserve.</p>
+      <p className="muted card-subtitle">Moves money out of the Government Reserve into any account (a player's Discord ID, or another system wallet) -- a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
       <form onSubmit={withdrawMoney} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
           <label>Amount</label>
           <input type="number" min="1" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} style={{ width: 150 }} />
+        </div>
+        <div>
+          <label>To Account (Discord ID)</label>
+          <input value={withdrawTarget} onChange={e => setWithdrawTarget(e.target.value)} style={{ width: 180 }} />
         </div>
         <div style={{ flex: 1, minWidth: 160 }}>
           <label>Reason (optional)</label>
