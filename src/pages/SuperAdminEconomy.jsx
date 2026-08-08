@@ -443,8 +443,6 @@ const CRIME_LABELS = {
   atm: "ATM Robbery",
   store: "Store Robbery",
   pickpocket: "Pickpocket",
-  playerBank: "Player Bank Robbery",
-  playerAtm: "Player ATM Robbery",
 };
 
 // ==================================================================
