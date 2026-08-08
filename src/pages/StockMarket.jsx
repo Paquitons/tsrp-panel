@@ -15,7 +15,7 @@ export default function StockMarket() {
   const base = usePublicBase();
 
   usePolling(() => apiFetch("/public/stocks", { auth: false })
-    .then(data => setStocks(data.stocks))
+    .then(data => { setStocks(data.stocks); setError(null); })
     .catch(err => setError(err.message)), STOCKS_POLL_MS);
 
   return (

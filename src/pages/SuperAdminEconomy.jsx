@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdentity";
 import AccountPicker from "../components/AccountPicker";
@@ -46,7 +46,7 @@ export function EconomyOverviewPanel() {
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawPickerKey, setWithdrawPickerKey] = useState(0);
 
-  usePolling(() => apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
+  usePolling(() => apiFetch("/super-admin/economy-overview").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   function flash(msg) {
     setNotice(msg);
@@ -455,14 +455,28 @@ export function BusinessesPanel() {
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState(null);
 
+  // The background poll must re-run the LAST SUBMITTED search, not
+  // whatever's currently typed in the box -- otherwise a poll landing
+  // mid-keystroke silently replaces the visible list with results for a
+  // half-typed query the admin never submitted. A ref (not state) so
+  // typing itself doesn't need to re-render or reset the poll.
+  const submittedQuery = useRef("");
+
+  function refresh() {
+    apiFetch(`/super-admin/businesses?q=${encodeURIComponent(submittedQuery.current)}`)
+      .then(({ businesses }) => { setBusinesses(businesses); setError(null); })
+      .catch(err => setError(err.message));
+  }
+
   function search(e) {
     e?.preventDefault();
-    apiFetch(`/super-admin/businesses?q=${encodeURIComponent(query)}`).then(({ businesses }) => setBusinesses(businesses)).catch(err => setError(err.message));
+    submittedQuery.current = query;
+    refresh();
   }
   // `selected` (the edit modal below) is a snapshot captured on click, not
   // derived from `businesses` -- refreshing the list in the background
   // never touches whatever's currently open for editing.
-  usePolling(search, ADMIN_POLL_MS);
+  usePolling(refresh, ADMIN_POLL_MS);
 
   return (
     <>
@@ -864,7 +878,7 @@ export function LotteryPanel() {
   const [ticketPrice, setTicketPrice] = useState(100);
 
   function load() {
-    apiFetch("/super-admin/lottery").then(setData).catch(err => setError(err.message));
+    apiFetch("/super-admin/lottery").then(d => { setData(d); setError(null); }).catch(err => setError(err.message));
   }
   usePolling(load, ADMIN_POLL_MS);
 
@@ -1118,8 +1132,8 @@ export function DebtPanel() {
 
   function load() {
     const qs = statusFilter ? `?status=${statusFilter}` : "";
-    apiFetch(`/super-admin/debt/loans${qs}`).then(({ loans }) => setLoans(loans)).catch(err => setError(err.message));
-    apiFetch("/super-admin/debt/leaderboard").then(setLeaderboard).catch(err => setError(err.message));
+    apiFetch(`/super-admin/debt/loans${qs}`).then(({ loans }) => { setLoans(loans); setError(null); }).catch(err => setError(err.message));
+    apiFetch("/super-admin/debt/leaderboard").then(l => { setLeaderboard(l); setError(null); }).catch(err => setError(err.message));
   }
   usePolling(load, ADMIN_POLL_MS, [statusFilter]);
 

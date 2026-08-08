@@ -23,7 +23,7 @@ export default function Tickets() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  usePolling(() => apiFetch("/tickets?limit=100").then(setData).catch(err => setError(err.message)), LIST_POLL_MS);
+  usePolling(() => apiFetch("/tickets?limit=100").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), LIST_POLL_MS);
 
   if (error && !data) {
     return (

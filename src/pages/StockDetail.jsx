@@ -31,7 +31,7 @@ export default function StockDetail() {
   }, [ticker]);
 
   usePolling(() => apiFetch(`/public/stocks/${ticker}?since=${Date.now() - Number(range)}`, { auth: false })
-    .then(setStock)
+    .then(s => { setStock(s); setError(null); })
     .catch(err => setError(err.message)), STOCK_DETAIL_POLL_MS, [ticker, range]);
 
   return (

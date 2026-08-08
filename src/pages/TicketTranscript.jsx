@@ -84,12 +84,12 @@ export default function TicketTranscript() {
   const [error, setError] = useState(null);
 
   usePolling(
-    () => apiFetch(`/tickets/${ticketNumber}`).then(setData).catch(err => setError(err.message)),
+    () => apiFetch(`/tickets/${ticketNumber}`).then(d => { setData(d); setError(null); }).catch(err => setError(err.message)),
     POLL_MS,
     [ticketNumber]
   );
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="content">
         <div className="page-header"><h1>Ticket Transcript</h1></div>
@@ -116,6 +116,7 @@ export default function TicketTranscript() {
       <div className="page-header" style={{ marginTop: 12 }}>
         <h1>Ticket #{ticket.ticket_number}</h1>
       </div>
+      {error && <div className="error-banner">{error}</div>}
       <div className="card-grid" style={{ marginBottom: 20 }}>
         <div className="stat-tile">
           <div className="muted">Opened By</div>

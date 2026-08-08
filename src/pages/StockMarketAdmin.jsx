@@ -93,7 +93,7 @@ function OverviewTab() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  usePolling(() => apiFetch("/super-admin/stock-market/overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
+  usePolling(() => apiFetch("/super-admin/stock-market/overview").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   if (error) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
   if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
@@ -152,7 +152,7 @@ function StocksTab() {
   const [error, setError] = useState(null);
 
   function load() {
-    apiFetch("/super-admin/stocks").then(({ stocks }) => setStocks(stocks)).catch(err => setError(err.message));
+    apiFetch("/super-admin/stocks").then(({ stocks }) => { setStocks(stocks); setError(null); }).catch(err => setError(err.message));
   }
   // Paused (not just slow) while a stock is open for editing below --
   // this list isn't shown then, and there's no reason to keep hitting the
@@ -263,7 +263,7 @@ function StockDetail({ ticker, onBack }) {
   const [notice, setNotice] = useState(null);
 
   function load() {
-    apiFetch(`/super-admin/stocks/${ticker}`).then(({ stock, performance }) => { setStock(stock); setPerformance(performance); }).catch(err => setError(err.message));
+    apiFetch(`/super-admin/stocks/${ticker}`).then(({ stock, performance }) => { setStock(stock); setPerformance(performance); setError(null); }).catch(err => setError(err.message));
     apiFetch(`/super-admin/stocks/${ticker}/transactions`).then(({ transactions }) => setTransactions(transactions));
     apiFetch(`/super-admin/stocks/${ticker}/holders`).then(({ holders }) => setHolders(holders));
   }
@@ -506,6 +506,7 @@ function MarketControlsTab() {
   const [config, setConfig] = useState(null);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   const [crashPercent, setCrashPercent] = useState("10");
   const [rallyPercent, setRallyPercent] = useState("10");
@@ -513,7 +514,7 @@ function MarketControlsTab() {
   const [industryPercent, setIndustryPercent] = useState("10");
 
   function load() {
-    apiFetch("/super-admin/stock-market/config").then(setConfig).catch(err => setError(err.message));
+    apiFetch("/super-admin/stock-market/config").then(c => { setConfig(c); setError(null); }).catch(err => setError(err.message));
   }
   usePolling(load, ADMIN_POLL_MS);
 
@@ -523,23 +524,31 @@ function MarketControlsTab() {
   }
 
   async function toggleConfig(field) {
+    if (busy) return;
     setError(null);
+    setBusy(true);
     try {
       const next = await apiFetch("/super-admin/stock-market/config", { method: "PATCH", body: { [field]: !config[field] } });
       setConfig(next);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function trigger(path, body, label) {
+    if (busy) return;
     setError(null);
     if (!confirm(`${label}? This affects every open stock${body.category ? ` in ${body.category}` : ""} immediately.`)) return;
+    setBusy(true);
     try {
       const { affected } = await apiFetch(`/super-admin/stock-market/${path}`, { method: "POST", body });
       flash(`Affected ${affected.length} stock(s): ${affected.join(", ") || "none"}.`);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -553,10 +562,10 @@ function MarketControlsTab() {
       <h2 style={{ marginTop: 16 }}>Trading Status</h2>
       <p className="muted card-subtitle">Pausing blocks buy/sell but prices keep moving. Freezing the market stops price movement too -- a harder stop.</p>
       <div className="button-row">
-        <button className="secondary" type="button" onClick={() => toggleConfig("tradingPaused")}>
+        <button className="secondary" type="button" disabled={busy} onClick={() => toggleConfig("tradingPaused")}>
           {config.tradingPaused ? "Resume Trading" : "Pause Trading"}
         </button>
-        <button className="btn-red" type="button" onClick={() => toggleConfig("marketFrozen")}>
+        <button className="btn-red" type="button" disabled={busy} onClick={() => toggleConfig("marketFrozen")}>
           {config.marketFrozen ? "Unfreeze Market" : "Freeze Entire Market"}
         </button>
       </div>
@@ -570,7 +579,7 @@ function MarketControlsTab() {
         <div className="form-inline-field"><label>Percent Down</label><input type="number" min="1" max="90" value={crashPercent} onChange={e => setCrashPercent(e.target.value)} /></div>
         <div className="form-inline-field-btn">
           <label aria-hidden="true">&nbsp;</label>
-          <button className="btn-red" type="button" onClick={() => trigger("crash", { percent: Number(crashPercent) }, `Crash the market ${crashPercent}%`)}>Trigger Crash</button>
+          <button className="btn-red" type="button" disabled={busy} onClick={() => trigger("crash", { percent: Number(crashPercent) }, `Crash the market ${crashPercent}%`)}>Trigger Crash</button>
         </div>
       </div>
 
@@ -579,7 +588,7 @@ function MarketControlsTab() {
         <div className="form-inline-field"><label>Percent Up</label><input type="number" min="1" max="200" value={rallyPercent} onChange={e => setRallyPercent(e.target.value)} /></div>
         <div className="form-inline-field-btn">
           <label aria-hidden="true">&nbsp;</label>
-          <button className="primary" type="button" onClick={() => trigger("rally", { percent: Number(rallyPercent) }, `Rally the market +${rallyPercent}%`)}>Trigger Rally</button>
+          <button className="primary" type="button" disabled={busy} onClick={() => trigger("rally", { percent: Number(rallyPercent) }, `Rally the market +${rallyPercent}%`)}>Trigger Rally</button>
         </div>
       </div>
 
@@ -591,7 +600,7 @@ function MarketControlsTab() {
           <label aria-hidden="true">&nbsp;</label>
           <button
             className="secondary" type="button"
-            disabled={!industryCategory.trim()}
+            disabled={!industryCategory.trim() || busy}
             onClick={() => trigger("industry-event", { category: industryCategory.trim(), percent: Number(industryPercent) }, `Apply a ${industryPercent}% event to ${industryCategory}`)}
           >
             Trigger Event
@@ -642,7 +651,7 @@ function MarketEventsTab() {
 
   function load() {
     const qs = statusFilter ? `?status=${statusFilter}` : "";
-    apiFetch(`/super-admin/market-events${qs}`).then(({ events }) => setEvents(events)).catch(err => setError(err.message));
+    apiFetch(`/super-admin/market-events${qs}`).then(({ events }) => { setEvents(events); setError(null); }).catch(err => setError(err.message));
   }
   // Safe with an event open for editing below (EditMarketEventForm) for
   // the same reason as the stock detail view above -- its fields are
@@ -700,6 +709,17 @@ function MarketEventsTab() {
 
 function MarketEventCard({ event, onAct }) {
   const [editing, setEditing] = useState(false);
+  const [acting, setActing] = useState(false);
+
+  async function run(id, action, body, successMsg) {
+    if (acting) return;
+    setActing(true);
+    try {
+      await onAct(id, action, body, successMsg);
+    } finally {
+      setActing(false);
+    }
+  }
 
   return (
     <div className="loa-card">
@@ -729,18 +749,18 @@ function MarketEventCard({ event, onAct }) {
       <div className="button-row" style={{ marginTop: 8 }}>
         {event.status === "pending" && !editing && (
           <>
-            <button className="primary" type="button" onClick={() => onAct(event.id, "approve", {}, "Event approved.")}>Approve</button>
-            <button className="secondary" type="button" onClick={() => setEditing(true)}>Edit</button>
-            <button className="btn-red" type="button" onClick={() => confirm("Reject this event?") && onAct(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event rejected.")}>Reject</button>
+            <button className="primary" type="button" disabled={acting} onClick={() => run(event.id, "approve", {}, "Event approved.")}>Approve</button>
+            <button className="secondary" type="button" disabled={acting} onClick={() => setEditing(true)}>Edit</button>
+            <button className="btn-red" type="button" disabled={acting} onClick={() => confirm("Reject this event?") && run(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event rejected.")}>Reject</button>
           </>
         )}
         {event.status === "approved" && (
-          <button className="btn-red" type="button" onClick={() => confirm("Cancel this scheduled event before it applies?") && onAct(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event cancelled.")}>
+          <button className="btn-red" type="button" disabled={acting} onClick={() => confirm("Cancel this scheduled event before it applies?") && run(event.id, "reject", { reason: prompt("Reason (optional):") ?? undefined }, "Event cancelled.")}>
             Cancel
           </button>
         )}
         {event.status === "applied" && (
-          <button className="btn-red" type="button" onClick={() => confirm(`Reverse "${event.headline}"? This restores every affected stock to its price right before this event.`) && onAct(event.id, "reverse", { reason: prompt("Reason (optional):") ?? undefined }, "Event reversed.")}>
+          <button className="btn-red" type="button" disabled={acting} onClick={() => confirm(`Reverse "${event.headline}"? This restores every affected stock to its price right before this event.`) && run(event.id, "reverse", { reason: prompt("Reason (optional):") ?? undefined }, "Event reversed.")}>
             Reverse
           </button>
         )}
@@ -901,8 +921,8 @@ function NewsTab() {
   const [error, setError] = useState(null);
 
   function load() {
-    apiFetch("/super-admin/stock-market/news").then(({ news }) => setNews(news)).catch(err => setError(err.message));
-    apiFetch("/super-admin/economy-news").then(({ announcements }) => setAnnouncements(announcements)).catch(err => setError(err.message));
+    apiFetch("/super-admin/stock-market/news").then(({ news }) => { setNews(news); setError(null); }).catch(err => setError(err.message));
+    apiFetch("/super-admin/economy-news").then(({ announcements }) => { setAnnouncements(announcements); setError(null); }).catch(err => setError(err.message));
   }
   usePolling(load, ADMIN_POLL_MS);
 
@@ -994,9 +1014,9 @@ function InsightsTab() {
   const [notice, setNotice] = useState(null);
 
   function load() {
-    apiFetch("/super-admin/economy-config").then(c => setConfig(c.marketInsights)).catch(err => setError(err.message));
-    apiFetch("/super-admin/market-insights/price-alerts").then(({ alerts }) => setAlerts(alerts)).catch(err => setError(err.message));
-    apiFetch("/super-admin/market-insights/log").then(({ log }) => setLog(log)).catch(err => setError(err.message));
+    apiFetch("/super-admin/economy-config").then(c => { setConfig(c.marketInsights); setError(null); }).catch(err => setError(err.message));
+    apiFetch("/super-admin/market-insights/price-alerts").then(({ alerts }) => { setAlerts(alerts); setError(null); }).catch(err => setError(err.message));
+    apiFetch("/super-admin/market-insights/log").then(({ log }) => { setLog(log); setError(null); }).catch(err => setError(err.message));
   }
   // Safe to poll even with `config` being edited below -- it's only ever
   // written back explicitly via Save, same useState-from-fetch pattern as
@@ -1054,8 +1074,12 @@ function InsightsTab() {
 
   async function removeAlert(id) {
     if (!confirm("Delete this price alert?")) return;
-    await apiFetch(`/super-admin/market-insights/price-alerts/${id}`, { method: "DELETE" });
-    load();
+    try {
+      await apiFetch(`/super-admin/market-insights/price-alerts/${id}`, { method: "DELETE" });
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   if (!config) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
@@ -1137,7 +1161,7 @@ function AuditLogTab() {
   const [log, setLog] = useState([]);
   const [error, setError] = useState(null);
 
-  usePolling(() => apiFetch("/super-admin/stock-market/audit-log").then(({ log }) => setLog(log)).catch(err => setError(err.message)), ADMIN_POLL_MS);
+  usePolling(() => apiFetch("/super-admin/stock-market/audit-log").then(({ log }) => { setLog(log); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   return (
     <>

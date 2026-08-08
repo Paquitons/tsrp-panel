@@ -86,7 +86,7 @@ export default function EconomyNews() {
   const base = usePublicBase();
 
   usePolling(() => apiFetch("/public/economy/news", { auth: false })
-    .then(data => setNews(data.news))
+    .then(data => { setNews(data.news); setError(null); })
     .catch(err => setError(err.message)), NEWS_POLL_MS);
 
   return (

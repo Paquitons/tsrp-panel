@@ -33,7 +33,7 @@ export default function Leaderboards() {
   const [error, setError] = useState(null);
   const base = usePublicBase();
 
-  usePolling(() => apiFetch("/public/leaderboards", { auth: false }).then(setData).catch(err => setError(err.message)), LEADERBOARDS_POLL_MS);
+  usePolling(() => apiFetch("/public/leaderboards", { auth: false }).then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), LEADERBOARDS_POLL_MS);
 
   return (
     <div className="home-page">

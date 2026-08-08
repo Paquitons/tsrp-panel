@@ -17,6 +17,7 @@ export default function Roster() {
     .then(data => {
       setStaff(data.staff);
       setTiers(data.tiers);
+      setError(null);
     })
     .catch(err => setError(err.message)), ROSTER_POLL_MS);
 
