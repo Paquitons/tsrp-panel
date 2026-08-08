@@ -311,6 +311,21 @@ function StockDetail({ ticker, onBack }) {
     }
   }
 
+  async function deleteStock() {
+    const warning = holders.length
+      ? `Permanently delete ${ticker}? ${holders.length} current holder(s) will lose their position with no refund. All price history and transactions are erased too. This cannot be undone.`
+      : `Permanently delete ${ticker}? All price history is erased too. This cannot be undone.`;
+    if (!confirm(warning)) return;
+    const reason = prompt("Reason (optional):") ?? undefined;
+    setError(null);
+    try {
+      await apiFetch(`/super-admin/stocks/${ticker}`, { method: "DELETE", body: { reason } });
+      onBack();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   if (!stock) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
 
   return (
@@ -342,7 +357,7 @@ function StockDetail({ ticker, onBack }) {
         <StockPriceChart history={history} />
       </div>
 
-      <StockAdminControls stock={stock} onAct={act} onSaveEdit={saveEdit} />
+      <StockAdminControls stock={stock} onAct={act} onSaveEdit={saveEdit} onDelete={deleteStock} />
 
       <h2 style={{ marginTop: 20 }}>Top Holders</h2>
       <div className="loa-list">
@@ -379,7 +394,7 @@ function StockDetail({ ticker, onBack }) {
   );
 }
 
-function StockAdminControls({ stock, onAct, onSaveEdit }) {
+function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
   const [name, setName] = useState(stock.name);
   const [description, setDescription] = useState(stock.description);
   const [category, setCategory] = useState(stock.category);
@@ -459,6 +474,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit }) {
         ) : (
           <button className="secondary" type="button" onClick={() => onAct("relist", {}, "Relisted.")}>Relist</button>
         )}
+        <button className="btn-red" type="button" onClick={onDelete}>Delete Stock</button>
       </div>
 
       <h2 style={{ marginTop: 20 }}>Stock Split</h2>
