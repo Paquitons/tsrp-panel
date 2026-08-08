@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
+import DiscordIdentity from "../components/DiscordIdentity";
+import AccountPicker from "../components/AccountPicker";
 import Avatar from "../components/Avatar";
-import PortalDropdown from "../components/PortalDropdown";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import RobloxLinkModal from "../components/RobloxLinkModal";
 
@@ -50,7 +50,6 @@ function UnlinkModal({ discordId, onClose, onUnlinked }) {
 export default function Verification() {
   const { user } = useAuth();
   const canAccess = !!user?.isManagementOrAbove;
-  const search = useStaffSearch("/verification/members", "members");
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -73,7 +72,6 @@ export default function Verification() {
   }
 
   function pickMember(member) {
-    search.pick(member);
     loadProfile(member.discordId);
   }
 
@@ -99,25 +97,7 @@ export default function Verification() {
 
       <div className="card">
         <h2>Find a Discord User</h2>
-        <div className="autocomplete-wrap">
-          <input
-            ref={search.inputRef}
-            autoComplete="off"
-            value={search.query}
-            onChange={e => search.onQueryChange(e.target.value)}
-            onFocus={() => search.suggestions.length > 0 && search.setShowSuggestions(true)}
-            placeholder="Search by username, nickname, or Discord user ID"
-          />
-          <PortalDropdown anchorRef={search.inputRef} open={search.showSuggestions} onClose={() => search.setShowSuggestions(false)} className="autocomplete-list-portal">
-            {search.suggestions.map(s => (
-              <div key={s.discordId} className="autocomplete-item" onClick={() => pickMember(s)}>
-                <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
-                <span className="autocomplete-name">{s.nickname ?? s.username}</span>
-                {s.nickname && <span className="autocomplete-hint">@{s.username}</span>}
-              </div>
-            ))}
-          </PortalDropdown>
-        </div>
+        <AccountPicker endpoint="/verification/members" onSelect={pickMember} />
       </div>
 
       {loading && <p className="muted">Loading…</p>}
@@ -154,8 +134,11 @@ export default function Verification() {
                     Linked {new Date(profile.link.linkedAt).toLocaleString()}
                     {profile.link.linkedBy && (
                       <>
-                        {" "}by <DiscordAvatar discordId={profile.link.linkedBy} avatarHash={profile.link.linkedBy_avatar_hash} size={16} style={{ verticalAlign: "middle", margin: "0 4px" }} />
-                        {profile.link.linkedBy_username ?? profile.link.linkedBy}
+                        {" "}by{" "}
+                        <DiscordIdentity
+                          nickname={profile.link.linkedBy_nickname} username={profile.link.linkedBy_username}
+                          discordId={profile.link.linkedBy} avatarHash={profile.link.linkedBy_avatar_hash} size={16}
+                        />
                       </>
                     )}
                   </div>
@@ -192,7 +175,11 @@ export default function Verification() {
                       {h.previous_roblox_username ?? h.previous_roblox_id ?? "(none)"} &rarr; {h.new_roblox_username ?? h.new_roblox_id ?? "(none)"}
                     </div>
                     <div className="log-card-field">
-                      <span className="muted">By:</span> <DiscordAvatar discordId={h.performed_by} avatarHash={h.performed_by_avatar_hash} size={16} style={{ verticalAlign: "middle", margin: "0 4px" }} />{h.performed_by_username ?? h.performed_by}
+                      <span className="muted">By:</span>{" "}
+                      <DiscordIdentity
+                        nickname={h.performed_by_nickname} username={h.performed_by_username}
+                        discordId={h.performed_by} avatarHash={h.performed_by_avatar_hash} size={16}
+                      />
                     </div>
                     {h.reason && <div className="log-card-field"><span className="muted">Reason:</span> {h.reason}</div>}
                   </div>

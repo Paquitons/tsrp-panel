@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { apiFetch, API_BASE } from "../api";
 import { usePolling } from "../hooks/usePolling";
+import DiscordIdentity from "../components/DiscordIdentity";
 
 const POLL_MS = 15_000;
 
@@ -116,9 +117,22 @@ export default function TicketTranscript() {
         <h1>Ticket #{ticket.ticket_number}</h1>
       </div>
       <div className="card-grid" style={{ marginBottom: 20 }}>
-        <div className="stat-tile"><div className="muted">Opened By</div><div>{ticket.opener_username ?? ticket.opener_discord_id}</div></div>
-        <div className="stat-tile"><div className="muted">Claimed By</div><div>{ticket.claimer_username ?? (ticket.claimed_by ? ticket.claimed_by : "Unclaimed")}</div></div>
-        <div className="stat-tile"><div className="muted">Closed By</div><div>{ticket.closer_username ?? (ticket.closed_by ? ticket.closed_by : "Automatic")}</div></div>
+        <div className="stat-tile">
+          <div className="muted">Opened By</div>
+          <DiscordIdentity nickname={ticket.opener_nickname} username={ticket.opener_username} discordId={ticket.opener_discord_id} avatarHash={ticket.opener_avatar_hash} showAvatar={false} />
+        </div>
+        <div className="stat-tile">
+          <div className="muted">Claimed By</div>
+          {ticket.claimed_by
+            ? <DiscordIdentity nickname={ticket.claimer_nickname} username={ticket.claimer_username} discordId={ticket.claimed_by} avatarHash={ticket.claimer_avatar_hash} showAvatar={false} />
+            : <div>Unclaimed</div>}
+        </div>
+        <div className="stat-tile">
+          <div className="muted">Closed By</div>
+          {ticket.closed_by
+            ? <DiscordIdentity nickname={ticket.closer_nickname} username={ticket.closer_username} discordId={ticket.closed_by} avatarHash={ticket.closer_avatar_hash} showAvatar={false} />
+            : <div>Automatic</div>}
+        </div>
         <div className="stat-tile"><div className="muted">Close Reason</div><div>{ticket.close_reason || "--"}</div></div>
         <div className="stat-tile"><div className="muted">Opened</div><div>{new Date(ticket.opened_at).toLocaleString()}</div></div>
         <div className="stat-tile"><div className="muted">Closed</div><div>{ticket.closed_at ? new Date(ticket.closed_at).toLocaleString() : "--"}</div></div>

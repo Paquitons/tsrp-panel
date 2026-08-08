@@ -2,16 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
 import { usePolling } from "../hooks/usePolling";
+import DiscordIdentity from "../components/DiscordIdentity";
 
 const LIST_POLL_MS = 15_000;
 
 function formatDate(ms) {
   if (!ms) return "--";
   return new Date(ms).toLocaleString();
-}
-
-function who(row, prefix, fallbackId) {
-  return row[`${prefix}_username`] ?? (fallbackId ? `<@${fallbackId}>` : "--");
 }
 
 // ==================================================================
@@ -49,6 +46,7 @@ export default function Tickets() {
     ? data.tickets.filter(t =>
         String(t.ticket_number).includes(search.trim())
         || (t.opener_username ?? "").toLowerCase().includes(search.trim().toLowerCase())
+        || (t.opener_nickname ?? "").toLowerCase().includes(search.trim().toLowerCase())
         || (t.close_reason ?? "").toLowerCase().includes(search.trim().toLowerCase())
       )
     : data.tickets;
@@ -77,7 +75,12 @@ export default function Tickets() {
             <div>
               <strong>Ticket #{t.ticket_number}</strong>
               <div className="muted" style={{ fontSize: "var(--text-xs)" }}>
-                Opened by {who(t, "opener", t.opener_discord_id)} -- closed {formatDate(t.closed_at)}
+                Opened by{" "}
+                <DiscordIdentity
+                  nickname={t.opener_nickname} username={t.opener_username} discordId={t.opener_discord_id}
+                  avatarHash={t.opener_avatar_hash} showAvatar={false}
+                />
+                {" "}-- closed {formatDate(t.closed_at)}
               </div>
             </div>
             <span className="muted" style={{ marginLeft: "auto", fontSize: "var(--text-xs)" }}>
