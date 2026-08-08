@@ -93,6 +93,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           discordId={log.issuer_discord_id}
           avatarHash={log.issuer_avatar_hash}
           size={28}
+          showId={false}
           primaryClassName={issuerClickable ? "log-card-clickable-name" : ""}
           onPrimaryClick={issuerClickable ? () => onIssuerClick(log.issuer_discord_id) : undefined}
         />

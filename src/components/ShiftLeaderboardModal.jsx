@@ -1,5 +1,4 @@
 import DiscordAvatar from "./DiscordAvatar";
-import { discordDisplayName } from "./DiscordIdentity";
 import { formatDuration, dutyFlagLabel } from "../utils";
 
 export default function ShiftLeaderboardModal({
@@ -39,7 +38,7 @@ export default function ShiftLeaderboardModal({
             {leaderboard.map((row, idx) => {
               const activeEntry = onDutyStaff.find(s => s.discordId === row.discord_id);
               const isActive = !!activeEntry;
-              const name = discordDisplayName(row.staff_nickname, row.staff_username, row.discord_id);
+              const name = row.staff_nickname || row.staff_username || "Unknown Member";
               const canEnd = canManage && isActive;
               return (
                 <div key={row.discord_id} className="leaderboard-row">

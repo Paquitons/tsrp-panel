@@ -141,6 +141,7 @@ export default function LOAModal({ onClose }) {
                         discordId={r.discord_id}
                         avatarHash={r.requester_avatar_hash}
                         size={22}
+                        showId={false}
                       />
                     </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>

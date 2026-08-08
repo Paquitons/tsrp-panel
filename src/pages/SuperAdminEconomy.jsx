@@ -24,6 +24,7 @@ function NamedHolder({ discordId, prefix, row }) {
       variant="row"
       nickname={row[`${prefix}_nickname`]} username={row[`${prefix}_username`]}
       discordId={discordId} avatarHash={row[`${prefix}_avatar_hash`]} size={22}
+      showId={false}
     />
   );
 }

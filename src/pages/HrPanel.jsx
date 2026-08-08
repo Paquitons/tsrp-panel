@@ -354,6 +354,7 @@ export default function HrPanel() {
                         discordId={s.target_discord_id}
                         avatarHash={s.target_avatar_hash}
                         size={26}
+                        showId={false}
                       />
                       <span className={`badge ${s.action === "promote" ? "loa-status-approved" : "loa-status-denied"}`} style={{ marginLeft: "auto" }}>{s.action === "promote" ? "Promote" : "Demote"}</span>
                     </div>
@@ -399,6 +400,7 @@ export default function HrPanel() {
                         discordId={r.discord_id}
                         avatarHash={r.requester_avatar_hash}
                         size={22}
+                        showId={false}
                       />
                     </span>
                     <span className="muted">{new Date(r.start_date).toLocaleDateString()} to {new Date(r.end_date).toLocaleDateString()}</span>
@@ -599,6 +601,7 @@ export default function HrPanel() {
                       discordId={discordId}
                       avatarHash={strikes[0].target_avatar_hash}
                       size={28}
+                      showId={false}
                     />
                     <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
                   </div>
@@ -637,6 +640,7 @@ export default function HrPanel() {
                           discordId={r.discord_id}
                           avatarHash={r.requester_avatar_hash}
                           size={22}
+                          showId={false}
                         />
                       </span>
                       <span className="muted">Returns {new Date(r.end_date).toLocaleDateString()}</span>
@@ -671,6 +675,7 @@ export default function HrPanel() {
                           discordId={r.discord_id}
                           avatarHash={r.requester_avatar_hash}
                           size={22}
+                          showId={false}
                         />
                       </span>
                       <span className={r.returned_early ? "loa-status-approved" : "muted"}>
