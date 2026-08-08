@@ -294,6 +294,11 @@ export function EconomyConfigPanel() {
               <input type="number" min="0" value={config.crime[key].fine}
                 onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], fine: Number(e.target.value) } } })} />
             </div>
+            <div>
+              <label>Jail Time on Failure (minutes)</label>
+              <input type="number" min="0" value={config.crime[key].jailMinutes}
+                onChange={e => setConfig({ ...config, crime: { ...config.crime, [key]: { ...config.crime[key], jailMinutes: Number(e.target.value) } } })} />
+            </div>
           </div>
         </div>
       ))}
