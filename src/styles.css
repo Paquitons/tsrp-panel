@@ -1177,6 +1177,54 @@ code {
   white-space: nowrap;
 }
 
+/* ---------- Ticket transcript (Discord-style message list) ---------- */
+
+.transcript-message {
+  display: flex;
+  gap: var(--space-3);
+  padding: 6px var(--space-2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+}
+.transcript-message:hover { background: var(--surface-hover); }
+
+.transcript-message-avatar {
+  flex-shrink: 0;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.transcript-message-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.transcript-message-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.transcript-message-content {
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.discord-mention {
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 500;
+  color: var(--info);
+  background: rgba(88, 101, 242, 0.15);
+}
+
+.discord-mention-everyone {
+  color: var(--warning);
+  background: rgba(255, 182, 72, 0.15);
+}
+
 /* ---------- Log cards ---------- */
 
 .log-card-list {

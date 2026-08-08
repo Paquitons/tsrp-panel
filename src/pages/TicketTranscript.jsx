@@ -3,8 +3,65 @@ import { useParams, Link } from "react-router-dom";
 import { apiFetch, API_BASE } from "../api";
 import { usePolling } from "../hooks/usePolling";
 import DiscordIdentity from "../components/DiscordIdentity";
+import DiscordAvatar from "../components/DiscordAvatar";
 
 const POLL_MS = 15_000;
+
+// Matches Discord's own mention syntax as it's stored raw in an archived
+// message's content: <@id>/<@!id> (user -- the "!" variant is a legacy
+// nickname-mention marker, functionally identical), <@&id> (role),
+// <#id> (channel), and the two ID-less broadcast mentions. One combined
+// regex (not four separate passes) so pieces of text stay in their
+// original order when split.
+const MENTION_RE = /<@!?(\d+)>|<@&(\d+)>|<#(\d+)>|@everyone|@here/g;
+
+/**
+ * Splits a raw message content string into an array of plain strings and
+ * resolved mention elements, using the `mentions` lookup the API resolved
+ * server-side (see tsrp-panel-api's routes/tickets.js). Resolution
+ * happens per-render from the id + the shared lookup table, not baked
+ * into stored content, so this renders identically for a transcript from
+ * five minutes ago or two years ago, and degrades to a plain "deleted"
+ * label rather than breaking if the user/role/channel no longer exists.
+ */
+function renderContent(content, mentions) {
+  if (!content) return null;
+
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+
+  while ((match = MENTION_RE.exec(content)) !== null) {
+    if (match.index > lastIndex) parts.push(content.slice(lastIndex, match.index));
+
+    const [full, userId, roleId, channelId] = match;
+    if (userId) {
+      const user = mentions.users?.[userId];
+      const label = user?.nickname || user?.username || "deleted-user";
+      parts.push(<span key={key++} className="discord-mention discord-mention-user">@{label}</span>);
+    } else if (roleId) {
+      const role = mentions.roles?.[roleId];
+      const color = role?.color ? `#${role.color.toString(16).padStart(6, "0")}` : undefined;
+      parts.push(
+        <span key={key++} className="discord-mention discord-mention-role" style={color ? { color, background: `${color}26` } : undefined}>
+          @{role?.name ?? "deleted-role"}
+        </span>
+      );
+    } else if (channelId) {
+      const channel = mentions.channels?.[channelId];
+      parts.push(<span key={key++} className="discord-mention discord-mention-channel">#{channel?.name ?? "deleted-channel"}</span>);
+    } else {
+      // @everyone / @here -- no id, matched as literal text
+      parts.push(<span key={key++} className="discord-mention discord-mention-everyone">{full}</span>);
+    }
+
+    lastIndex = match.index + full.length;
+  }
+  if (lastIndex < content.length) parts.push(content.slice(lastIndex));
+
+  return parts;
+}
 
 function formatBytes(n) {
   if (!Number.isFinite(n)) return "";
@@ -60,20 +117,29 @@ function AttachmentView({ attachment }) {
   );
 }
 
-function MessageRow({ message }) {
+function MessageRow({ message, mentions }) {
+  // Prefer the live-resolved identity (kept current even on an old
+  // transcript); fall back to the archived tag, which is the only thing
+  // left once someone's left the server or the message came from a
+  // webhook/bot that doesn't resolve as a normal guild member.
+  const name = message.authorNickname || message.authorUsername || message.authorTag;
+
   return (
-    <div className="loa-card" style={{ marginBottom: 8 }}>
-      <div className="button-row" style={{ justifyContent: "space-between" }}>
-        <strong>{message.authorTag}</strong>
-        <span className="muted" style={{ fontSize: "var(--text-xs)" }}>{new Date(message.createdAt).toLocaleString()}</span>
-      </div>
-      {message.content && <p style={{ margin: "6px 0", whiteSpace: "pre-wrap" }}>{message.content}</p>}
-      {message.isEmbed && !message.content && <p className="muted" style={{ margin: "6px 0", fontStyle: "italic" }}>[embed]</p>}
-      {message.attachments.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
-          {message.attachments.map(a => <AttachmentView key={a.id} attachment={a} />)}
+    <div className="transcript-message">
+      <DiscordAvatar discordId={message.authorDiscordId} avatarHash={message.authorAvatarHash} size={40} className="transcript-message-avatar" />
+      <div className="transcript-message-body">
+        <div className="transcript-message-header">
+          <strong>{name}</strong>
+          <span className="muted" style={{ fontSize: "var(--text-xs)" }}>{new Date(message.createdAt).toLocaleString()}</span>
         </div>
-      )}
+        {message.content && <p className="transcript-message-content">{renderContent(message.content, mentions)}</p>}
+        {message.isEmbed && !message.content && <p className="muted" style={{ margin: "2px 0", fontStyle: "italic" }}>[embed]</p>}
+        {message.attachments.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+            {message.attachments.map(a => <AttachmentView key={a.id} attachment={a} />)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -106,7 +172,7 @@ export default function TicketTranscript() {
     );
   }
 
-  const { ticket, messages } = data;
+  const { ticket, messages, mentions } = data;
 
   return (
     <div className="content">
@@ -141,7 +207,7 @@ export default function TicketTranscript() {
 
       <h2>Messages ({messages.length})</h2>
       {messages.length === 0 && <p className="muted">No messages were recorded for this ticket.</p>}
-      {messages.map(m => <MessageRow key={m.id} message={m} />)}
+      {messages.map(m => <MessageRow key={m.id} message={m} mentions={mentions} />)}
     </div>
   );
 }
