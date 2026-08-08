@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DiscordAvatar from "./DiscordAvatar";
-import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon } from "./icons";
+import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon, HistoryIcon } from "./icons";
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 
@@ -27,6 +27,7 @@ const NAV_ITEMS = [
     show: user => user?.isManagementOrAbove,
   },
   { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
+  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon },
   { to: "/changelog", label: "Changelog", icon: ScrollIcon },
 ];
 

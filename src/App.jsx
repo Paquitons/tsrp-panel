@@ -16,6 +16,8 @@ import SuperAdmin from "./pages/SuperAdmin";
 import Changelog from "./pages/Changelog";
 import ChangelogEntry from "./pages/ChangelogEntry";
 import Verification from "./pages/Verification";
+import Tickets from "./pages/Tickets";
+import TicketTranscript from "./pages/TicketTranscript";
 import Strike3Prompt from "./components/Strike3Prompt";
 
 // Every page that exists both at its normal public URL AND, for a
@@ -76,6 +78,8 @@ function AppShell() {
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
         {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
+        <Route path="/tickets" element={<Tickets />} />
+        <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />
       </Routes>
       <Strike3Prompt />
     </div>
