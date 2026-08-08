@@ -62,7 +62,6 @@ export default function SuperAdmin() {
   const [newStart, setNewStart] = useState(() => toDateTimeInputValue(Date.now()));
   const [newEnd, setNewEnd] = useState("");
   const [newBreakMinutes, setNewBreakMinutes] = useState(0);
-  const [newType, setNewType] = useState("");
   const [creating, setCreating] = useState(false);
 
   async function createShift(e) {
@@ -78,11 +77,9 @@ export default function SuperAdmin() {
           startedAt: parseDateTimeInput(newStart),
           endedAt: newEnd ? parseDateTimeInput(newEnd) : undefined,
           breakSeconds: Math.round(Number(newBreakMinutes || 0) * 60),
-          shiftType: newType || undefined,
         },
       });
       setNewEnd("");
-      setNewType("");
       await loadShifts(search.target.discordId);
     } catch (err) {
       setError(err.message);
@@ -185,15 +182,9 @@ export default function SuperAdmin() {
                   <label>Ended (blank = active)</label>
                   <input type="datetime-local" value={newEnd} onChange={e => setNewEnd(e.target.value)} />
                 </div>
-              </div>
-              <div className="form-row">
                 <div>
                   <label>Break (minutes)</label>
                   <input type="number" min="0" value={newBreakMinutes} onChange={e => setNewBreakMinutes(e.target.value)} />
-                </div>
-                <div>
-                  <label>Shift Type</label>
-                  <input value={newType} onChange={e => setNewType(e.target.value)} placeholder="Optional" />
                 </div>
               </div>
               <button className="primary" type="submit" disabled={creating}>{creating ? "Creating…" : "Create Shift"}</button>
@@ -221,7 +212,6 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
   const [active, setActive] = useState(shift.ended_at === null);
   const [endedAt, setEndedAt] = useState(toDateTimeInputValue(shift.ended_at ?? Date.now()));
   const [breakMinutes, setBreakMinutes] = useState(Math.round((shift.break_seconds ?? 0) / 60));
-  const [shiftType, setShiftType] = useState(shift.shift_type ?? "");
   const [saving, setSaving] = useState(false);
 
   async function save() {
@@ -231,7 +221,6 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
         startedAt: parseDateTimeInput(startedAt),
         endedAt: active ? null : parseDateTimeInput(endedAt),
         breakSeconds: Math.round(Number(breakMinutes || 0) * 60),
-        shiftType: shiftType || null,
       });
     } finally {
       setSaving(false);
@@ -264,10 +253,6 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
         <div>
           <label>Break (minutes)</label>
           <input type="number" min="0" value={breakMinutes} onChange={e => setBreakMinutes(e.target.value)} />
-        </div>
-        <div>
-          <label>Type</label>
-          <input value={shiftType} onChange={e => setShiftType(e.target.value)} />
         </div>
       </div>
       <div className="button-row">

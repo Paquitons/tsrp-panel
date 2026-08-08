@@ -1696,13 +1696,6 @@ code {
   gap: var(--space-2);
 }
 
-.hero-shift-start input {
-  margin-bottom: 0;
-  width: 200px;
-  flex-shrink: 1;
-  min-width: 120px;
-}
-
 .hero-shift-start button {
   flex-shrink: 0;
   white-space: nowrap;

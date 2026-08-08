@@ -57,7 +57,6 @@ export default function Dashboard() {
   // ---------- Shift state ----------
   const [active, setActive] = useState(null);
   const [onBreak, setOnBreak] = useState(false);
-  const [shiftType, setShiftType] = useState("");
   const [shiftError, setShiftError] = useState(null);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
@@ -128,7 +127,7 @@ export default function Dashboard() {
   async function startShift() {
     setShiftError(null);
     try {
-      await apiFetch("/shifts/start", { method: "POST", body: { shiftType: shiftType || undefined } });
+      await apiFetch("/shifts/start", { method: "POST" });
       await refreshShift();
       await refreshOnDuty();
     } catch (err) { setShiftError(err.message); }
@@ -450,7 +449,6 @@ export default function Dashboard() {
               </>
             ) : (
               <div className="hero-shift-start">
-                <input value={shiftType} onChange={e => setShiftType(e.target.value)} placeholder="Shift type (optional)" />
                 <button className="btn-green small" onClick={startShift}>Start Shift</button>
               </div>
             )}
