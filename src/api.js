@@ -1,4 +1,4 @@
-export const API_BASE = "https://api.tsrp.online";
+export const API_BASE = import.meta.env.VITE_API_BASE || "https://api.tsrp.online";
 
 /**
  * Makes an authenticated request to the backend. Automatically attaches the

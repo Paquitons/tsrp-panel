@@ -4,6 +4,7 @@ import DiscordIdentity from "../components/DiscordIdentity";
 import CustomSelect from "../components/CustomSelect";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import StockPriceChart from "../components/StockPriceChart";
+import Tabs from "../components/Tabs";
 import { usePolling } from "../hooks/usePolling";
 import { toDateTimeInputValue, parseDateTimeInput, CHART_RANGE_OPTIONS } from "../utils";
 
@@ -54,10 +55,8 @@ export default function StockMarketAdmin() {
 
   return (
     <>
-      <div className="tabs" role="tablist" style={{ marginTop: 16 }}>
-        {SUB_TABS.map(t => (
-          <button key={t.value} type="button" className={`tab ${subTab === t.value ? "active" : ""}`} onClick={() => setSubTab(t.value)}>{t.label}</button>
-        ))}
+      <div style={{ marginTop: 16 }}>
+        <Tabs tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
       </div>
 
       {subTab === "overview" && <OverviewTab />}
@@ -687,10 +686,8 @@ function MarketEventsTab() {
         <button className="primary" type="button" onClick={() => setShowCreate(true)}>New Market Event</button>
       </div>
 
-      <div className="tabs" role="tablist" style={{ marginTop: 16 }}>
-        {EVENT_STATUS_FILTERS.map(f => (
-          <button key={f.value} type="button" className={`tab ${statusFilter === f.value ? "active" : ""}`} onClick={() => setStatusFilter(f.value)}>{f.label}</button>
-        ))}
+      <div style={{ marginTop: 16 }}>
+        <Tabs tabs={EVENT_STATUS_FILTERS} active={statusFilter} onChange={setStatusFilter} />
       </div>
 
       <div className="loa-list" style={{ marginTop: 12 }}>

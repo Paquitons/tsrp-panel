@@ -476,6 +476,23 @@ html, body, #root {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-5);
   overflow-x: auto;
+  /* Scroll-shadow hint: when there are more tabs than fit (e.g. Super
+     Admin's 11 tabs even at desktop widths, since .content caps out at
+     980px), a fade appears at whichever edge still has hidden tabs so the
+     cut-off never looks like the end of the list. The two "scroll"
+     background layers are pinned to the viewport (not the scrolling
+     content) while the two "local" layers scroll away with the tabs, so a
+     fade only stays visible while there's actually more to see in that
+     direction. */
+  background:
+    linear-gradient(to right, var(--surface-sunken) 40%, transparent) local,
+    linear-gradient(to left, var(--surface-sunken) 40%, transparent) local,
+    linear-gradient(to right, rgba(88, 101, 242, 0.4), transparent) scroll,
+    linear-gradient(to left, rgba(88, 101, 242, 0.4), transparent) scroll;
+  background-repeat: no-repeat;
+  background-color: var(--surface-sunken);
+  background-size: 36px 100%, 36px 100%, 20px 100%, 20px 100%;
+  background-position: left, right, left, right;
 }
 
 .tab {
