@@ -3,6 +3,7 @@ import { apiFetch } from "../api";
 import { timeAgo } from "../utils";
 import Avatar from "./Avatar";
 import LogCard from "./LogCard";
+import DiscordIdentity from "./DiscordIdentity";
 
 function describeActivity(a) {
   switch (a.type) {
@@ -119,8 +120,12 @@ export default function UserPanel({ username, discordId, onClose }) {
           </Section>
 
           <Section title="Discord Account">
-            {data.discordIds?.length > 0 ? (
-              data.discordIds.map(id => <div key={id} className="up-field"><code>{id}</code></div>)
+            {data.discordAccounts?.length > 0 ? (
+              data.discordAccounts.map(acc => (
+                <div key={acc.discordId} className="up-field">
+                  <DiscordIdentity variant="row" nickname={acc.nickname} username={acc.username} discordId={acc.discordId} avatarHash={acc.avatarHash} />
+                </div>
+              ))
             ) : (
               <p className="muted">No linked Discord account found.</p>
             )}

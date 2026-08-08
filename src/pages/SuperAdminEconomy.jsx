@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
-import DiscordAvatar from "../components/DiscordAvatar";
+import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdentity";
+import AccountPicker from "../components/AccountPicker";
 import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
 
@@ -19,10 +20,11 @@ function fmt(n) {
 
 function NamedHolder({ discordId, prefix, row }) {
   return (
-    <div className="verification-identity-row" style={{ gap: 8 }}>
-      <DiscordAvatar discordId={discordId} avatarHash={row[`${prefix}_avatar_hash`]} size={22} />
-      <span>{row[`${prefix}_username`] ?? discordId}</span>
-    </div>
+    <DiscordIdentity
+      variant="row"
+      nickname={row[`${prefix}_nickname`]} username={row[`${prefix}_username`]}
+      discordId={discordId} avatarHash={row[`${prefix}_avatar_hash`]} size={22}
+    />
   );
 }
 
@@ -41,6 +43,7 @@ export function EconomyOverviewPanel() {
   const [withdrawTarget, setWithdrawTarget] = useState("");
   const [withdrawReason, setWithdrawReason] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawPickerKey, setWithdrawPickerKey] = useState(0);
 
   usePolling(() => apiFetch("/super-admin/economy-overview").then(setData).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
@@ -78,8 +81,8 @@ export function EconomyOverviewPanel() {
     try {
       const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, targetDiscordId: withdrawTarget.trim(), reason: withdrawReason || undefined } });
       setData(next);
-      setWithdrawAmount(""); setWithdrawTarget(""); setWithdrawReason("");
       flash(`Withdrew ${fmt(amount)} to ${withdrawTarget.trim()}.`);
+      setWithdrawAmount(""); setWithdrawTarget(""); setWithdrawReason(""); setWithdrawPickerKey(k => k + 1);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -135,15 +138,19 @@ export function EconomyOverviewPanel() {
       </form>
 
       <h2 style={{ marginTop: 20 }}>Withdraw Money</h2>
-      <p className="muted card-subtitle">Moves money out of the Government Reserve into any account (a player's Discord ID, or another system wallet) -- a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
+      <p className="muted card-subtitle">Moves money out of the Government Reserve into any account -- a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
+      <div className="form-inline-field" style={{ maxWidth: 340, marginBottom: 8 }}>
+        <label>To Player</label>
+        <AccountPicker key={withdrawPickerKey} onSelect={m => setWithdrawTarget(m.discordId)} placeholder="Search by username or nickname" />
+      </div>
       <form onSubmit={withdrawMoney} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
           <label>Amount</label>
           <input type="number" min="1" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} style={{ width: 150 }} />
         </div>
         <div>
-          <label>To Account (Discord ID)</label>
-          <input value={withdrawTarget} onChange={e => setWithdrawTarget(e.target.value)} style={{ width: 180 }} />
+          <label>Or System Wallet / ID</label>
+          <input value={withdrawTarget} onChange={e => setWithdrawTarget(e.target.value)} placeholder="e.g. GOVERNMENT" style={{ width: 180 }} />
         </div>
         <div style={{ flex: 1, minWidth: 160 }}>
           <label>Reason (optional)</label>
@@ -477,7 +484,9 @@ export function BusinessesPanel() {
           <div key={b.id} className="loa-card loa-card-row" style={{ cursor: "pointer" }} onClick={() => setSelected(b)}>
             <div>
               <div className="verification-identity-name">{b.name} <span className="badge loa-status-pending">{b.type}</span></div>
-              <div className="muted">Owner: {b.owner_username ?? b.owner_discord_id}</div>
+              <div className="muted">
+                Owner: <DiscordIdentity nickname={b.owner_nickname} username={b.owner_username} discordId={b.owner_discord_id} showAvatar={false} />
+              </div>
             </div>
             <span className="muted" style={{ marginLeft: "auto" }}>{fmt(b.treasury)}</span>
           </div>
@@ -505,6 +514,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
   const [slotPayoutRate, setSlotPayoutRate] = useState(business.slot_payout_rate);
   const [vipMinBalance, setVipMinBalance] = useState(business.vip_min_balance ?? "");
   const [ownerDiscordId, setOwnerDiscordId] = useState(business.owner_discord_id);
+  const [newOwnerLabel, setNewOwnerLabel] = useState(null); // set only if the owner is actually being changed via the picker
   const [enabledGames, setEnabledGames] = useState(() => {
     try { return JSON.parse(business.enabled_games); } catch { return []; }
   });
@@ -517,7 +527,9 @@ function BusinessEditModal({ business, onClose, onSaved }) {
 
   async function save() {
     if (ownerDiscordId !== business.owner_discord_id) {
-      if (!confirm(`Override ownership from ${business.owner_discord_id} to ${ownerDiscordId}? This cannot be undone from here.`)) return;
+      const fromLabel = discordDisplayName(business.owner_nickname, business.owner_username, business.owner_discord_id);
+      const toLabel = newOwnerLabel ?? ownerDiscordId;
+      if (!confirm(`Override ownership from ${fromLabel} to ${toLabel}? This cannot be undone from here.`)) return;
     }
     setSaving(true);
     setError(null);
@@ -580,10 +592,16 @@ function BusinessEditModal({ business, onClose, onSaved }) {
           </>
         )}
 
-        <label style={{ marginTop: 12 }}>Owner Discord ID</label>
-        <input value={ownerDiscordId} onChange={e => setOwnerDiscordId(e.target.value)} />
+        <label style={{ marginTop: 12 }}>Owner</label>
+        <div className="button-row" style={{ alignItems: "center", marginBottom: 4 }}>
+          <DiscordIdentity variant="row" nickname={business.owner_nickname} username={business.owner_username} discordId={business.owner_discord_id} avatarHash={business.owner_avatar_hash} />
+        </div>
+        <AccountPicker
+          placeholder="Search to transfer ownership to someone else..."
+          onSelect={m => { setOwnerDiscordId(m.discordId); setNewOwnerLabel(discordDisplayName(m.nickname, m.username, m.discordId)); }}
+        />
         {ownerDiscordId !== business.owner_discord_id && (
-          <p className="muted field-hint">This will override ownership -- confirmation required on save.</p>
+          <p className="muted field-hint">New owner: {newOwnerLabel}. This will override ownership -- confirmation required on save.</p>
         )}
 
         <div className="button-row" style={{ marginTop: 16 }}>
@@ -625,7 +643,7 @@ export function CasinoControlsPanel() {
           <CustomSelect
             value={casinoId}
             onChange={setCasinoId}
-            options={casinos.map(c => ({ value: String(c.id), label: `${c.name} (owner: ${c.owner_username ?? c.owner_discord_id})` }))}
+            options={casinos.map(c => ({ value: String(c.id), label: `${c.name} (owner: ${c.owner_nickname || c.owner_username || c.owner_discord_id})` }))}
           />
         </>
       )}
@@ -973,7 +991,7 @@ export function StorefrontsPanel() {
           <CustomSelect
             value={storefrontId}
             onChange={setStorefrontId}
-            options={storefronts.map(s => ({ value: String(s.id), label: `${s.name} (owner: ${s.owner_username ?? s.owner_discord_id})` }))}
+            options={storefronts.map(s => ({ value: String(s.id), label: `${s.name} (owner: ${s.owner_nickname || s.owner_username || s.owner_discord_id})` }))}
           />
         </>
       )}
@@ -1088,6 +1106,8 @@ export function DebtPanel() {
   const [notice, setNotice] = useState(null);
 
   const [lookupId, setLookupId] = useState("");
+  const [lookupLabel, setLookupLabel] = useState(null);
+  const [lookupPickerKey, setLookupPickerKey] = useState(0);
   const [reputation, setReputation] = useState(null);
   const [newReputation, setNewReputation] = useState("");
 
@@ -1132,11 +1152,11 @@ export function DebtPanel() {
     }
   }
 
-  async function lookupReputation(e) {
-    e.preventDefault();
-    if (!lookupId.trim()) return;
+  async function lookupReputation(member) {
+    setLookupId(member.discordId);
+    setLookupLabel(discordDisplayName(member.nickname, member.username, member.discordId));
     try {
-      const { score } = await apiFetch(`/super-admin/debt/reputation/${lookupId.trim()}`);
+      const { score } = await apiFetch(`/super-admin/debt/reputation/${member.discordId}`);
       setReputation(score);
       setNewReputation(String(score));
     } catch (err) {
@@ -1211,13 +1231,10 @@ export function DebtPanel() {
       )}
 
       <h2 style={{ marginTop: 20 }}>Financial Reputation Lookup</h2>
-      <form onSubmit={lookupReputation} className="button-row" style={{ alignItems: "flex-end" }}>
-        <div>
-          <label>Discord ID</label>
-          <input value={lookupId} onChange={e => setLookupId(e.target.value)} placeholder="Discord ID" style={{ width: 220 }} />
-        </div>
-        <button className="secondary" type="submit">Look Up</button>
-      </form>
+      <div style={{ maxWidth: 340 }}>
+        <AccountPicker key={lookupPickerKey} onSelect={lookupReputation} />
+      </div>
+      {lookupLabel && <p className="muted" style={{ marginTop: 4 }}>Looking up: {lookupLabel}</p>}
       {reputation !== null && (
         <div className="button-row" style={{ marginTop: 8, alignItems: "flex-end" }}>
           <div>

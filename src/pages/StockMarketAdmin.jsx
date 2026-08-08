@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
-import DiscordAvatar from "../components/DiscordAvatar";
+import DiscordIdentity from "../components/DiscordIdentity";
 import CustomSelect from "../components/CustomSelect";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import StockPriceChart from "../components/StockPriceChart";
@@ -40,10 +40,11 @@ function pctClass(n) {
 
 function NamedHolder({ discordId, prefix, row }) {
   return (
-    <div className="verification-identity-row" style={{ gap: 8 }}>
-      <DiscordAvatar discordId={discordId} avatarHash={row[`${prefix}_avatar_hash`]} size={22} />
-      <span>{row[`${prefix}_username`] ?? discordId}</span>
-    </div>
+    <DiscordIdentity
+      variant="row"
+      nickname={row[`${prefix}_nickname`]} username={row[`${prefix}_username`]}
+      discordId={discordId} avatarHash={row[`${prefix}_avatar_hash`]} size={22}
+    />
   );
 }
 

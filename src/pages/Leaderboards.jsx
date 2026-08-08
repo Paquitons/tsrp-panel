@@ -56,7 +56,7 @@ export default function Leaderboards() {
                 key={p.discordId}
                 rank={i + 1}
                 avatar={<DiscordAvatar discordId={p.discordId} avatarHash={p.avatarHash} size={26} />}
-                name={p.username ?? `Player #${p.discordId.slice(-4)}`}
+                name={p.nickname || p.username || `Player #${p.discordId.slice(-4)}`}
                 value={fmt(p.balance)}
               />
             ))}

@@ -3,6 +3,7 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo } from "../utils";
 import DiscordAvatar from "./DiscordAvatar";
+import { discordDisplayName } from "./DiscordIdentity";
 import CustomSelect from "./CustomSelect";
 import AutoGrowTextarea from "./AutoGrowTextarea";
 
@@ -121,7 +122,7 @@ export default function Strike3Prompt() {
         <div className="user-panel-identity" style={{ marginBottom: 16 }}>
           <DiscordAvatar discordId={prompt.discord_id} avatarHash={prompt.target_avatar_hash} size={48} />
           <div>
-            <div className="log-card-username" style={{ fontSize: 17 }}>{prompt.target_username ?? prompt.discord_id}</div>
+            <div className="log-card-username" style={{ fontSize: 17 }}>{discordDisplayName(prompt.target_nickname, prompt.target_username, prompt.discord_id)}</div>
             <div className="muted">Triggered {timeAgo(prompt.created_at)}</div>
           </div>
         </div>

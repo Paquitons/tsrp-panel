@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { timeAgo, TYPE_LABELS } from "../utils";
 import Avatar from "./Avatar";
 import DiscordAvatar from "./DiscordAvatar";
+import { discordDisplayName } from "./DiscordIdentity";
 import CustomSelect from "./CustomSelect";
 import PortalDropdown from "./PortalDropdown";
 
@@ -91,7 +92,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           style={issuerClickable ? { cursor: "pointer" } : undefined}
           onClick={() => issuerClickable && onIssuerClick(log.issuer_discord_id)}
         >
-          {log.issuer_username ?? log.issuer_discord_id}
+          {discordDisplayName(log.issuer_nickname, log.issuer_username, log.issuer_discord_id)}
         </span>
 
         <div className="log-card-menu">
@@ -146,7 +147,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
             <div className="log-card-completed">
               <span className="muted">Completed by</span>{" "}
               <DiscordAvatar discordId={log.completed_by} avatarHash={log.completed_by_avatar_hash} size={16} style={{ verticalAlign: "middle" }} />{" "}
-              {log.completed_by_username ?? log.completed_by}
+              {discordDisplayName(log.completed_by_nickname, log.completed_by_username, log.completed_by)}
             </div>
           )}
           <div className="log-card-timestamp muted">Created {timeAgo(log.created_at)}</div>

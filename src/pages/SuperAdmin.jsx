@@ -3,6 +3,8 @@ import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
+import DiscordIdentity from "../components/DiscordIdentity";
+import AccountPicker from "../components/AccountPicker";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
@@ -277,30 +279,31 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
 }
 
 /**
- * Unrestricted economy controls -- looked up by raw Discord ID (not the
- * staff-search autocomplete) since anyone active in the server can have a
- * wallet, not just people who've logged into the panel.
+ * Unrestricted economy controls -- targets anyone via the standard
+ * account picker (search by username/nickname, or still paste a Discord
+ * ID if that's genuinely what you have) since anyone active in the
+ * server can have a wallet, not just people who've logged into the panel.
  */
 function EconomyControl() {
-  const [discordId, setDiscordId] = useState("");
+  const [target, setTarget] = useState(null); // { discordId, username, nickname, avatarHash }
   const [balance, setBalanceState] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [amount, setAmount] = useState("");
   const [setAmountValue, setSetAmountValue] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pickerKey, setPickerKey] = useState(0); // bump to reset AccountPicker's search box
 
-  async function loadBalance(e) {
-    e?.preventDefault();
-    if (!discordId.trim()) return;
+  async function selectTarget(member) {
+    setTarget(member);
+    setBalanceState(null);
     setLoading(true);
     setError(null);
     try {
-      const result = await apiFetch(`/super-admin/economy/${discordId.trim()}`);
+      const result = await apiFetch(`/super-admin/economy/${member.discordId}`);
       setBalanceState(result.balance);
     } catch (err) {
       setError(err.message);
-      setBalanceState(null);
     } finally {
       setLoading(false);
     }
@@ -308,13 +311,13 @@ function EconomyControl() {
 
   async function adjust(sign) {
     const parsed = Math.trunc(Number(amount));
-    if (!discordId.trim() || !Number.isFinite(parsed) || parsed <= 0) return;
+    if (!target || !Number.isFinite(parsed) || parsed <= 0) return;
     setBusy(true);
     setError(null);
     try {
       const result = await apiFetch("/super-admin/economy/adjust", {
         method: "POST",
-        body: { discordId: discordId.trim(), amount: parsed * sign },
+        body: { discordId: target.discordId, amount: parsed * sign },
       });
       setBalanceState(result.balance);
       setAmount("");
@@ -328,13 +331,13 @@ function EconomyControl() {
   async function applySet(e) {
     e.preventDefault();
     const parsed = Math.trunc(Number(setAmountValue));
-    if (!discordId.trim() || !Number.isFinite(parsed)) return;
+    if (!target || !Number.isFinite(parsed)) return;
     setBusy(true);
     setError(null);
     try {
       const result = await apiFetch("/super-admin/economy/set", {
         method: "POST",
-        body: { discordId: discordId.trim(), amount: parsed },
+        body: { discordId: target.discordId, amount: parsed },
       });
       setBalanceState(result.balance);
       setSetAmountValue("");
@@ -350,16 +353,16 @@ function EconomyControl() {
       <p className="muted card-subtitle">Give, take, or set anyone's balance directly. No limits or checks.</p>
       {error && <div className="error-banner">{error}</div>}
 
-      <form onSubmit={loadBalance} className="form-inline-row">
-        <div className="form-inline-field">
-          <label>Discord ID</label>
-          <input value={discordId} onChange={e => setDiscordId(e.target.value)} placeholder="e.g. 1115356536160653444" />
+      <AccountPicker key={pickerKey} onSelect={selectTarget} placeholder="Search by username, nickname, or Discord ID" />
+
+      {target && (
+        <div className="button-row" style={{ marginTop: 8, alignItems: "center" }}>
+          <DiscordIdentity variant="row" nickname={target.nickname} username={target.username} discordId={target.discordId} avatarHash={target.avatarHash} />
+          <button className="secondary" type="button" onClick={() => { setTarget(null); setBalanceState(null); setPickerKey(k => k + 1); }}>Change</button>
         </div>
-        <div className="form-inline-field form-inline-field-btn">
-          <label aria-hidden="true">&nbsp;</label>
-          <button className="secondary" type="submit" disabled={loading}>{loading ? "Loading…" : "Look Up"}</button>
-        </div>
-      </form>
+      )}
+
+      {loading && <p className="muted" style={{ marginTop: 12 }}>Loading…</p>}
 
       {balance !== null && (
         <>

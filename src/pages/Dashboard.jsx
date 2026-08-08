@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { formatClockTime, formatDurationWithSeconds, TYPE_LABELS } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
+import { discordDisplayName } from "../components/DiscordIdentity";
 import UserPanel from "../components/UserPanel";
 import LogCard from "../components/LogCard";
 import CustomSelect from "../components/CustomSelect";
@@ -462,7 +463,7 @@ export default function Dashboard() {
                 <div
                   className="on-duty-avatar"
                   key={s.discordId}
-                  title={`${s.username ?? s.discordId}${s.onBreak ? " (on break)" : ""}`}
+                  title={`${discordDisplayName(s.nickname, s.username, s.discordId)}${s.onBreak ? " (on break)" : ""}`}
                   onClick={() => openUserByDiscord(s.discordId)}
                   style={{ cursor: "pointer" }}
                 >
