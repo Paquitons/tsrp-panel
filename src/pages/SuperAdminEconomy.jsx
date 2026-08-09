@@ -42,6 +42,7 @@ export function EconomyOverviewPanel() {
   const [printing, setPrinting] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawTarget, setWithdrawTarget] = useState("");
+  const [withdrawCategory, setWithdrawCategory] = useState("manual");
   const [withdrawReason, setWithdrawReason] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawPickerKey, setWithdrawPickerKey] = useState(0);
@@ -80,7 +81,7 @@ export function EconomyOverviewPanel() {
     setWithdrawing(true);
     setError(null);
     try {
-      const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, targetDiscordId: withdrawTarget.trim(), reason: withdrawReason || undefined } });
+      const next = await apiFetch("/super-admin/economy-overview/withdraw-money", { method: "POST", body: { amount, targetDiscordId: withdrawTarget.trim(), reason: withdrawReason || undefined, category: withdrawCategory } });
       setData(next);
       flash(`Withdrew ${fmt(amount)} to ${withdrawTarget.trim()}.`);
       setWithdrawAmount(""); setWithdrawTarget(""); setWithdrawReason(""); setWithdrawPickerKey(k => k + 1);
@@ -153,12 +154,21 @@ export function EconomyOverviewPanel() {
           <label>Or System Wallet / ID</label>
           <input value={withdrawTarget} onChange={e => setWithdrawTarget(e.target.value)} placeholder="e.g. GOVERNMENT" style={{ width: 180 }} />
         </div>
+        <div style={{ minWidth: 160 }}>
+          <label>Category</label>
+          <CustomSelect
+            value={withdrawCategory}
+            onChange={setWithdrawCategory}
+            options={SPENDING_CATEGORY_LABELS}
+          />
+        </div>
         <div style={{ flex: 1, minWidth: 160 }}>
           <label>Reason (optional)</label>
           <input value={withdrawReason} onChange={e => setWithdrawReason(e.target.value)} />
         </div>
         <button className="secondary" type="submit" disabled={withdrawing}>{withdrawing ? "Withdrawing…" : "Withdraw Money"}</button>
       </form>
+      <p className="muted" style={{ marginTop: 4 }}>Shown on the Taxes tab's spending breakdown, so it's clear this money went back into the economy and where.</p>
 
       <h2 style={{ marginTop: 20 }}>Top 10 Wallets</h2>
       <div className="loa-list">
@@ -231,28 +241,154 @@ export function EconomyConfigPanel() {
       {saved && <div className="success-banner">Saved.</div>}
 
       <h2>Taxes</h2>
+      <p className="muted card-subtitle">
+        Every tax charge anywhere in the economy is logged to the Tax Dashboard (see the Taxes tab) and to each
+        payer's own tax history -- it always ends up in the Government Treasury, never removed from the economy.
+        Everything below "Business Income Tax by Type" is brand new and defaults to off (rate/fee of 0); turning
+        one on is an explicit choice, not a silent change to how the existing economy already worked.
+      </p>
+
+      <h3>Personal Income Tax</h3>
       <div className="form-row">
         <div>
-          <label>Personal Tax Rate (%)</label>
+          <label>Rate (%)</label>
           <input type="number" step="0.1" min="0" value={config.taxes.personalRate * 100}
             onChange={e => setConfig({ ...config, taxes: { ...config.taxes, personalRate: Number(e.target.value) / 100 } })} />
         </div>
         <div>
-          <label>Personal Tax-Free Threshold</label>
+          <label>Tax-Free Threshold</label>
           <input type="number" min="0" value={config.taxes.personalThreshold}
             onChange={e => setConfig({ ...config, taxes: { ...config.taxes, personalThreshold: Number(e.target.value) } })} />
         </div>
+        <div>
+          <label>Frequency (hours)</label>
+          <input type="number" min="1" value={config.taxes.personalTaxIntervalHours}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, personalTaxIntervalHours: Number(e.target.value) } })} />
+        </div>
       </div>
+
+      <h3 style={{ marginTop: 16 }}>Net Worth Tax</h3>
+      <p className="muted card-subtitle">Taxes total wealth (cash + bank + businesses + property + investments, minus loans) instead of just cash on hand.</p>
       <div className="form-row">
         <div>
-          <label>Business Tax Rate (%)</label>
+          <label>Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.netWorthRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, netWorthRate: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Tax-Free Threshold</label>
+          <input type="number" min="0" value={config.taxes.netWorthThreshold}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, netWorthThreshold: Number(e.target.value) } })} />
+        </div>
+        <div>
+          <label>Frequency (days)</label>
+          <input type="number" min="1" value={config.taxes.netWorthTaxIntervalDays}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, netWorthTaxIntervalDays: Number(e.target.value) } })} />
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 16 }}>Business Income Tax by Type</h3>
+      <p className="muted card-subtitle">Falls back to the Default rate for any type not overridden. Threshold and frequency are shared across every type.</p>
+      <div className="form-row">
+        <div>
+          <label>Default Rate (%)</label>
           <input type="number" step="0.1" min="0" value={config.taxes.businessRate * 100}
             onChange={e => setConfig({ ...config, taxes: { ...config.taxes, businessRate: Number(e.target.value) / 100 } })} />
         </div>
         <div>
-          <label>Business Tax-Free Threshold</label>
+          <label>Tax-Free Threshold</label>
           <input type="number" min="0" value={config.taxes.businessThreshold}
             onChange={e => setConfig({ ...config, taxes: { ...config.taxes, businessThreshold: Number(e.target.value) } })} />
+        </div>
+        <div>
+          <label>Frequency (hours)</label>
+          <input type="number" min="1" value={config.taxes.businessTaxIntervalHours}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, businessTaxIntervalHours: Number(e.target.value) } })} />
+        </div>
+      </div>
+      <div className="card-grid">
+        {Object.entries(BUSINESS_TYPE_LABELS).map(([key, label]) => (
+          <div key={key}>
+            <label>{label} Rate (%)</label>
+            <input type="number" step="0.1" min="0" value={config.taxes.businessRatesByType[key] * 100}
+              onChange={e => setConfig({ ...config, taxes: { ...config.taxes, businessRatesByType: { ...config.taxes.businessRatesByType, [key]: Number(e.target.value) / 100 } } })} />
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{ marginTop: 16 }}>Business Licensing Fee by Type</h3>
+      <p className="muted card-subtitle">A flat, recurring dollar amount per business (not a percentage of treasury) -- the cost of staying licensed to operate.</p>
+      <div className="form-row">
+        <div>
+          <label>Frequency (days)</label>
+          <input type="number" min="1" value={config.taxes.licenseFeeIntervalDays}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, licenseFeeIntervalDays: Number(e.target.value) } })} />
+        </div>
+      </div>
+      <div className="card-grid">
+        {Object.entries(BUSINESS_TYPE_LABELS).map(([key, label]) => (
+          <div key={key}>
+            <label>{label} Fee</label>
+            <input type="number" min="0" value={config.taxes.licenseFeeByType[key]}
+              onChange={e => setConfig({ ...config, taxes: { ...config.taxes, licenseFeeByType: { ...config.taxes.licenseFeeByType, [key]: Number(e.target.value) } } })} />
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{ marginTop: 16 }}>Sales &amp; Luxury Tax</h3>
+      <p className="muted card-subtitle">Skimmed from a storefront's revenue on the sale, not added on top of the price a customer already agreed to.</p>
+      <div className="form-row">
+        <div>
+          <label>Sales Tax Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.salesTaxRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, salesTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Luxury Surcharge (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.luxuryTaxRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, luxuryTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Luxury Threshold (single purchase)</label>
+          <input type="number" min="0" value={config.taxes.luxuryThreshold}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, luxuryThreshold: Number(e.target.value) } })} />
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 16 }}>Transaction &amp; Large Transfer Tax</h3>
+      <p className="muted card-subtitle">Withheld from what the recipient receives on /economy pay, not added on top of what the sender is charged. Neither applies below its own threshold.</p>
+      <div className="form-row">
+        <div>
+          <label>Transaction Tax Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.transactionTaxRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, transactionTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Applies Above</label>
+          <input type="number" min="0" value={config.taxes.transactionThreshold}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, transactionThreshold: Number(e.target.value) } })} />
+        </div>
+      </div>
+      <div className="form-row">
+        <div>
+          <label>Large Transfer Tax Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.largeTransferTaxRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, largeTransferTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+        <div>
+          <label>Applies Above</label>
+          <input type="number" min="0" value={config.taxes.largeTransferThreshold}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, largeTransferThreshold: Number(e.target.value) } })} />
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 16 }}>Capital Gains Tax</h3>
+      <p className="muted card-subtitle">Only on an actual profit when selling a stock -- a sale at a loss or break-even owes nothing.</p>
+      <div className="form-row">
+        <div>
+          <label>Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.capitalGainsRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, capitalGainsRate: Number(e.target.value) / 100 } })} />
         </div>
       </div>
 
@@ -444,6 +580,22 @@ const CRIME_LABELS = {
   store: "Store Robbery",
   pickpocket: "Pickpocket",
 };
+
+const BUSINESS_TYPE_LABELS = {
+  storefront: "Storefront",
+  casino: "Casino",
+  bank: "Bank",
+  insurance: "Insurance Company",
+};
+
+const SPENDING_CATEGORY_LABELS = [
+  { value: "manual", label: "Manual / Other" },
+  { value: "grant", label: "Grant" },
+  { value: "contract", label: "Contract" },
+  { value: "infrastructure", label: "Infrastructure" },
+  { value: "job", label: "Government Job" },
+  { value: "purchase", label: "Government Purchase" },
+];
 
 // ==================================================================
 // Businesses -- search, view, and unrestricted edit (including
@@ -1650,6 +1802,173 @@ export function InsurancePanel() {
           </div>
         ))}
         {claims.length === 0 && <p className="muted">No claims found.</p>}
+      </div>
+    </>
+  );
+}
+
+// ==================================================================
+// Tax Dashboard -- read-only reporting over tax_ledger/
+// government_spending_log, the two tables highrock-bot's taxLedger.js
+// and this page's own Withdraw Money action write to. Rates/thresholds
+// are edited on the Economy Config tab; this tab is purely "what actually
+// happened."
+// ==================================================================
+const TAX_CATEGORY_LABELS = {
+  personal_income: "Personal Income Tax",
+  business_income: "Business Income Tax",
+  net_worth: "Net Worth Tax",
+  property: "Property Tax",
+  sales: "Sales Tax",
+  luxury: "Luxury Tax",
+  transaction: "Transaction Tax",
+  large_transfer: "Large Transfer Tax",
+  capital_gains: "Capital Gains Tax",
+  license_fee: "Business License Fee",
+};
+
+function taxCategoryLabel(key) {
+  return TAX_CATEGORY_LABELS[key] ?? key;
+}
+
+function spendingCategoryLabel(key) {
+  return SPENDING_CATEGORY_LABELS.find(c => c.value === key)?.label ?? key;
+}
+
+/** A minimal 30-bar revenue-over-time chart -- plain flexbox bars, no charting library, matching this app's "zero UI dependencies" convention. */
+function TaxRevenueChart({ data }) {
+  const max = Math.max(1, ...data.map(d => d.total));
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 120, marginTop: 8, marginBottom: 4 }}>
+      {data.map(d => (
+        <div
+          key={d.date}
+          title={`${d.date}: ${fmt(d.total)}`}
+          style={{
+            flex: 1,
+            height: `${Math.max(2, (d.total / max) * 100)}%`,
+            background: d.total > 0 ? "var(--accent)" : "var(--border-subtle)",
+            borderRadius: 2,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function TaxDashboardPanel() {
+  const [overview, setOverview] = useState(null);
+  const [ledger, setLedger] = useState(null);
+  const [spending, setSpending] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [payerTypeFilter, setPayerTypeFilter] = useState("");
+  const [error, setError] = useState(null);
+
+  usePolling(() => apiFetch("/super-admin/tax-dashboard").then(d => { setOverview(d); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
+
+  function loadLedger() {
+    const params = new URLSearchParams();
+    if (categoryFilter) params.set("category", categoryFilter);
+    if (payerTypeFilter) params.set("payerType", payerTypeFilter);
+    apiFetch(`/super-admin/tax-dashboard/ledger?${params}`).then(setLedger).catch(err => setError(err.message));
+  }
+  usePolling(loadLedger, ADMIN_POLL_MS, [categoryFilter, payerTypeFilter]);
+  usePolling(() => apiFetch("/super-admin/tax-dashboard/spending").then(setSpending).catch(err => setError(err.message)), ADMIN_POLL_MS);
+
+  if (error && !overview) return <div className="error-banner">{error}</div>;
+  if (!overview) return <p className="muted">Loading…</p>;
+
+  return (
+    <>
+      <p className="muted card-subtitle">
+        Every tax charge anywhere in the economy, and every dollar spent back out of the Government Treasury --
+        the two halves of the closed loop. Rates live on the Economy Config tab.
+      </p>
+      {error && <div className="error-banner">{error}</div>}
+
+      <div className="card-grid">
+        <div className="stat-tile"><div className="muted">Total Collected (all time)</div><div className="verification-identity-name">{fmt(overview.totalCollected)}</div></div>
+        <div className="stat-tile"><div className="muted">Collected Today</div><div className="verification-identity-name">{fmt(overview.totalToday)}</div></div>
+        <div className="stat-tile"><div className="muted">From Players</div><div className="verification-identity-name">{fmt(overview.fromPlayers)}</div></div>
+        <div className="stat-tile"><div className="muted">From Businesses</div><div className="verification-identity-name">{fmt(overview.fromBusinesses)}</div></div>
+        <div className="stat-tile"><div className="muted">Government Treasury</div><div className="verification-identity-name">{fmt(overview.governmentBalance)}</div></div>
+        <div className="stat-tile"><div className="muted">Total Spent (all time)</div><div className="verification-identity-name">{fmt(overview.totalSpent)}</div></div>
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Revenue -- Last 30 Days</h2>
+      <TaxRevenueChart data={overview.overTime} />
+
+      <h2 style={{ marginTop: 20 }}>Collected By Category</h2>
+      <div className="loa-list">
+        {overview.byCategory.map(row => (
+          <div className="loa-card loa-card-row" key={row.category}>
+            <span>{taxCategoryLabel(row.category)} <span className="muted">({row.count})</span></span>
+            <span className="muted" style={{ marginLeft: "auto" }}>{fmt(row.total)}</span>
+          </div>
+        ))}
+        {overview.byCategory.length === 0 && <p className="muted">No taxes collected yet.</p>}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Government Spending By Category</h2>
+      <div className="loa-list">
+        {overview.spendingByCategory.map(row => (
+          <div className="loa-card loa-card-row" key={row.category}>
+            <span>{spendingCategoryLabel(row.category)} <span className="muted">({row.count})</span></span>
+            <span className="muted" style={{ marginLeft: "auto" }}>{fmt(row.total)}</span>
+          </div>
+        ))}
+        {overview.spendingByCategory.length === 0 && <p className="muted">Nothing spent yet -- see Withdraw Money on the Economy Overview tab.</p>}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Recent Tax Activity</h2>
+      <div className="form-inline-row" style={{ marginBottom: 12 }}>
+        <div className="form-inline-field">
+          <label>Category</label>
+          <CustomSelect
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            options={[{ value: "", label: "All Categories" }, ...Object.keys(TAX_CATEGORY_LABELS).map(k => ({ value: k, label: taxCategoryLabel(k) }))]}
+          />
+        </div>
+        <div className="form-inline-field">
+          <label>Payer</label>
+          <CustomSelect
+            value={payerTypeFilter}
+            onChange={setPayerTypeFilter}
+            options={[{ value: "", label: "Everyone" }, { value: "player", label: "Players" }, { value: "business", label: "Businesses" }]}
+          />
+        </div>
+      </div>
+      <div className="loa-list">
+        {(ledger?.entries ?? []).map(entry => (
+          <div className="loa-card" key={entry.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <span className="badge loa-status-approved">{taxCategoryLabel(entry.category)}</span>
+              <span className="muted">{new Date(entry.created_at).toLocaleString()}</span>
+            </div>
+            <div className="log-card-field">{entry.payer_label} ({entry.payer_type}) -- {fmt(entry.amount)}</div>
+            {entry.reason && <div className="log-card-field muted">{entry.reason}</div>}
+          </div>
+        ))}
+        {ledger && ledger.entries.length === 0 && <p className="muted">No tax activity matches this filter.</p>}
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Recent Government Spending</h2>
+      <div className="loa-list">
+        {(spending?.entries ?? []).map(entry => (
+          <div className="loa-card" key={entry.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <span className="badge loa-status-pending">{spendingCategoryLabel(entry.category)}</span>
+              <span className="muted">{new Date(entry.created_at).toLocaleString()}</span>
+            </div>
+            <div className="log-card-field">
+              {entry.recipient_label ?? "Unknown recipient"} -- {fmt(entry.amount)}
+              {entry.spent_by && <span className="muted"> -- authorized by <DiscordIdentity discordId={entry.spent_by} showAvatar={false} /></span>}
+            </div>
+            {entry.reason && <div className="log-card-field muted">{entry.reason}</div>}
+          </div>
+        ))}
+        {spending && spending.entries.length === 0 && <p className="muted">No spending recorded yet.</p>}
       </div>
     </>
   );
