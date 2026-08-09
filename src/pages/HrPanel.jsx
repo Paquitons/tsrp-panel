@@ -10,6 +10,7 @@ import DiscordIdentity from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
 import HrAutomodOffenses from "./HrAutomodOffenses";
+import HrQuotas from "./HrQuotas";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -322,6 +323,7 @@ export default function HrPanel() {
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
     { value: "automod", label: "Automod Offenses" },
+    { value: "quotas", label: "Quotas" },
   ];
 
   return (
@@ -582,6 +584,7 @@ export default function HrPanel() {
         )}
 
         {actionTab === "automod" && <HrAutomodOffenses />}
+        {actionTab === "quotas" && <HrQuotas />}
       </div>
 
       {/* ---------- Reference: read-only, glance info ---------- */}
