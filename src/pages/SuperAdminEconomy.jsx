@@ -1149,10 +1149,10 @@ const EFFECT_TYPE_OPTIONS = [
 function catalogEffectSummary(item) {
   if (!item.effect_type) return "Cosmetic, no effect";
   if (item.effect_type === "requirement") {
-    return `Required for ${item.effect_target === "CHOOSE" ? "a crime type the owner picks" : item.effect_target}${item.consumable ? " (consumed on use)" : " (persistent)"}`;
+    return `Required for ${item.effect_target}${item.consumable ? " (consumed on use)" : " (persistent)"}`;
   }
   if (item.effect_type === "crime_success_boost") return `+${Math.round(item.effect_value * 100)}% crime success, ${item.duration_minutes}m`;
-  if (item.effect_type === "crime_cooldown_reset") return `-${item.effect_value}m ${item.effect_target === "CHOOSE" ? "(owner picks crime type)" : item.effect_target} cooldown`;
+  if (item.effect_type === "crime_cooldown_reset") return `-${item.effect_value}m ${item.effect_target} cooldown`;
   if (item.effect_type === "work_cooldown_reset") return `-${item.effect_value}m work cooldown`;
   if (item.effect_type === "jail_time_reduction") return `-${item.effect_value}m jail time`;
   return "Cosmetic";
@@ -1272,7 +1272,7 @@ export function GovernmentCatalogPanel() {
               <CustomSelect
                 value={form.effectTarget}
                 onChange={v => setForm({ ...form, effectTarget: v })}
-                options={[{ value: "CHOOSE", label: "Owner picks when stocking" }, ...crimeTypes.map(c => ({ value: c, label: c }))]}
+                options={crimeTypes.map(c => ({ value: c, label: c }))}
               />
             </div>
           )}
