@@ -1028,9 +1028,15 @@ const STOREFRONT_CATEGORIES = [
   { value: "general", label: "General" },
 ];
 
+function durabilityLabel(consumable) {
+  if (!consumable) return "";
+  if (consumable === 1) return " (consumed on use)";
+  return ` (${consumable} uses)`;
+}
+
 function effectSummary(p) {
   if (!p.effect_type) return null;
-  if (p.effect_type === "requirement") return `Required for ${p.effect_target}${p.consumable ? " (consumed on use)" : ""}`;
+  if (p.effect_type === "requirement") return `Required for ${p.effect_target}${durabilityLabel(p.consumable)}`;
   if (p.effect_type === "crime_success_boost") return `+${Math.round(p.effect_value * 100)}% crime success, ${Math.round(p.effect_duration_ms / 60000)}m`;
   if (p.effect_type === "crime_cooldown_reset") return `-${Math.round(p.effect_value / 60000)}m ${p.effect_target} cooldown`;
   if (p.effect_type === "work_cooldown_reset") return `-${Math.round(p.effect_value / 60000)}m work cooldown`;
@@ -1149,7 +1155,7 @@ const EFFECT_TYPE_OPTIONS = [
 function catalogEffectSummary(item) {
   if (!item.effect_type) return "Cosmetic, no effect";
   if (item.effect_type === "requirement") {
-    return `Required for ${item.effect_target}${item.consumable ? " (consumed on use)" : " (persistent)"}`;
+    return `Required for ${item.effect_target}${item.consumable ? ` (${item.consumable} use${item.consumable === 1 ? "" : "s"})` : " (persistent)"}`;
   }
   if (item.effect_type === "crime_success_boost") return `+${Math.round(item.effect_value * 100)}% crime success, ${item.duration_minutes}m`;
   if (item.effect_type === "crime_cooldown_reset") return `-${item.effect_value}m ${item.effect_target} cooldown`;
@@ -1160,7 +1166,7 @@ function catalogEffectSummary(item) {
 
 const EMPTY_CATALOG_FORM = {
   key: "", name: "", description: "", category: "general", wholesalePrice: "",
-  effectType: "", effectTarget: "", effectValue: "", durationMinutes: "", consumable: false, enabled: true,
+  effectType: "", effectTarget: "", effectValue: "", durationMinutes: "", consumable: "0", enabled: true,
 };
 
 export function GovernmentCatalogPanel() {
@@ -1187,7 +1193,7 @@ export function GovernmentCatalogPanel() {
       wholesalePrice: String(item.wholesale_price),
       effectType: item.effect_type ?? "", effectTarget: item.effect_target ?? "",
       effectValue: item.effect_value ?? "", durationMinutes: item.duration_minutes ?? "",
-      consumable: !!item.consumable, enabled: !!item.enabled,
+      consumable: String(item.consumable ?? 0), enabled: !!item.enabled,
     });
   }
 
@@ -1213,7 +1219,7 @@ export function GovernmentCatalogPanel() {
       effectTarget: form.effectTarget || null,
       effectValue: form.effectValue === "" ? null : Number(form.effectValue),
       durationMinutes: form.durationMinutes === "" ? null : Number(form.durationMinutes),
-      consumable: form.consumable,
+      consumable: form.effectType === "requirement" ? Number(form.consumable || 0) : 0,
       enabled: form.enabled,
     };
     try {
@@ -1287,8 +1293,8 @@ export function GovernmentCatalogPanel() {
           )}
           {form.effectType === "requirement" && (
             <div>
-              <label>Consumable?</label>
-              <CustomSelect value={form.consumable ? "yes" : "no"} onChange={v => setForm({ ...form, consumable: v === "yes" })} options={[{ value: "no", label: "No -- persistent" }, { value: "yes", label: "Yes -- used up on a gated crime attempt" }]} />
+              <label>Uses Before Wearing Out (0 = persistent forever)</label>
+              <input type="number" min="0" step="1" value={form.consumable} onChange={e => setForm({ ...form, consumable: e.target.value })} />
             </div>
           )}
           <div>
