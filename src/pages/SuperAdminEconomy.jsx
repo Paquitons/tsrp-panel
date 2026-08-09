@@ -1310,3 +1310,130 @@ export function DebtPanel() {
     </>
   );
 }
+
+// ==================================================================
+// Player Insurance -- oversight of every personal policy/claim, plus
+// the ability to approve/deny a claim directly (unrestricted, same
+// philosophy as everywhere else here -- normally a claim needs the
+// insurer's own permission check, which Super Admin bypasses). Policy
+// purchasing/claim submission itself stays entirely player-driven via
+// highrock-bot's /insurance -- this panel never creates either.
+// ==================================================================
+const INSURANCE_TYPE_LABELS = { theft: "Theft", crime: "Crime", gambling: "Gambling", general: "General" };
+const CLAIM_STATUS_LABELS = { pending: "Pending", approved: "Approved", denied: "Denied" };
+
+export function InsurancePanel() {
+  const [companies, setCompanies] = useState([]);
+  const [claims, setClaims] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("pending");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+
+  function load() {
+    apiFetch("/super-admin/insurance/companies").then(({ companies }) => { setCompanies(companies); setError(null); }).catch(err => setError(err.message));
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    if (typeFilter) params.set("type", typeFilter);
+    const qs = params.toString() ? `?${params}` : "";
+    apiFetch(`/super-admin/insurance/claims${qs}`).then(({ claims }) => { setClaims(claims); setError(null); }).catch(err => setError(err.message));
+  }
+  usePolling(load, ADMIN_POLL_MS, [statusFilter, typeFilter]);
+
+  function flash(msg) {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  }
+
+  async function approve(claim) {
+    const input = prompt(`Payout amount (requested ${fmt(claim.requested_payout)}, limit ${fmt(claim.coverage_limit)}). Leave blank to pay the requested amount:`, claim.requested_payout);
+    if (input === null) return;
+    const payout = input.trim() === "" ? undefined : Number(input);
+    try {
+      const { claim: updated } = await apiFetch(`/super-admin/insurance/claims/${claim.id}/approve`, { method: "POST", body: { payout } });
+      flash(`Claim #${claim.id} approved -- paid ${fmt(updated.approved_payout)}.`);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function deny(claim) {
+    if (!confirm(`Deny claim #${claim.id} (requesting ${fmt(claim.requested_payout)})?`)) return;
+    const reason = prompt("Reason (shown to the claimant, optional):") ?? undefined;
+    try {
+      await apiFetch(`/super-admin/insurance/claims/${claim.id}/deny`, { method: "POST", body: { reason } });
+      flash(`Claim #${claim.id} denied.`);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <>
+      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {notice && <div className="success-banner">{notice}</div>}
+
+      <h2 style={{ marginTop: 16 }}>Insurance Companies</h2>
+      <div className="loa-list">
+        {companies.map(c => (
+          <div className="loa-card loa-card-row" key={c.id}>
+            <NamedHolder discordId={c.owner_discord_id} prefix="owner" row={c} />
+            <span className="muted" style={{ marginLeft: 8 }}>{c.name}</span>
+            <span className="muted" style={{ marginLeft: "auto" }}>{fmt(c.treasury)} treasury</span>
+          </div>
+        ))}
+        {companies.length === 0 && <p className="muted">No insurance companies founded yet.</p>}
+      </div>
+
+      <div className="modal-title-row" style={{ marginTop: 20, marginBottom: 8 }}>
+        <h2 style={{ margin: 0 }}>Claims</h2>
+        <div className="button-row">
+          <CustomSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[{ value: "", label: "All Statuses" }, ...Object.entries(CLAIM_STATUS_LABELS).map(([value, label]) => ({ value, label }))]}
+          />
+          <CustomSelect
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={[{ value: "", label: "All Types" }, ...Object.entries(INSURANCE_TYPE_LABELS).map(([value, label]) => ({ value, label }))]}
+          />
+        </div>
+      </div>
+      <div className="loa-list">
+        {claims.map(c => (
+          <div className="loa-card" key={c.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <NamedHolder discordId={c.discord_id} prefix="claimant" row={c} />
+              <span className={`badge ${c.status === "approved" ? "loa-status-approved" : c.status === "denied" ? "loa-status-denied" : "loa-status-pending"}`}>
+                {CLAIM_STATUS_LABELS[c.status] ?? c.status}
+              </span>
+            </div>
+            <div className="log-card-field">
+              #{c.id} -- {INSURANCE_TYPE_LABELS[c.policy_type] ?? c.policy_type} -- lost {fmt(c.amount_lost)}, requested {fmt(c.requested_payout)}
+              {c.status === "approved" && ` -- paid ${fmt(c.approved_payout)}`}
+            </div>
+            <div className="log-card-field muted">
+              Coverage limit {fmt(c.coverage_limit)}, deductible {fmt(c.deductible)}
+              {c.source_table ? ` -- ${c.source_table} #${c.source_id}` : c.description ? ` -- "${c.description}"` : ""}
+            </div>
+            <div className="log-card-field muted">
+              Submitted {new Date(c.created_at).toLocaleString()}
+              {c.decided_at ? ` -- decided ${new Date(c.decided_at).toLocaleString()}` : ""}
+              {c.status === "denied" && c.decline_reason ? ` -- ${c.decline_reason}` : ""}
+            </div>
+            {c.status === "pending" && (
+              <div className="button-row" style={{ marginTop: 8 }}>
+                <button className="primary" type="button" onClick={() => approve(c)}>Approve</button>
+                <button className="danger" type="button" onClick={() => deny(c)}>Deny</button>
+              </div>
+            )}
+          </div>
+        ))}
+        {claims.length === 0 && <p className="muted">No claims found.</p>}
+      </div>
+    </>
+  );
+}
