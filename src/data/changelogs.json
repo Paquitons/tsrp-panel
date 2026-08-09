@@ -4,13 +4,13 @@
     "slug": "v1-10-0",
     "title": "TSRP Update",
     "date": "2026-08-09",
-    "summary": "A full economy rebalance -- /work pays enough to actually afford storefront items now, and several more rates are tunable from Super Admin without a code change.",
+    "summary": "A full economy rebalance -- /work pays enough to actually afford storefront items now, and several more rates can be tuned by staff without a code change.",
     "sections": [
       {
         "heading": "Economy Rebalance",
         "items": [
           "/work payouts are up roughly 2.5x across every job tier, and the daily bonus went from $50 to $75, so a shift or two now actually covers a storefront purchase.",
-          "Investment/stock dividend rate, property resale rate, bank loan term limits, and the minimum loan interest rate are now Super Admin-configurable instead of fixed in code."
+          "Investment/stock dividend rate, property resale rate, bank loan term limits, and the minimum loan interest rate can now be adjusted by staff instead of requiring a code change."
         ]
       }
     ]
