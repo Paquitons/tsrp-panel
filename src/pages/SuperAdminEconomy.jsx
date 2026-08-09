@@ -578,7 +578,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
         <div className="form-row">
           <div>
             <label>Type</label>
-            <CustomSelect value={type} onChange={setType} options={[{ value: "storefront", label: "Storefront" }, { value: "casino", label: "Casino" }]} />
+            <CustomSelect value={type} onChange={setType} options={[{ value: "storefront", label: "Storefront" }, { value: "casino", label: "Casino" }, { value: "bank", label: "Bank" }, { value: "insurance", label: "Insurance Company" }]} />
           </div>
           <div>
             <label>Treasury</label>
