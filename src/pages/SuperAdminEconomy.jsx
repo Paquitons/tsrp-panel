@@ -980,14 +980,12 @@ export function LotteryPanel() {
 // ==================================================================
 export function StorefrontsPanel() {
   const [storefronts, setStorefronts] = useState([]);
-  const [catalog, setCatalog] = useState({});
   const [storefrontId, setStorefrontId] = useState("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    apiFetch("/super-admin/storefronts").then(({ storefronts, catalog }) => {
+    apiFetch("/super-admin/storefronts").then(({ storefronts }) => {
       setStorefronts(storefronts);
-      setCatalog(catalog);
       if (storefronts.length > 0) setStorefrontId(String(storefronts[0].id));
     }).catch(err => setError(err.message));
   }, []);
@@ -996,7 +994,11 @@ export function StorefrontsPanel() {
 
   return (
     <>
-      <p className="muted card-subtitle">Stock items, set prices, and review sales for any player-owned storefront.</p>
+      <p className="muted card-subtitle">
+        Oversight for any player-owned storefront's products and sales. Gameplay effects (tool requirements,
+        temporary boosts, cooldown/jail reduction) are set by the owner in Discord via /storefrontowner --
+        this view covers name, price, stock, and category.
+      </p>
       {error && <div className="error-banner">{error}</div>}
       {storefronts.length === 0 && !error && <p className="muted">No storefronts exist yet.</p>}
 
@@ -1011,72 +1013,95 @@ export function StorefrontsPanel() {
         </>
       )}
 
-      {storefront && <StorefrontListingsEditor key={storefront.id} storefront={storefront} catalog={catalog} />}
+      {storefront && <StorefrontProductsEditor key={storefront.id} storefront={storefront} />}
     </>
   );
 }
 
-function StorefrontListingsEditor({ storefront, catalog }) {
-  const [listings, setListings] = useState([]);
+const STOREFRONT_CATEGORIES = [
+  { value: "food", label: "Food" },
+  { value: "medical", label: "Medical" },
+  { value: "clothing", label: "Clothing" },
+  { value: "electronics", label: "Electronics" },
+  { value: "tools", label: "Tools" },
+  { value: "security", label: "Security" },
+  { value: "general", label: "General" },
+];
+
+function effectSummary(p) {
+  if (!p.effect_type) return null;
+  if (p.effect_type === "requirement") return `Required for ${p.effect_target}${p.consumable ? " (consumed on use)" : ""}`;
+  if (p.effect_type === "crime_success_boost") return `+${Math.round(p.effect_value * 100)}% crime success, ${Math.round(p.effect_duration_ms / 60000)}m`;
+  if (p.effect_type === "crime_cooldown_reset") return `-${Math.round(p.effect_value / 60000)}m ${p.effect_target} cooldown`;
+  if (p.effect_type === "work_cooldown_reset") return `-${Math.round(p.effect_value / 60000)}m work cooldown`;
+  if (p.effect_type === "jail_time_reduction") return `-${Math.round(p.effect_value / 60000)}m jail time`;
+  return null;
+}
+
+function StorefrontProductsEditor({ storefront }) {
+  const [products, setProducts] = useState([]);
   const [stats, setStats] = useState(null);
   const [sales, setSales] = useState([]);
   const [error, setError] = useState(null);
 
-  const [itemKey, setItemKey] = useState(Object.keys(catalog)[0] ?? "");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("general");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
 
   function loadAll() {
-    apiFetch(`/super-admin/storefronts/${storefront.id}/listings`).then(({ listings }) => setListings(listings));
+    apiFetch(`/super-admin/storefronts/${storefront.id}/products`).then(({ products }) => setProducts(products));
     apiFetch(`/super-admin/storefronts/${storefront.id}/sales`).then(({ stats, sales }) => { setStats(stats); setSales(sales); });
   }
   useEffect(loadAll, [storefront.id]);
 
-  async function addOrUpdateListing(e) {
+  async function addProduct(e) {
     e.preventDefault();
-    if (!itemKey || !price) return;
+    if (!name || !price) return;
     try {
-      const { listings } = await apiFetch(`/super-admin/storefronts/${storefront.id}/listings`, {
+      const { products } = await apiFetch(`/super-admin/storefronts/${storefront.id}/products`, {
         method: "POST",
-        body: { itemKey, price: Number(price), stock: stock === "" ? undefined : Number(stock) },
+        body: { name, category, price: Number(price), stock: stock === "" ? undefined : Number(stock) },
       });
-      setListings(listings);
-      setPrice(""); setStock("");
+      setProducts(products);
+      setName(""); setPrice(""); setStock("");
     } catch (err) {
       setError(err.message);
     }
   }
 
-  async function removeListing(key) {
-    if (!confirm(`Stop selling ${catalog[key]?.label ?? key} here?`)) return;
-    await apiFetch(`/super-admin/storefronts/${storefront.id}/listings/${key}`, { method: "DELETE" });
-    setListings(listings.filter(l => l.item_key !== key));
+  async function removeProduct(product) {
+    if (!confirm(`Remove ${product.name} from this storefront?`)) return;
+    await apiFetch(`/super-admin/storefronts/${storefront.id}/products/${product.id}`, { method: "DELETE" });
+    setProducts(products.filter(p => p.id !== product.id));
   }
 
   return (
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <h2 style={{ marginTop: 16 }}>Listings</h2>
-      <form onSubmit={addOrUpdateListing} className="form-row">
+      <h2 style={{ marginTop: 16 }}>Products</h2>
+      <form onSubmit={addProduct} className="form-row">
+        <div><label>Name</label><input required value={name} onChange={e => setName(e.target.value)} /></div>
         <div>
-          <label>Item</label>
-          <CustomSelect value={itemKey} onChange={setItemKey} options={Object.entries(catalog).map(([key, item]) => ({ value: key, label: item.label }))} />
+          <label>Category</label>
+          <CustomSelect value={category} onChange={setCategory} options={STOREFRONT_CATEGORIES} />
         </div>
         <div><label>Price</label><input type="number" required min="1" value={price} onChange={e => setPrice(e.target.value)} /></div>
         <div><label>Stock (blank = unlimited)</label><input type="number" min="0" value={stock} onChange={e => setStock(e.target.value)} /></div>
-        <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="secondary" type="submit">Save Listing</button></div>
+        <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="secondary" type="submit">Add Product</button></div>
       </form>
 
       <div className="loa-list">
-        {listings.map(l => (
-          <div className="loa-card loa-card-row" key={l.item_key}>
-            <span>{catalog[l.item_key]?.label ?? l.item_key}</span>
-            <span className="muted">{fmt(l.price)}{l.stock !== null ? ` -- ${l.stock} in stock` : " -- unlimited"}</span>
-            <button className="btn-red small" type="button" style={{ marginLeft: "auto" }} onClick={() => removeListing(l.item_key)}>Remove</button>
+        {products.map(p => (
+          <div className="loa-card loa-card-row" key={p.id}>
+            <span>{p.name} <span className="muted">({STOREFRONT_CATEGORIES.find(c => c.value === p.category)?.label ?? p.category})</span></span>
+            <span className="muted">{fmt(p.price)}{p.stock !== null ? ` -- ${p.stock} in stock` : " -- unlimited"}{!p.available ? " -- SOLD OUT" : ""}</span>
+            {effectSummary(p) && <span className="muted">{effectSummary(p)}</span>}
+            <button className="btn-red small" type="button" style={{ marginLeft: "auto" }} onClick={() => removeProduct(p)}>Remove</button>
           </div>
         ))}
-        {listings.length === 0 && <p className="muted">Nothing for sale yet.</p>}
+        {products.length === 0 && <p className="muted">Nothing for sale yet.</p>}
       </div>
 
       {stats && (
@@ -1095,7 +1120,7 @@ function StorefrontListingsEditor({ storefront, catalog }) {
         {sales.map(s => (
           <div className="loa-card loa-card-row" key={s.id}>
             <NamedHolder discordId={s.discord_id} prefix="buyer" row={s} />
-            <span className="muted">{catalog[s.item_key]?.label ?? s.item_key} x{s.quantity}</span>
+            <span className="muted">{s.product_name} x{s.quantity}</span>
             <span className="muted" style={{ marginLeft: "auto" }}>{fmt(s.total_price)}</span>
           </div>
         ))}

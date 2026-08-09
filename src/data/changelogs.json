@@ -1,5 +1,50 @@
 [
   {
+    "version": "1.9.0",
+    "slug": "v1-9-0",
+    "title": "TSRP Update",
+    "date": "2026-08-09",
+    "summary": "Banks are now entirely player-run, players can own more than one business, personal insurance is here, and picking a bank or insurer is now as easy as typing its name.",
+    "sections": [
+      {
+        "heading": "Player-Owned Banks, Fully",
+        "items": [
+          "Robbing a bank or ATM with /crime now always targets a real, player-owned bank -- the old generic, unowned bank is gone for good.",
+          "Banks now have several ways to actually make money instead of just loan interest: account maintenance fees, withdrawal fees, a loan origination fee, a late payment fee on overdue loans, and a small daily return on their own idle treasury.",
+          "All of these fees are tunable by Super Admin, so the economy can be rebalanced without a code change."
+        ]
+      },
+      {
+        "heading": "New: Own Multiple Businesses",
+        "items": [
+          "Players are no longer limited to one business -- own several at once, each with its own balance, employees, revenue, loans, insurance, and reputation.",
+          "Super Admin can still set a cap on how many businesses one player is allowed to own."
+        ]
+      },
+      {
+        "heading": "New: Personal Insurance",
+        "items": [
+          "Players can now buy their own insurance policies -- theft, crime, gambling, and general financial protection -- and file a claim if they suffer a covered loss.",
+          "Every claim is manually reviewed before it pays out, and payouts come from the insurer's own balance, never out of thin air.",
+          "Gambling coverage specifically comes with strict limits so insurance can't be used to guarantee casino winnings.",
+          "Staff can review every policy, claim, and insurance company from a new Insurance tab in Super Admin."
+        ]
+      },
+      {
+        "heading": "Easier Bank & Insurance Selection",
+        "items": [
+          "Choosing a bank to rob, register with, or apply for a loan from -- or an insurance company to buy a policy from -- is now a simple type-to-search list of business names, instead of picking a player first."
+        ]
+      },
+      {
+        "heading": "Other Fixes",
+        "items": [
+          "VIPs can now post links and gifs in any channel (invite links are still always blocked)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.8.0",
     "slug": "v1-8-0",
     "title": "TSRP Update",
