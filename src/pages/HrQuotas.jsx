@@ -41,7 +41,7 @@ export default function HrQuotas() {
   return (
     <>
       <p className="muted card-subtitle">
-        On-duty time logged since Monday 00:00 UTC, against a {data.quotaHours}-hour weekly quota. Every current staff member appears here, even with 0 hours.
+        On-duty time for the same period as the shift leaderboard{data.lastReset ? ` (since it was last reset)` : ` (all-time -- the leaderboard has never been reset)`}, against a {data.quotaHours}-hour quota. Every current staff member appears here, even with 0 hours.
       </p>
 
       <div className="card-grid" style={{ marginTop: 8 }}>
