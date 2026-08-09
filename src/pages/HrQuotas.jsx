@@ -12,12 +12,14 @@ const FILTERS = [
   { value: "met", label: "Met Quota" },
   { value: "not_met", label: "Did Not Meet Quota" },
   { value: "zero", label: "0 Hours" },
+  { value: "on_loa", label: "On LOA" },
 ];
 
 function matchesFilter(member, filter) {
   if (filter === "met") return member.metQuota;
   if (filter === "not_met") return !member.metQuota;
   if (filter === "zero") return member.totalSeconds === 0;
+  if (filter === "on_loa") return member.onLoa;
   return true;
 }
 
@@ -66,9 +68,12 @@ export default function HrQuotas() {
                   discordId={member.discordId} avatarHash={member.avatarHash}
                   size={26}
                 />
-                <span className={`badge ${member.metQuota ? "loa-status-approved" : "loa-status-denied"}`}>
-                  {member.metQuota ? "Met Quota" : "Did Not Meet Quota"}
-                </span>
+                <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  {member.onLoa && <span className="badge loa-status-pending">On LOA</span>}
+                  <span className={`badge ${member.metQuota ? "loa-status-approved" : "loa-status-denied"}`}>
+                    {member.metQuota ? "Met Quota" : "Did Not Meet Quota"}
+                  </span>
+                </div>
               </div>
               <div className="log-card-field">
                 {formatDuration(member.totalSeconds)} / {data.quotaHours}h
