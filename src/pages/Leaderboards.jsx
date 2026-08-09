@@ -50,6 +50,7 @@ export default function Leaderboards() {
         <div className="board-grid">
           <section className="board-card">
             <h2>Richest Players</h2>
+            <p className="muted card-subtitle">By total net worth -- cash, bank, businesses, property, and investments, minus loans.</p>
             {data.players.length === 0 && <p className="muted">No wallets yet.</p>}
             {data.players.map((p, i) => (
               <RankedRow
@@ -57,7 +58,7 @@ export default function Leaderboards() {
                 rank={i + 1}
                 avatar={<DiscordAvatar discordId={p.discordId} avatarHash={p.avatarHash} size={26} />}
                 name={p.nickname || p.username || `Player #${p.discordId.slice(-4)}`}
-                value={fmt(p.balance)}
+                value={fmt(p.netWorth)}
               />
             ))}
           </section>
