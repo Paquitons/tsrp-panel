@@ -8,7 +8,7 @@ import AccountPicker from "../components/AccountPicker";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
-import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, LotteryPanel, DebtPanel, InsurancePanel } from "./SuperAdminEconomy";
+import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
 
@@ -20,6 +20,7 @@ const TABS = [
   { value: "businesses", label: "Businesses" },
   { value: "casino", label: "Casino Controls" },
   { value: "storefronts", label: "Storefronts" },
+  { value: "govcatalog", label: "Government Catalog" },
   { value: "lottery", label: "Lottery" },
   { value: "stocks", label: "Stock Market" },
   { value: "debt", label: "Debt & Loans" },
@@ -163,6 +164,7 @@ export default function SuperAdmin() {
         {tab === "businesses" && <BusinessesPanel />}
         {tab === "casino" && <CasinoControlsPanel />}
         {tab === "storefronts" && <StorefrontsPanel />}
+        {tab === "govcatalog" && <GovernmentCatalogPanel />}
         {tab === "lottery" && <LotteryPanel />}
         {tab === "stocks" && <StockMarketAdmin />}
         {tab === "debt" && <DebtPanel />}

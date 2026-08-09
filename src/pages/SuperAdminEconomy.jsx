@@ -1131,6 +1131,192 @@ function StorefrontProductsEditor({ storefront }) {
 }
 
 // ==================================================================
+// Government Catalog -- full control over what any storefront can
+// stock (see highrock-bot's storefront.js/govCatalog.js). This is the
+// single source of truth every storefront reads live -- adding,
+// editing, disabling, or deleting an item here takes effect
+// immediately, no bot deploy needed.
+// ==================================================================
+const EFFECT_TYPE_OPTIONS = [
+  { value: "", label: "None (cosmetic)" },
+  { value: "requirement", label: "Requirement -- gates a crime type behind owning one" },
+  { value: "crime_success_boost", label: "Crime Success Boost -- temporary success % bump" },
+  { value: "crime_cooldown_reset", label: "Crime Cooldown Reset -- instant" },
+  { value: "work_cooldown_reset", label: "Work Cooldown Reset -- instant" },
+  { value: "jail_time_reduction", label: "Jail Time Reduction -- instant" },
+];
+
+function catalogEffectSummary(item) {
+  if (!item.effect_type) return "Cosmetic, no effect";
+  if (item.effect_type === "requirement") {
+    return `Required for ${item.effect_target === "CHOOSE" ? "a crime type the owner picks" : item.effect_target}${item.consumable ? " (consumed on use)" : " (persistent)"}`;
+  }
+  if (item.effect_type === "crime_success_boost") return `+${Math.round(item.effect_value * 100)}% crime success, ${item.duration_minutes}m`;
+  if (item.effect_type === "crime_cooldown_reset") return `-${item.effect_value}m ${item.effect_target === "CHOOSE" ? "(owner picks crime type)" : item.effect_target} cooldown`;
+  if (item.effect_type === "work_cooldown_reset") return `-${item.effect_value}m work cooldown`;
+  if (item.effect_type === "jail_time_reduction") return `-${item.effect_value}m jail time`;
+  return "Cosmetic";
+}
+
+const EMPTY_CATALOG_FORM = {
+  key: "", name: "", description: "", category: "general", wholesalePrice: "",
+  effectType: "", effectTarget: "", effectValue: "", durationMinutes: "", consumable: false, enabled: true,
+};
+
+export function GovernmentCatalogPanel() {
+  const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [crimeTypes, setCrimeTypes] = useState([]);
+  const [error, setError] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(EMPTY_CATALOG_FORM);
+
+  function load() {
+    apiFetch("/super-admin/gov-catalog").then(({ items, categories, crimeTypes }) => {
+      setItems(items);
+      setCategories(categories);
+      setCrimeTypes(crimeTypes);
+    }).catch(err => setError(err.message));
+  }
+  useEffect(load, []);
+
+  function startEdit(item) {
+    setEditingId(item.id);
+    setForm({
+      key: item.key, name: item.name, description: item.description ?? "", category: item.category,
+      wholesalePrice: String(item.wholesale_price),
+      effectType: item.effect_type ?? "", effectTarget: item.effect_target ?? "",
+      effectValue: item.effect_value ?? "", durationMinutes: item.duration_minutes ?? "",
+      consumable: !!item.consumable, enabled: !!item.enabled,
+    });
+  }
+
+  function startCreate() {
+    setEditingId("new");
+    setForm(EMPTY_CATALOG_FORM);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(EMPTY_CATALOG_FORM);
+  }
+
+  async function save(e) {
+    e.preventDefault();
+    const body = {
+      key: form.key || undefined,
+      name: form.name,
+      description: form.description,
+      category: form.category,
+      wholesalePrice: Number(form.wholesalePrice),
+      effectType: form.effectType || null,
+      effectTarget: form.effectTarget || null,
+      effectValue: form.effectValue === "" ? null : Number(form.effectValue),
+      durationMinutes: form.durationMinutes === "" ? null : Number(form.durationMinutes),
+      consumable: form.consumable,
+      enabled: form.enabled,
+    };
+    try {
+      if (editingId === "new") {
+        await apiFetch("/super-admin/gov-catalog", { method: "POST", body });
+      } else {
+        await apiFetch(`/super-admin/gov-catalog/${editingId}`, { method: "PATCH", body });
+      }
+      cancelEdit();
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function remove(item) {
+    if (!confirm(`Delete "${item.name}" from the catalog? Storefronts that already stocked it keep their existing inventory, but can never restock it.`)) return;
+    await apiFetch(`/super-admin/gov-catalog/${item.id}`, { method: "DELETE" });
+    load();
+  }
+
+  const showsTarget = form.effectType === "requirement" || form.effectType === "crime_cooldown_reset";
+  const showsBoostFields = form.effectType === "crime_success_boost";
+  const showsMinutesOnly = form.effectType === "crime_cooldown_reset" || form.effectType === "work_cooldown_reset" || form.effectType === "jail_time_reduction";
+
+  return (
+    <>
+      <p className="muted card-subtitle">
+        Every product a storefront can ever stock comes from here -- name, description, category, wholesale price,
+        and what it actually does are all set by you. A storefront owner can only pick how many units to buy and
+        what to resell them for; they can never change the description or the effect.
+      </p>
+      {error && <div className="error-banner">{error}</div>}
+
+      {editingId === null && (
+        <button className="secondary" type="button" onClick={startCreate} style={{ marginBottom: 16 }}>+ New Catalog Item</button>
+      )}
+
+      {editingId !== null && (
+        <form onSubmit={save} className="form-row" style={{ flexWrap: "wrap", marginBottom: 20 }}>
+          <div><label>Name</label><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+          <div><label>Key (blank = auto from name)</label><input value={form.key} onChange={e => setForm({ ...form, key: e.target.value })} placeholder="auto" /></div>
+          <div style={{ flexBasis: "100%" }}><label>Description</label><input required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+          <div>
+            <label>Category</label>
+            <CustomSelect value={form.category} onChange={v => setForm({ ...form, category: v })} options={categories.map(c => ({ value: c, label: c[0].toUpperCase() + c.slice(1) }))} />
+          </div>
+          <div><label>Wholesale Price</label><input type="number" required min="1" value={form.wholesalePrice} onChange={e => setForm({ ...form, wholesalePrice: e.target.value })} /></div>
+          <div>
+            <label>Effect</label>
+            <CustomSelect value={form.effectType} onChange={v => setForm({ ...form, effectType: v })} options={EFFECT_TYPE_OPTIONS} />
+          </div>
+          {showsTarget && (
+            <div>
+              <label>Crime Type Target</label>
+              <CustomSelect
+                value={form.effectTarget}
+                onChange={v => setForm({ ...form, effectTarget: v })}
+                options={[{ value: "CHOOSE", label: "Owner picks when stocking" }, ...crimeTypes.map(c => ({ value: c, label: c }))]}
+              />
+            </div>
+          )}
+          {showsBoostFields && (
+            <>
+              <div><label>Boost % (0-1)</label><input type="number" step="0.01" min="0.01" max="1" required value={form.effectValue} onChange={e => setForm({ ...form, effectValue: e.target.value })} /></div>
+              <div><label>Duration (minutes)</label><input type="number" min="1" required value={form.durationMinutes} onChange={e => setForm({ ...form, durationMinutes: e.target.value })} /></div>
+            </>
+          )}
+          {showsMinutesOnly && (
+            <div><label>Minutes Reduced</label><input type="number" min="1" required value={form.effectValue} onChange={e => setForm({ ...form, effectValue: e.target.value })} /></div>
+          )}
+          {form.effectType === "requirement" && (
+            <div>
+              <label>Consumable?</label>
+              <CustomSelect value={form.consumable ? "yes" : "no"} onChange={v => setForm({ ...form, consumable: v === "yes" })} options={[{ value: "no", label: "No -- persistent" }, { value: "yes", label: "Yes -- used up on a gated crime attempt" }]} />
+            </div>
+          )}
+          <div>
+            <label>Enabled</label>
+            <CustomSelect value={form.enabled ? "yes" : "no"} onChange={v => setForm({ ...form, enabled: v === "yes" })} options={[{ value: "yes", label: "Yes -- stockable" }, { value: "no", label: "No -- hidden from browsing/stocking" }]} />
+          </div>
+          <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="secondary" type="submit">{editingId === "new" ? "Create" : "Save"}</button></div>
+          <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="btn-red" type="button" onClick={cancelEdit}>Cancel</button></div>
+        </form>
+      )}
+
+      <div className="loa-list">
+        {items.map(item => (
+          <div className="loa-card loa-card-row" key={item.id}>
+            <span>{item.name} <span className="muted">({item.category})</span>{!item.enabled && <span className="muted"> -- DISABLED</span>}</span>
+            <span className="muted">{fmt(item.wholesale_price)} wholesale</span>
+            <span className="muted">{catalogEffectSummary(item)}</span>
+            <button className="secondary small" type="button" style={{ marginLeft: "auto" }} onClick={() => startEdit(item)}>Edit</button>
+            <button className="btn-red small" type="button" onClick={() => remove(item)}>Delete</button>
+          </div>
+        ))}
+        {items.length === 0 && <p className="muted">No catalog items yet.</p>}
+      </div>
+    </>
+  );
+}
+
+// ==================================================================
 // Debt & Loans -- oversight for the player-driven /loan system. Loan
 // issuing/repayment itself always happens in Discord; everything here is
 // correction (edit/forgive), the two leaderboards, reputation lookup, and
