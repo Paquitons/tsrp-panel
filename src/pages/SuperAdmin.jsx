@@ -8,7 +8,7 @@ import AccountPicker from "../components/AccountPicker";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
-import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel } from "./SuperAdminEconomy";
+import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel, TaxDashboardPanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
 
@@ -17,6 +17,7 @@ const TABS = [
   { value: "economy", label: "Wallets" },
   { value: "overview", label: "Economy Overview" },
   { value: "econconfig", label: "Economy Config" },
+  { value: "taxes", label: "Taxes" },
   { value: "businesses", label: "Businesses" },
   { value: "casino", label: "Casino Controls" },
   { value: "storefronts", label: "Storefronts" },
@@ -161,6 +162,7 @@ export default function SuperAdmin() {
         {tab === "economy" && <EconomyControl />}
         {tab === "overview" && <EconomyOverviewPanel />}
         {tab === "econconfig" && <EconomyConfigPanel />}
+        {tab === "taxes" && <TaxDashboardPanel />}
         {tab === "businesses" && <BusinessesPanel />}
         {tab === "casino" && <CasinoControlsPanel />}
         {tab === "storefronts" && <StorefrontsPanel />}
