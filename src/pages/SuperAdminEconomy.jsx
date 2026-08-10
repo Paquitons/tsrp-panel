@@ -392,6 +392,16 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
+      <h3 style={{ marginTop: 16 }}>Casino Chip Purchase Tax</h3>
+      <p className="muted card-subtitle">Skimmed from a chip purchase before the rest reaches the casino's treasury -- membership fees and cashouts aren't taxed, only the initial chip purchase.</p>
+      <div className="form-row">
+        <div>
+          <label>Rate (%)</label>
+          <input type="number" step="0.1" min="0" value={config.taxes.casinoChipPurchaseTaxRate * 100}
+            onChange={e => setConfig({ ...config, taxes: { ...config.taxes, casinoChipPurchaseTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+      </div>
+
       <h2 style={{ marginTop: 20 }}>Systems</h2>
       <div className="card-grid">
         {Object.keys(SYSTEM_LABELS).map(key => (
@@ -680,6 +690,10 @@ function BusinessEditModal({ business, onClose, onSaved }) {
   const [maxBet, setMaxBet] = useState(business.max_bet);
   const [slotPayoutRate, setSlotPayoutRate] = useState(business.slot_payout_rate);
   const [vipMinBalance, setVipMinBalance] = useState(business.vip_min_balance ?? "");
+  const [membershipFee, setMembershipFee] = useState(business.membership_fee ?? 0);
+  const [membershipPeriodDays, setMembershipPeriodDays] = useState(business.membership_period_days ?? 30);
+  const [chipRate, setChipRate] = useState(business.chip_rate ?? 1);
+  const [cashoutRate, setCashoutRate] = useState(business.cashout_rate ?? 1);
   const [ownerDiscordId, setOwnerDiscordId] = useState(business.owner_discord_id);
   const [newOwnerLabel, setNewOwnerLabel] = useState(null); // set only if the owner is actually being changed via the picker
   const [enabledGames, setEnabledGames] = useState(() => {
@@ -708,6 +722,8 @@ function BusinessEditModal({ business, onClose, onSaved }) {
           slotPayoutRate: Number(slotPayoutRate),
           vipMinBalance: vipMinBalance === "" ? null : Number(vipMinBalance),
           enabledGames, ownerDiscordId,
+          membershipFee: Number(membershipFee), membershipPeriodDays: Number(membershipPeriodDays),
+          chipRate: Number(chipRate), cashoutRate: Number(cashoutRate),
         },
       });
       onSaved(updated);
@@ -750,11 +766,19 @@ function BusinessEditModal({ business, onClose, onSaved }) {
             </div>
             <label>Enabled Games</label>
             <div className="card-grid">
-              {GAMES.map(g => (
+              {[...GAMES, "poker"].map(g => (
                 <label className="checkbox-label" key={g}>
-                  <input type="checkbox" checked={enabledGames.includes(g)} onChange={() => toggleGame(g)} /> {GAME_LABELS[g]}
+                  <input type="checkbox" checked={enabledGames.includes(g)} onChange={() => toggleGame(g)} /> {GAME_LABELS[g] ?? "Poker"}
                 </label>
               ))}
+            </div>
+            <div className="form-row">
+              <div><label>Membership Fee ($)</label><input type="number" value={membershipFee} onChange={e => setMembershipFee(e.target.value)} /></div>
+              <div><label>Membership Period (days)</label><input type="number" value={membershipPeriodDays} onChange={e => setMembershipPeriodDays(e.target.value)} /></div>
+            </div>
+            <div className="form-row">
+              <div><label>Chip Rate ($ per chip, buy)</label><input type="number" step="0.01" value={chipRate} onChange={e => setChipRate(e.target.value)} /></div>
+              <div><label>Cashout Rate ($ per chip, sell)</label><input type="number" step="0.01" value={cashoutRate} onChange={e => setCashoutRate(e.target.value)} /></div>
             </div>
           </>
         )}
@@ -816,6 +840,7 @@ export function CasinoControlsPanel() {
       )}
 
       {casino && <CasinoGameControls key={casino.id} casino={casino} />}
+      {casino && <CasinoChipOverview key={`chips-${casino.id}`} casino={casino} />}
     </>
   );
 }
@@ -1016,6 +1041,61 @@ function CasinoGameControls({ casino }) {
           </div>
         ))}
         {transactions.length === 0 && <p className="muted">No rounds played yet.</p>}
+      </div>
+    </>
+  );
+}
+
+// ==================================================================
+// Casino membership + chip overview -- read-only oversight of the
+// closed-loop chip economy (purchases, cashouts, outstanding liability,
+// active members) for the selected casino. Membership fee/period and
+// chip/cashout rates themselves are edited via BusinessEditModal, same
+// as bet limits always have been.
+// ==================================================================
+function CasinoChipOverview({ casino }) {
+  const [stats, setStats] = useState(null);
+  const [ledger, setLedger] = useState([]);
+  const [error, setError] = useState(null);
+
+  function load() {
+    Promise.all([
+      apiFetch(`/super-admin/casinos/${casino.id}/chips`),
+      apiFetch(`/super-admin/casinos/${casino.id}/chips/ledger?limit=15`),
+    ]).then(([s, { ledger }]) => { setStats(s); setLedger(ledger); setError(null); }).catch(err => setError(err.message));
+  }
+  useEffect(load, [casino.id]);
+
+  const cashRate = casino.cashout_rate > 0 ? casino.cashout_rate : 1;
+
+  return (
+    <>
+      <h2 style={{ marginTop: 20 }}>Membership &amp; Chips</h2>
+      {error && <div className="error-banner">{error}</div>}
+      {stats && (
+        <div className="card-grid">
+          <div className="stat-tile"><div className="muted">Active Members</div><div className="verification-identity-name">{stats.activeMembers}</div></div>
+          <div className="stat-tile"><div className="muted">Casino Treasury</div><div className="verification-identity-name">{fmt(casino.treasury)}</div></div>
+          <div className="stat-tile"><div className="muted">Outstanding Chip Liability</div><div className="verification-identity-name">{stats.outstandingLiability.toLocaleString()} chips (~{fmt(Math.ceil(stats.outstandingLiability * cashRate))})</div></div>
+          <div className="stat-tile"><div className="muted">Chips Purchased (cash)</div><div className="verification-identity-name">{fmt(stats.totalPurchased)}</div></div>
+          <div className="stat-tile"><div className="muted">Cashed Out (cash)</div><div className="verification-identity-name">{fmt(stats.totalCashedOut)}</div></div>
+          <div className="stat-tile"><div className="muted">Purchase Tax Paid</div><div className="verification-identity-name">{fmt(stats.totalTaxPaid)}</div></div>
+        </div>
+      )}
+
+      <h2 style={{ marginTop: 20 }}>Recent Chip Activity</h2>
+      <div className="loa-list">
+        {ledger.map(l => (
+          <div className="loa-card loa-card-row" key={l.id}>
+            <NamedHolder discordId={l.discord_id} prefix="player" row={l} />
+            <span className="muted">{l.category}</span>
+            <span className="muted" style={{ marginLeft: "auto" }}>
+              {l.chip_amount >= 0 ? "+" : ""}{l.chip_amount.toLocaleString()} chips
+              {l.cash_amount != null ? ` (${fmt(l.cash_amount)}${l.tax_amount ? `, ${fmt(l.tax_amount)} tax` : ""})` : ""}
+            </span>
+          </div>
+        ))}
+        {ledger.length === 0 && <p className="muted">No chip activity yet.</p>}
       </div>
     </>
   );
@@ -1825,6 +1905,7 @@ const TAX_CATEGORY_LABELS = {
   large_transfer: "Large Transfer Tax",
   capital_gains: "Capital Gains Tax",
   license_fee: "Business License Fee",
+  casino_chip_purchase: "Casino Chip Purchase Tax",
 };
 
 function taxCategoryLabel(key) {
