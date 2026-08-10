@@ -773,8 +773,8 @@ function BusinessEditModal({ business, onClose, onSaved }) {
               ))}
             </div>
             <div className="form-row">
-              <div><label>Membership Fee ($)</label><input type="number" value={membershipFee} onChange={e => setMembershipFee(e.target.value)} /></div>
-              <div><label>Membership Period (days)</label><input type="number" value={membershipPeriodDays} onChange={e => setMembershipPeriodDays(e.target.value)} /></div>
+              <div><label>Membership Fee ($, charged recurring)</label><input type="number" value={membershipFee} onChange={e => setMembershipFee(e.target.value)} /></div>
+              <div><label>Charge Every (days, 1 = daily)</label><input type="number" min="1" value={membershipPeriodDays} onChange={e => setMembershipPeriodDays(e.target.value)} /></div>
             </div>
             <div className="form-row">
               <div><label>Chip Rate ($ per chip, buy)</label><input type="number" step="0.01" value={chipRate} onChange={e => setChipRate(e.target.value)} /></div>
