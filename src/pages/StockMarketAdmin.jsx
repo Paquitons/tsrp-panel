@@ -239,7 +239,7 @@ function CreateStockModal({ onClose, onCreated }) {
             <div><label>Category</label><input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Tech, Industrial, Retail" /></div>
             <div><label>Volatility (%)</label><input type="number" min="0.1" step="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
           </div>
-          <label>Simulated Shares Outstanding</label>
+          <label>Total Shares (fixed -- only changes later via a split or issuing more shares)</label>
           <input type="number" min="1" value={sharesOutstanding} onChange={e => setSharesOutstanding(e.target.value)} />
           <div className="button-row" style={{ marginTop: 16 }}>
             <button className="primary" type="submit" disabled={saving}>{saving ? "Listing…" : "List Stock"}</button>
@@ -254,17 +254,23 @@ function CreateStockModal({ onClose, onCreated }) {
 function StockDetail({ ticker, onBack }) {
   const [stock, setStock] = useState(null);
   const [performance, setPerformance] = useState(null);
+  const [highLow, setHighLow] = useState(null);
+  const [sharesAvailable, setSharesAvailable] = useState(null);
   const [history, setHistory] = useState([]);
   const [range, setRange] = useState(CHART_RANGE_OPTIONS[0].value);
   const [transactions, setTransactions] = useState([]);
   const [holders, setHolders] = useState([]);
+  const [events, setEvents] = useState([]);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
 
   function load() {
-    apiFetch(`/super-admin/stocks/${ticker}`).then(({ stock, performance }) => { setStock(stock); setPerformance(performance); setError(null); }).catch(err => setError(err.message));
+    apiFetch(`/super-admin/stocks/${ticker}`).then(({ stock, performance, highLow, sharesAvailable }) => {
+      setStock(stock); setPerformance(performance); setHighLow(highLow); setSharesAvailable(sharesAvailable); setError(null);
+    }).catch(err => setError(err.message));
     apiFetch(`/super-admin/stocks/${ticker}/transactions`).then(({ transactions }) => setTransactions(transactions));
     apiFetch(`/super-admin/stocks/${ticker}/holders`).then(({ holders }) => setHolders(holders));
+    apiFetch(`/super-admin/stocks/${ticker}/events`).then(({ events }) => setEvents(events));
   }
   // Safe to poll even with editable fields below (StockAdminControls) --
   // those are useState-initialized once from the `stock` prop with no
@@ -342,12 +348,16 @@ function StockDetail({ ticker, onBack }) {
         <span className={`badge ${stock.status === "open" ? "loa-status-approved" : "loa-status-denied"}`}>{stock.status}</span>
         {!!stock.frozen && <span className="badge loa-status-pending">Frozen</span>}
       </div>
-      <p className="muted">{stock.category} -- {money(stock.current_price)}/share -- Market cap {money(stock.current_price * stock.shares_outstanding)}</p>
+      <p className="muted">{stock.category} -- {money(stock.current_price)}/share -- Market value {money(stock.current_price * stock.shares_outstanding)}</p>
 
       <div className="card-grid">
-        <div className="stat-tile"><div className="muted">Daily</div><div className={pctClass(performance?.daily)}>{pct(performance?.daily)}</div></div>
-        <div className="stat-tile"><div className="muted">Weekly</div><div className={pctClass(performance?.weekly)}>{pct(performance?.weekly)}</div></div>
-        <div className="stat-tile"><div className="muted">Monthly</div><div className={pctClass(performance?.monthly)}>{pct(performance?.monthly)}</div></div>
+        <div className="stat-tile"><div className="muted">24h Change</div><div className={pctClass(performance?.daily)}>{pct(performance?.daily)}</div></div>
+        <div className="stat-tile"><div className="muted">7-Day Change</div><div className={pctClass(performance?.weekly)}>{pct(performance?.weekly)}</div></div>
+        <div className="stat-tile"><div className="muted">30-Day Change</div><div className={pctClass(performance?.monthly)}>{pct(performance?.monthly)}</div></div>
+        <div className="stat-tile"><div className="muted">All-Time High</div><div className="verification-identity-name">{highLow?.high != null ? money(highLow.high) : "--"}</div></div>
+        <div className="stat-tile"><div className="muted">All-Time Low</div><div className="verification-identity-name">{highLow?.low != null ? money(highLow.low) : "--"}</div></div>
+        <div className="stat-tile"><div className="muted">Total Shares</div><div className="verification-identity-name">{stock.shares_outstanding.toLocaleString()}</div></div>
+        <div className="stat-tile"><div className="muted">Available Shares</div><div className="verification-identity-name">{sharesAvailable != null ? sharesAvailable.toLocaleString() : "--"}</div></div>
       </div>
 
       <div className="modal-title-row" style={{ marginTop: 16, marginBottom: 8 }}>
@@ -391,6 +401,22 @@ function StockDetail({ ticker, onBack }) {
         ))}
         {transactions.length === 0 && <p className="muted">No transactions yet.</p>}
       </div>
+
+      <h2 style={{ marginTop: 20 }}>Recent Company Events</h2>
+      <div className="loa-list">
+        {events.map(e => (
+          <div className="loa-card" key={e.id}>
+            <div className="loa-card-top loa-card-top-stack">
+              <span className={`badge ${e.polarity === "positive" ? "loa-status-approved" : "loa-status-denied"}`}>
+                {e.severity} {e.polarity} -- {e.impact_percent >= 0 ? "+" : ""}{e.impact_percent.toFixed(1)}%
+              </span>
+              <span className="muted">{new Date(e.created_at).toLocaleString()}</span>
+            </div>
+            <div className="log-card-field">{e.reason}</div>
+          </div>
+        ))}
+        {events.length === 0 && <p className="muted">No company events yet -- price has only moved from normal daily market movement.</p>}
+      </div>
     </>
   );
 }
@@ -400,13 +426,13 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
   const [description, setDescription] = useState(stock.description);
   const [category, setCategory] = useState(stock.category);
   const [volatility, setVolatility] = useState(stock.volatility * 100);
-  const [sharesOutstanding, setSharesOutstanding] = useState(stock.shares_outstanding);
   const [dividendRate, setDividendRate] = useState(stock.dividend_rate ? stock.dividend_rate * 100 : "");
   const [dividendIntervalHours, setDividendIntervalHours] = useState(stock.dividend_interval_ms ? stock.dividend_interval_ms / 3600000 : "");
 
   const [setPriceValue, setSetPriceValue] = useState("");
   const [adjustPercent, setAdjustPercent] = useState("");
   const [splitRatio, setSplitRatio] = useState("2");
+  const [additionalShares, setAdditionalShares] = useState("");
 
   return (
     <>
@@ -417,14 +443,28 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
       <AutoGrowTextarea value={description} onChange={e => setDescription(e.target.value)} />
       <div className="form-row">
         <div><label>Category</label><input value={category} onChange={e => setCategory(e.target.value)} /></div>
-        <div><label>Volatility (%)</label><input type="number" step="0.1" min="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
+        <div><label>Volatility (%, scales daily movement -- default is 3)</label><input type="number" step="0.1" min="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
       </div>
-      <label>Simulated Shares Outstanding</label>
-      <input type="number" min="1" value={sharesOutstanding} onChange={e => setSharesOutstanding(e.target.value)} />
       <div className="button-row">
-        <button className="primary" type="button" onClick={() => onSaveEdit({ name, description, category, volatility: Number(volatility) / 100, sharesOutstanding: Number(sharesOutstanding) })}>
+        <button className="primary" type="button" onClick={() => onSaveEdit({ name, description, category, volatility: Number(volatility) / 100 })}>
           Save Details
         </button>
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Issue Shares</h2>
+      <p className="muted card-subtitle">The only way total shares changes outside a split -- a structural event with its own price impact (configurable in Economy Config's Stocks section) and a logged company event.</p>
+      <div className="form-inline-row">
+        <div className="form-inline-field"><label>Additional Shares</label><input type="number" min="1" value={additionalShares} onChange={e => setAdditionalShares(e.target.value)} /></div>
+        <div className="form-inline-field-btn">
+          <label aria-hidden="true">&nbsp;</label>
+          <button
+            className="secondary" type="button"
+            onClick={() => additionalShares && confirm(`Issue ${additionalShares} additional shares of ${stock.ticker}? This dilutes the fixed supply and moves the price.`) &&
+              onAct("issue-shares", { additionalShares: Number(additionalShares) }, "Shares issued.")}
+          >
+            Issue Shares
+          </button>
+        </div>
       </div>
 
       <h2 style={{ marginTop: 20 }}>Dividend</h2>

@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.11.0",
+    "slug": "v1-11-0",
+    "title": "TSRP Update",
+    "date": "2026-08-10",
+    "summary": "A new Fast Pass command for staff transfers, and an updated onboarding DM for new staff.",
+    "sections": [
+      {
+        "heading": "New: /fastpass",
+        "items": [
+          "Fast-tracks a Fast Pass / Staff Transfer Summer Programme applicant straight to Junior Moderator with a single command. Just pick the player, no trainer notes or co-trainers needed.",
+          "Doesn't require the Awaiting Training role, since a Fast Pass applicant applies via ticket instead of going through the normal trainee pipeline.",
+          "Same role assignment, nickname sync, and staff announcements as /passtraining."
+        ]
+      },
+      {
+        "heading": "Updated: /passtraining Onboarding DM",
+        "items": [
+          "New staff are now told they must join the TSRP Roblox group, with the link included.",
+          "The Staff Panel link now points straight to the login page."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.10.0",
     "slug": "v1-10-0",
     "title": "TSRP Update",
