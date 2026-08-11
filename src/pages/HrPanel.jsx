@@ -43,6 +43,7 @@ export default function HrPanel() {
   const [activeLOAs, setActiveLOAs] = useState([]);
   const [loaHistory, setLoaHistory] = useState([]);
   const [pendingPromotions, setPendingPromotions] = useState([]);
+  const [fastPassTrials, setFastPassTrials] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // ---------- Issue Strike: staff search-autocomplete ----------
@@ -160,6 +161,10 @@ export default function HrPanel() {
     try {
       const { requests } = await apiFetch("/loa/history");
       setLoaHistory(requests);
+    } catch { /* ignore */ }
+    try {
+      const { trials } = await apiFetch("/fastpass-trials/active");
+      setFastPassTrials(trials);
     } catch { /* ignore */ }
     if (canReviewBigActions) {
       try {
@@ -653,6 +658,43 @@ export default function HrPanel() {
                     <div className="button-row">
                       <button className="secondary small" onClick={() => openExtend(r.discord_id, r.end_date)}>Extend / Change Date</button>
                       <button className="btn-red small" onClick={() => endLOANow(r.discord_id)}>End Now</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-col">
+          <div className="card">
+            <h2>Active Fast Pass Trials ({fastPassTrials.length})</h2>
+            <p className="muted card-subtitle">Every Fast Pass hire starts a 7-day trial, tracked automatically from /fastpass.</p>
+            {fastPassTrials.length === 0 ? (
+              <p className="muted">Nobody is currently on a Fast Pass trial.</p>
+            ) : (
+              <div className="loa-list">
+                {fastPassTrials.map(t => (
+                  <div className="loa-card" key={t.id}>
+                    <div className="loa-card-top loa-card-top-stack">
+                      <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                        <DiscordIdentity
+                          variant="row"
+                          nickname={t.target_nickname}
+                          username={t.target_username}
+                          discordId={t.discord_id}
+                          avatarHash={t.target_avatar_hash}
+                          size={22}
+                          showId={false}
+                        />
+                      </span>
+                      <span className={t.effectiveStatus === "active" ? "loa-status-approved" : "muted"}>
+                        {t.effectiveStatus === "active" ? expiresLabel(t.expires_at) : "expired"}
+                      </span>
+                    </div>
+                    <div className="muted" style={{ marginBottom: 4 }}>
+                      Issued {new Date(t.issued_at).toLocaleDateString()} by{" "}
+                      {t.issuer_nickname || t.issuer_username || "Unknown Member"}
                     </div>
                   </div>
                 ))}
