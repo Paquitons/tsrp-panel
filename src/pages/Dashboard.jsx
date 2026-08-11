@@ -272,6 +272,7 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
   const [createSuccess, setCreateSuccess] = useState(false);
+  const [createCooldownNote, setCreateCooldownNote] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef(null);
@@ -308,10 +309,33 @@ export default function Dashboard() {
     setSelectedUser({ type: "discord", value: discordId });
   }
 
+  // Human-readable summary of what happened to the Kick Rejoin Cooldown
+  // (see kickCooldownShared.js on the backend) after logging a kick --
+  // null for every other punishment type, since only "kick" ever triggers
+  // one. A cooldown outcome is purely informational and never blocks the
+  // punishment log itself from being saved.
+  function describeCooldown(cooldown) {
+    if (!cooldown) return null;
+    if (cooldown.started) {
+      return `Rejoin cooldown started -- this player will be automatically re-kicked if they rejoin within ${cooldown.cooldownMinutes} minute(s).`;
+    }
+    switch (cooldown.reason) {
+      case "unresolved":
+        return "⚠️ Rejoin cooldown NOT started -- this player couldn't be verified against ERLC's player data. Re-check the username if you want the cooldown enforced.";
+      case "already_active":
+        return "This player already has an active rejoin cooldown from a previous kick -- no change made.";
+      case "disabled":
+        return null; // feature is off -- no need to alarm staff with a note about it
+      default:
+        return null;
+    }
+  }
+
   async function createLog(e) {
     e.preventDefault();
     setCreateError(null);
     setCreateSuccess(false);
+    setCreateCooldownNote(null);
     setCreating(true);
     try {
       const body = {
@@ -323,8 +347,9 @@ export default function Dashboard() {
         if (!form.unbanAt) throw new Error("An unban date is required for temp bans.");
         body.unbanAt = new Date(form.unbanAt).getTime();
       }
-      await apiFetch("/punishments", { method: "POST", body });
+      const { cooldown } = await apiFetch("/punishments", { method: "POST", body });
       setCreateSuccess(true);
+      setCreateCooldownNote(describeCooldown(cooldown));
       setForm(prev => ({ ...prev, targetRobloxUsername: "", reason: "", unbanAt: "" }));
       refreshLogs();
     } catch (err) {
@@ -520,6 +545,7 @@ export default function Dashboard() {
             <h2>Create New Log</h2>
             {createError && <div className="error-banner">{createError}</div>}
             {createSuccess && <div className="success-banner">Log created successfully.</div>}
+            {createCooldownNote && <div className="muted" style={{ marginTop: -4, marginBottom: 8 }}>{createCooldownNote}</div>}
             <form onSubmit={createLog}>
               <label>User</label>
               <div className="autocomplete-wrap">
