@@ -232,6 +232,7 @@ export function EconomyConfigPanel() {
     new_listing: "New Stock Listings",
     lottery_win: "Lottery Wins",
     market_warning: "Market Warnings",
+    company_event: "Company Events",
   };
 
   return (
@@ -399,6 +400,100 @@ export function EconomyConfigPanel() {
           <label>Rate (%)</label>
           <input type="number" step="0.1" min="0" value={config.taxes.casinoChipPurchaseTaxRate * 100}
             onChange={e => setConfig({ ...config, taxes: { ...config.taxes, casinoChipPurchaseTaxRate: Number(e.target.value) / 100 } })} />
+        </div>
+      </div>
+
+      <h2 style={{ marginTop: 20 }}>Stock Market</h2>
+      <p className="muted card-subtitle">
+        Every stock has a fixed share supply -- price only moves from the daily movement below plus company events, never from trading itself.
+      </p>
+
+      <h3 style={{ marginTop: 16 }}>Daily Movement</h3>
+      <p className="muted card-subtitle">Fires once per stock every intervalHours: a direction coin-flip, then a size tier (weighted by the percentages below), then a uniform roll within that tier's range.</p>
+      <div className="form-row">
+        <div>
+          <label>Check Interval (hours)</label>
+          <input type="number" min="1" value={config.stocks.dailyMovement.intervalHours}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, dailyMovement: { ...config.stocks.dailyMovement, intervalHours: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Chance of Upward Movement (%)</label>
+          <input type="number" min="0" max="100" value={config.stocks.dailyMovement.upChancePercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, dailyMovement: { ...config.stocks.dailyMovement, upChancePercent: Number(e.target.value) } } })} />
+        </div>
+      </div>
+      {["small", "medium", "large"].map(tier => (
+        <div key={tier}>
+          <label style={{ textTransform: "capitalize" }}>{tier} Movement</label>
+          <div className="form-row">
+            <div>
+              <label>Weight (%)</label>
+              <input type="number" min="0" max="100" value={config.stocks.dailyMovement.tierWeightPercent[tier]}
+                onChange={e => setConfig({ ...config, stocks: { ...config.stocks, dailyMovement: { ...config.stocks.dailyMovement, tierWeightPercent: { ...config.stocks.dailyMovement.tierWeightPercent, [tier]: Number(e.target.value) } } } })} />
+            </div>
+            <div>
+              <label>Min (%)</label>
+              <input type="number" step="0.1" min="0" value={config.stocks.dailyMovement[tier].minPercent}
+                onChange={e => setConfig({ ...config, stocks: { ...config.stocks, dailyMovement: { ...config.stocks.dailyMovement, [tier]: { ...config.stocks.dailyMovement[tier], minPercent: Number(e.target.value) } } } })} />
+            </div>
+            <div>
+              <label>Max (%)</label>
+              <input type="number" step="0.1" min="0" value={config.stocks.dailyMovement[tier].maxPercent}
+                onChange={e => setConfig({ ...config, stocks: { ...config.stocks, dailyMovement: { ...config.stocks.dailyMovement, [tier]: { ...config.stocks.dailyMovement[tier], maxPercent: Number(e.target.value) } } } })} />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <h3 style={{ marginTop: 16 }}>Company Events</h3>
+      <p className="muted card-subtitle">A separate roll from daily movement -- fictional company news (contracts, lawsuits, product launches, etc) that also moves price and shows up in a stock's event history.</p>
+      <div className="form-row">
+        <div>
+          <label>Chance Any Event Fires (%)</label>
+          <input type="number" min="0" max="100" value={config.stocks.events.eventChancePercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, events: { ...config.stocks.events, eventChancePercent: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Chance Positive (%)</label>
+          <input type="number" min="0" max="100" value={config.stocks.events.positiveChancePercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, events: { ...config.stocks.events, positiveChancePercent: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Chance Major (%)</label>
+          <input type="number" min="0" max="100" value={config.stocks.events.majorChancePercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, events: { ...config.stocks.events, majorChancePercent: Number(e.target.value) } } })} />
+        </div>
+      </div>
+      {["minor", "major"].map(sev => (
+        <div key={sev}>
+          <label style={{ textTransform: "capitalize" }}>{sev} Event Impact</label>
+          <div className="form-row">
+            <div>
+              <label>Min (%)</label>
+              <input type="number" step="0.1" min="0" value={config.stocks.events[sev].minPercent}
+                onChange={e => setConfig({ ...config, stocks: { ...config.stocks, events: { ...config.stocks.events, [sev]: { ...config.stocks.events[sev], minPercent: Number(e.target.value) } } } })} />
+            </div>
+            <div>
+              <label>Max (%)</label>
+              <input type="number" step="0.1" min="0" value={config.stocks.events[sev].maxPercent}
+                onChange={e => setConfig({ ...config, stocks: { ...config.stocks, events: { ...config.stocks.events, [sev]: { ...config.stocks.events[sev], maxPercent: Number(e.target.value) } } } })} />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <h3 style={{ marginTop: 16 }}>Share Issuance</h3>
+      <p className="muted card-subtitle">The price effect applied when a Super Admin issues additional shares for a stock (see that stock's detail page) -- negative by default, since diluting the fixed supply is a structural, bearish change.</p>
+      <div className="form-row">
+        <div>
+          <label>Min Impact (%)</label>
+          <input type="number" step="0.1" value={config.stocks.shareIssuance.minImpactPercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, shareIssuance: { ...config.stocks.shareIssuance, minImpactPercent: Number(e.target.value) } } })} />
+        </div>
+        <div>
+          <label>Max Impact (%)</label>
+          <input type="number" step="0.1" value={config.stocks.shareIssuance.maxImpactPercent}
+            onChange={e => setConfig({ ...config, stocks: { ...config.stocks, shareIssuance: { ...config.stocks.shareIssuance, maxImpactPercent: Number(e.target.value) } } })} />
         </div>
       </div>
 
