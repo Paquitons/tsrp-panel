@@ -1,39 +1,5 @@
 [
   {
-    "version": "1.13.0",
-    "slug": "v1-13-0",
-    "title": "TSRP Update",
-    "date": "2026-08-12",
-    "summary": "A new Kick Rejoin Cooldown so a kicked player can't just walk back in, 7-day trial tracking for Fast Pass hires, and a handful of reliability fixes.",
-    "sections": [
-      {
-        "heading": "New: Kick Rejoin Cooldown",
-        "items": [
-          "Logging a kick from the Dashboard now automatically starts a rejoin cooldown. If that player tries to rejoin before it expires, they're automatically kicked again.",
-          "Only kicks logged through the panel start a cooldown, so it can't be triggered or spoofed from in-game.",
-          "The Internal Affairs page shows everyone currently on a cooldown, including how much time is left, who logged the kick and why, and how many times someone's been auto-kicked back out.",
-          "IA+ can remove a cooldown early if it was logged in error or the situation's been resolved, letting that player back in normally right away."
-        ]
-      },
-      {
-        "heading": "New: Fast Pass Trial Tracking",
-        "items": [
-          "/fastpass now automatically starts a 7-day trial the moment someone is onboarded.",
-          "Trial status (and time remaining) shows up in the new hire's onboarding DM, the Training Results post, their Fast Pass ticket, and a new card on the HR Panel.",
-          "Nothing happens automatically when the trial ends. It's purely there so leadership can see who's still within their first week."
-        ]
-      },
-      {
-        "heading": "Fixes & Reliability",
-        "items": [
-          "/shutdown now recognizes when the server had already gone offline on its own (a crash outside of /startup or /shutdown) and corrects the status right away instead of running through a doomed warning countdown and reporting a confusing failure.",
-          "Reduced how often the bot gets rate-limited by Bloxlink by no longer sending duplicate lookups for the same player when multiple things ask about them at once.",
-          "Quieted down log noise from a staff member leaving Discord at the exact moment their shift ended or their nickname was being updated. It wasn't a real problem, just noisy before."
-        ]
-      }
-    ]
-  },
-  {
     "version": "1.12.0",
     "slug": "v1-12-0",
     "title": "TSRP Update",
