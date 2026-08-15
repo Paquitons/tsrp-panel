@@ -38,7 +38,7 @@ export default function BotSettings() {
     setSaving(entry.key);
     setError(null);
     try {
-      await apiFetch(`/super-admin/bot-settings/${entry.key}`, { method: "PATCH", body: { value: entry.type === "number" ? Number(value) : value } });
+      await apiFetch(`/super-admin/bot-settings/${entry.key}`, { method: "PATCH", body: { value: entry.type === "number" ? Number(value) : value } }); // "text" and "boolean" both pass the value through as-is
       setPending(p => { const next = { ...p }; delete next[entry.key]; return next; });
       flash(`${entry.label} saved.`);
       load();
@@ -79,8 +79,9 @@ export default function BotSettings() {
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
         Reward amounts, cooldowns, formula constants, and catalog prices -- every change here is logged (who,
         before, after, when). Casino payout rates, stock market config, crime rates, and loan/debt rates each
-        have their own dedicated tab; role IDs and channel IDs aren't editable here since a bad value there can
-        break permissions bot-wide.
+        have their own dedicated tab; role IDs and most channel IDs aren't editable here since a bad value there
+        can break permissions bot-wide -- the one exception is the Ticket Category ID under Moderation, which
+        controls both where tickets are created and what's exempt from AutoMod.
       </p>
       {error && <div className="error-banner">{error}</div>}
       {notice && <div className="success-banner">{notice}</div>}
@@ -107,6 +108,13 @@ export default function BotSettings() {
                         />
                         {value ? "Enabled" : "Disabled"}
                       </label>
+                    ) : entry.type === "text" ? (
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={e => setPending(p => ({ ...p, [entry.key]: e.target.value }))}
+                        style={{ width: 220 }}
+                      />
                     ) : (
                       <input
                         type="number"
