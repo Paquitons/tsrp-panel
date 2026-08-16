@@ -1635,6 +1635,27 @@ code {
   white-space: nowrap;
 }
 
+.players-list-vehicle {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.players-list-row-flagged {
+  background: rgba(229, 57, 53, 0.12);
+}
+.players-list-row-flagged:hover {
+  background: rgba(229, 57, 53, 0.2);
+}
+
+.players-list-flag-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
 /* ---------- Custom Select (replaces generic native <select>) ---------- */
 
 .custom-select {
