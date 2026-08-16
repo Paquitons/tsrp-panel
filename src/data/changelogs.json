@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.15.1",
+    "slug": "v1-15-1",
+    "title": "TSRP Update",
+    "date": "2026-08-16",
+    "summary": "A fix for a remaining case where /startup could ping @everyone twice.",
+    "sections": [
+      {
+        "heading": "Fixes & Reliability",
+        "items": [
+          "Fixed a case where a Discord hiccup right after /startup's @everyone ping could cause the server to never get marked online, so a staff retry replayed the whole announcement and sent @everyone a second time."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.15.0",
     "slug": "v1-15-0",
     "title": "TSRP Update",
