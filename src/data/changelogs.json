@@ -1,5 +1,51 @@
 [
   {
+    "version": "1.14.0",
+    "slug": "v1-14-0",
+    "title": "TSRP Update",
+    "date": "2026-08-16",
+    "summary": "A new automated system to catch and stop moderator abuse, server population alerts, and a big batch of fixes, including one where a terminated staff member could keep using the panel.",
+    "sections": [
+      {
+        "heading": "New: Anti-Mod-Abuse Protection",
+        "items": [
+          "The bot now watches for dangerous bulk commands, like kicking or banning every player at once, and can automatically respond: pulling the staff member's in-game permissions first, then a game ban, termination, and a blacklist that keeps them reachable so leadership can review what happened before deciding on anything further.",
+          "Detection looks at the actual command, target, and how many players were really affected, not just keywords. If a command can't be confidently tied to a specific staff member, it's flagged for a human to review instead of being auto-punished.",
+          "Detection is near-instant."
+        ]
+      },
+      {
+        "heading": "New: Server Population Alerts",
+        "items": [
+          "The bot now posts an alert when the server's queue crosses a population threshold, and again once it drops back down, instead of staff having to notice on their own."
+        ]
+      },
+      {
+        "heading": "New: Fast Pass Trial Decisions",
+        "items": [
+          "When a Fast Pass hire's 7 day trial finishes, the bot now posts a decision card so leadership can promote them, terminate them, or keep them on as Junior Moderator right from Discord, instead of the trial just quietly ending with no action.",
+          "A trial now also ends early and automatically if that person leaves the server, gets terminated, or otherwise stops being eligible, instead of sitting there for the full 7 days regardless."
+        ]
+      },
+      {
+        "heading": "Security",
+        "items": [
+          "Fixed an issue where terminating, demoting, or blacklisting a staff member didn't end their existing panel session. They could keep using an already open tab until it expired on its own. Losing staff access now ends that access immediately, everywhere."
+        ]
+      },
+      {
+        "heading": "Fixes & Reliability",
+        "items": [
+          "Tickets now only ping Support Staff, instead of also pinging Management, Directors, or Internal Affairs depending on ticket type.",
+          "The Shift Leaderboard no longer shows \"Unknown User\" for people who've left staff. It only shows people who are still actively staff, and nobody's shift history is deleted.",
+          "Ticket channels are now fully exempt from AutoMod (word filters, spam detection, link filters, etc.), so normal ticket conversations don't get flagged.",
+          "Fixed a rare case where a slow response from ERLC could cause the Kick Rejoin Cooldown system to kick the same person back out twice.",
+          "Fixed a rare case where a network hiccup during /startup could send the @everyone server-online ping twice."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.13.0",
     "slug": "v1-13-0",
     "title": "TSRP Update",
