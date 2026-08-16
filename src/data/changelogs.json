@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.15.0",
+    "slug": "v1-15-0",
+    "title": "TSRP Update",
+    "date": "2026-08-16",
+    "summary": "A new VIP Vehicle Monitoring system, plus Kick Rejoin Cooldown and Anti-Mod-Abuse are now on by default after testing.",
+    "sections": [
+      {
+        "heading": "New: VIP Vehicle Monitoring",
+        "items": [
+          "Certain vehicles are VIP-only. Anyone caught driving one without VIP is flagged on the Players In Game panel with a hover tooltip explaining why, and their current vehicle is now shown there too.",
+          "A message is sent stating the player's Roblox username, Roblox ID, linked Discord account if any, and the vehicle they're driving, with no pings to anyone. The player also gets an in-game PM asking them to switch vehicles.",
+          "A cooldown stops the same person sitting in the vehicle from triggering repeat messages every few seconds.",
+          "Both Bloxlink linkage and VIP status are checked live every time, never assumed from stale data, so someone who links their account or gains VIP is never wrongly flagged."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "items": [
+          "Kick Rejoin Cooldown and Anti-Mod-Abuse's automatic punishment step are now on by default. Both were shipped off pending testing; both have since been tested and approved."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.14.0",
     "slug": "v1-14-0",
     "title": "TSRP Update",
