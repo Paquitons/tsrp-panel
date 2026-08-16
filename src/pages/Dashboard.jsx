@@ -529,9 +529,16 @@ export default function Dashboard() {
                 <p className="muted">No players match.</p>
               ) : (
                 filteredPlayers.map(p => (
-                  <div key={p.username} className="players-list-row" onClick={() => openUser(p.username)}>
+                  <div
+                    key={p.username}
+                    className={`players-list-row${p.vipFlag?.flagged ? " players-list-row-flagged" : ""}`}
+                    onClick={() => openUser(p.username)}
+                    title={p.vipFlag?.flagged ? `VIP Vehicle - ${p.vipFlag.reason}` : undefined}
+                  >
                     <Avatar username={p.username} robloxId={p.robloxId} size={24} />
                     <span className="players-list-name">{p.username}</span>
+                    {p.vehicle && <span className="players-list-vehicle">{p.vehicle}</span>}
+                    {p.vipFlag?.flagged && <span className="players-list-flag-icon">⚠️</span>}
                   </div>
                 ))
               )}
