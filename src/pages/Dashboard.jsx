@@ -364,9 +364,20 @@ export default function Dashboard() {
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(true);
 
+  // The polling interval below is set up once (empty deps, so it never
+  // re-subscribes) and calls this same refreshLogs reference on every tick
+  // -- reading `logSearch` directly here would forever use whatever it was
+  // on the render that created the interval (""), silently reverting any
+  // typed search back to unfiltered results a few seconds later. Reading
+  // through a ref that's kept in sync separately lets this same function
+  // always see the CURRENT search term, whether called from the interval
+  // or from the dedicated logSearch-change effect below.
+  const logSearchRef = useRef(logSearch);
+  useEffect(() => { logSearchRef.current = logSearch; }, [logSearch]);
+
   async function refreshLogs() {
     try {
-      const { logs } = await apiFetch(`/punishments?username=${encodeURIComponent(logSearch)}`);
+      const { logs } = await apiFetch(`/punishments?username=${encodeURIComponent(logSearchRef.current)}`);
       setLogs(logs);
     } catch { /* ignore */ }
     finally { setLogsLoading(false); }
