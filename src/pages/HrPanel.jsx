@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
-import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO } from "../utils";
+import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO, expiresLabel } from "../utils";
 import PortalDropdown from "../components/PortalDropdown";
 import CustomSelect from "../components/CustomSelect";
 import { useStaffSearch } from "../hooks/useStaffSearch";
@@ -21,15 +21,6 @@ function groupByDiscordId(strikes) {
     map.get(s.discord_id).push(s);
   }
   return [...map.entries()];
-}
-
-function expiresLabel(expiresAt) {
-  const msLeft = expiresAt - Date.now();
-  if (msLeft <= 0) return "expiring now";
-  const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  if (days > 0) return `expires in ${days}d ${hours}h`;
-  return `expires in ${hours}h`;
 }
 
 export default function HrPanel() {

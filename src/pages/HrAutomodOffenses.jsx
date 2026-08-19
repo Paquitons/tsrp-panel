@@ -3,18 +3,10 @@ import { apiFetch } from "../api";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
+import { expiresLabel } from "../utils";
 
 function fmtTime(ts) {
   return new Date(ts).toLocaleString();
-}
-
-function expiresLabel(expiresAt) {
-  const msLeft = expiresAt - Date.now();
-  if (msLeft <= 0) return "expiring now";
-  const hours = Math.floor(msLeft / (60 * 60 * 1000));
-  const mins = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
-  if (hours > 0) return `expires in ${hours}h ${mins}m`;
-  return `expires in ${mins}m`;
 }
 
 function statusClass(status) {

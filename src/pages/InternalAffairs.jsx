@@ -8,20 +8,7 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import DiscordIdentity from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Avatar from "../components/Avatar";
-
-// Same "expires in Xd Yh" / "expires in Xh Ym" shape as HrPanel's LOA/strike
-// list -- kept as its own local copy rather than shared, matching how that
-// page already does it.
-function expiresLabel(expiresAt) {
-  const msLeft = expiresAt - Date.now();
-  if (msLeft <= 0) return "expiring now";
-  const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  const mins = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
-  if (days > 0) return `${days}d ${hours}h left`;
-  if (hours > 0) return `${hours}h ${mins}m left`;
-  return `${mins}m left`;
-}
+import { expiresLabel } from "../utils";
 
 export default function InternalAffairs() {
   const { user } = useAuth();

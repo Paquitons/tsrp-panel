@@ -42,6 +42,27 @@ export function timeAgo(timestamp) {
 }
 
 /**
+ * Countdown label for something with a future expiry (strikes, AutoMod
+ * offenses, IA cases) -- "expires in Xd Yh", "expires in Xh Ym", or
+ * "expires in Xm", down to "expiring now" once past. Used to have three
+ * independent copies (HrPanel.jsx, InternalAffairs.jsx,
+ * HrAutomodOffenses.jsx) that had each drifted to a different granularity
+ * and phrasing ("Xd Yh left" vs "expires in Xd Yh", one of them missing
+ * minutes entirely) despite all labeling the same kind of value -- one
+ * canonical version here instead.
+ */
+export function expiresLabel(expiresAt) {
+  const msLeft = expiresAt - Date.now();
+  if (msLeft <= 0) return "expiring now";
+  const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const mins = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
+  if (days > 0) return `expires in ${days}d ${hours}h`;
+  if (hours > 0) return `expires in ${hours}h ${mins}m`;
+  return `expires in ${mins}m`;
+}
+
+/**
  * Wall-clock time of day (e.g. "3:42 PM"), for the live activity feed --
  * lets staff cross-reference an event against the exact moment it
  * happened instead of doing relative-time math in their head.
