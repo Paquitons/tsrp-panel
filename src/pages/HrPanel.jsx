@@ -13,6 +13,8 @@ import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
 import Modal from "../components/primitives/Modal";
 import Banner from "../components/primitives/Banner";
+import PageShell from "../components/primitives/PageShell";
+import { useApiQuery } from "../hooks/useApiQuery";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -31,13 +33,36 @@ export default function HrPanel() {
 
   const [actionTab, setActionTab] = useState("strike");
 
-  const [activeStrikes, setActiveStrikes] = useState([]);
-  const [pendingLOAs, setPendingLOAs] = useState([]);
-  const [activeLOAs, setActiveLOAs] = useState([]);
-  const [loaHistory, setLoaHistory] = useState([]);
-  const [pendingPromotions, setPendingPromotions] = useState([]);
-  const [fastPassTrials, setFastPassTrials] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Each list used to be fetched/stored by hand inside one monolithic
+  // refresh() (six sequential try/catches, each tolerating its own
+  // failure independently) called on a 3s interval AND after nearly every
+  // mutation below. Now each is its own query -- same cadence, same
+  // "one failing doesn't block the others" tolerance (a query's own error
+  // never affects a sibling query) -- with refreshAll() below replacing
+  // every `await refresh()` call site 1:1.
+  const HR_POLL_MS = 3_000;
+  const strikesQuery = useApiQuery(["strikes", "active"], canAccess && "/strikes/active", { refetchInterval: HR_POLL_MS, select: d => d.strikes });
+  const pendingLOAsQuery = useApiQuery(["loa", "pending"], canAccess && "/loa/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
+  const activeLOAsQuery = useApiQuery(["loa", "active"], canAccess && "/loa/active", { refetchInterval: HR_POLL_MS, select: d => d.requests });
+  const loaHistoryQuery = useApiQuery(["loa", "history"], canAccess && "/loa/history", { refetchInterval: HR_POLL_MS, select: d => d.requests });
+  const fastPassTrialsQuery = useApiQuery(["fastpass-trials", "active"], canAccess && "/fastpass-trials/active", { refetchInterval: HR_POLL_MS, select: d => d.trials });
+  const pendingPromotionsQuery = useApiQuery(["rank-changes", "pending"], canAccess && canReviewBigActions && "/rank-changes/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
+
+  const activeStrikes = strikesQuery.data ?? [];
+  const pendingLOAs = pendingLOAsQuery.data ?? [];
+  const activeLOAs = activeLOAsQuery.data ?? [];
+  const loaHistory = loaHistoryQuery.data ?? [];
+  const fastPassTrials = fastPassTrialsQuery.data ?? [];
+  const pendingPromotions = pendingPromotionsQuery.data ?? [];
+  const loading = strikesQuery.isLoading;
+
+  async function refreshAll() {
+    await Promise.all([
+      strikesQuery.refetch(), pendingLOAsQuery.refetch(), activeLOAsQuery.refetch(),
+      loaHistoryQuery.refetch(), fastPassTrialsQuery.refetch(),
+      canReviewBigActions ? pendingPromotionsQuery.refetch() : Promise.resolve(),
+    ]);
+  }
 
   // ---------- Issue Strike: staff search-autocomplete ----------
   const [strikeTarget, setStrikeTarget] = useState(null);
@@ -100,7 +125,7 @@ export default function HrPanel() {
       setTerminateSuccess(true);
       terminateSearch.reset();
       setTerminateReason("");
-      await refresh();
+      await refreshAll();
     } catch (err) {
       setTerminateError(err.message);
     } finally {
@@ -130,50 +155,13 @@ export default function HrPanel() {
       setResignSuccess(true);
       resignSearch.reset();
       setResignReason("");
-      await refresh();
+      await refreshAll();
     } catch (err) {
       setResignError(err.message);
     } finally {
       setResignSubmitting(false);
     }
   }
-
-  async function refresh() {
-    try {
-      const { strikes } = await apiFetch("/strikes/active");
-      setActiveStrikes(strikes);
-    } catch { /* ignore */ }
-    try {
-      const { requests } = await apiFetch("/loa/pending");
-      setPendingLOAs(requests);
-    } catch { /* ignore */ }
-    try {
-      const { requests } = await apiFetch("/loa/active");
-      setActiveLOAs(requests);
-    } catch { /* ignore */ }
-    try {
-      const { requests } = await apiFetch("/loa/history");
-      setLoaHistory(requests);
-    } catch { /* ignore */ }
-    try {
-      const { trials } = await apiFetch("/fastpass-trials/active");
-      setFastPassTrials(trials);
-    } catch { /* ignore */ }
-    if (canReviewBigActions) {
-      try {
-        const { requests } = await apiFetch("/rank-changes/pending");
-        setPendingPromotions(requests);
-      } catch { /* ignore */ }
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    if (!canAccess) return;
-    refresh();
-    const interval = setInterval(refresh, 3_000);
-    return () => clearInterval(interval);
-  }, [canAccess]);
 
   function onStaffQueryChange(value) {
     setStaffQuery(value);
@@ -212,7 +200,7 @@ export default function HrPanel() {
       setStrikeTarget(null);
       setStaffQuery("");
       setStrikeReason("");
-      await refresh();
+      await refreshAll();
     } catch (err) {
       setStrikeError(err.message);
     } finally {
@@ -224,7 +212,7 @@ export default function HrPanel() {
     if (!confirm("Remove this strike early? It would otherwise auto-expire in 2 weeks.")) return;
     try {
       await apiFetch(`/strikes/${id}`, { method: "DELETE" });
-      await refresh();
+      await refreshAll();
     } catch (err) {
       alert(err.message);
     }
@@ -233,7 +221,7 @@ export default function HrPanel() {
   async function reviewLOA(requestId, status) {
     try {
       await apiFetch(`/loa/${requestId}`, { method: "PATCH", body: { status } });
-      await refresh();
+      await refreshAll();
     } catch (err) {
       alert(err.message);
     }
@@ -242,7 +230,7 @@ export default function HrPanel() {
   async function reviewRankChange(id, status) {
     try {
       await apiFetch(`/rank-changes/${id}`, { method: "PATCH", body: { status } });
-      await refresh();
+      await refreshAll();
     } catch (err) {
       alert(err.message);
     }
@@ -280,7 +268,7 @@ export default function HrPanel() {
     if (!confirm("End this person's LOA right now?")) return;
     try {
       await apiFetch(`/loa/end/${discordId}`, { method: "PATCH" });
-      await refresh();
+      await refreshAll();
     } catch (err) {
       alert(err.message);
     }
@@ -298,7 +286,7 @@ export default function HrPanel() {
     try {
       await apiFetch(`/loa/extend/${extendingDiscordId}`, { method: "PATCH", body: { newEndDate: parseLocalDateInput(extendDate) } });
       setExtendingDiscordId(null);
-      await refresh();
+      await refreshAll();
     } catch (err) {
       setExtendError(err.message);
     }
@@ -306,10 +294,9 @@ export default function HrPanel() {
 
   if (!canAccess) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>HR Panel</h1></div>
-        <div className="error-banner">You need Management+ access to view this page.</div>
-      </div>
+      <PageShell title="HR Panel">
+        <Banner>You need Management+ access to view this page.</Banner>
+      </PageShell>
     );
   }
 
@@ -325,15 +312,12 @@ export default function HrPanel() {
   ];
 
   return (
-    <div className="content">
-      <div className="page-header">
-        <h1>HR Panel</h1>
-        <p className="muted">
-          {pendingCount > 0
-            ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
-            : "Nothing pending -- you're all caught up."}
-        </p>
-      </div>
+    <PageShell
+      title="HR Panel"
+      subtitle={pendingCount > 0
+        ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
+        : "Nothing pending -- you're all caught up."}
+    >
 
       {/* ---------- Approvals: needs a decision now, always visible, zero clicks ---------- */}
       <div className="card-grid">
@@ -426,7 +410,7 @@ export default function HrPanel() {
         {actionTab === "strike" && (
           <>
             <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
-            {strikeError && <div className="error-banner">{strikeError}</div>}
+            {strikeError && <Banner>{strikeError}</Banner>}
             <form onSubmit={submitStrike}>
               <label>Staff Member</label>
               <div className="autocomplete-wrap">
@@ -457,8 +441,8 @@ export default function HrPanel() {
 
         {actionTab === "rank" && canReviewBigActions && (
           <>
-            {rankChangeError && <div className="error-banner">{rankChangeError}</div>}
-            {rankChangeSuccess && <div className="success-banner">Done.</div>}
+            {rankChangeError && <Banner>{rankChangeError}</Banner>}
+            {rankChangeSuccess && <Banner variant="success">Done.</Banner>}
             <form onSubmit={submitRankChange}>
               <label>Action</label>
               <CustomSelect
@@ -511,8 +495,8 @@ export default function HrPanel() {
 
         {actionTab === "terminate" && canReviewBigActions && (
           <>
-            {terminateError && <div className="error-banner">{terminateError}</div>}
-            {terminateSuccess && <div className="success-banner">Done.</div>}
+            {terminateError && <Banner>{terminateError}</Banner>}
+            {terminateSuccess && <Banner variant="success">Done.</Banner>}
             <form onSubmit={submitTerminate}>
               <label>Staff Member</label>
               <div className="autocomplete-wrap">
@@ -549,8 +533,8 @@ export default function HrPanel() {
         {actionTab === "resign" && canProcessResignations && (
           <>
             <p className="muted card-subtitle">For processing someone else's resignation on their behalf.</p>
-            {resignError && <div className="error-banner">{resignError}</div>}
-            {resignSuccess && <div className="success-banner">Done.</div>}
+            {resignError && <Banner>{resignError}</Banner>}
+            {resignSuccess && <Banner variant="success">Done.</Banner>}
             <form onSubmit={submitResignation}>
               <label>Staff Member</label>
               <div className="autocomplete-wrap">
@@ -747,6 +731,6 @@ export default function HrPanel() {
             </form>
         </Modal>
       )}
-    </div>
+    </PageShell>
   );
 }
