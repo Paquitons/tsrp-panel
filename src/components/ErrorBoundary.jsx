@@ -32,9 +32,6 @@ export default class ErrorBoundary extends Component {
               This page hit an unexpected error and couldn't render. Reloading usually fixes it --
               if it keeps happening, let a developer know what page you were on.
             </p>
-            <div className="error-banner" style={{ marginTop: 12, fontFamily: "monospace", fontSize: "var(--text-sm)" }}>
-              {this.state.error.message}
-            </div>
             <button className="primary" style={{ marginTop: 16 }} onClick={() => window.location.reload()}>
               Reload Page
             </button>
