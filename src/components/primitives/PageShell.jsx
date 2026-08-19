@@ -9,12 +9,13 @@ const VARIANT_CLASS = {
   public: "home-page",
 };
 
-export default function PageShell({ variant = "authenticated", title, actions, className = "", children }) {
+export default function PageShell({ variant = "authenticated", title, subtitle, actions, className = "", children }) {
   return (
     <div className={`${VARIANT_CLASS[variant] ?? VARIANT_CLASS.authenticated} ${className}`.trim()}>
       {title && (
         <div className="page-header">
           <h1>{title}</h1>
+          {subtitle && <p className="muted">{subtitle}</p>}
           {actions && <div className="button-row">{actions}</div>}
         </div>
       )}

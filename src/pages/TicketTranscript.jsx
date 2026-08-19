@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { apiFetch, API_BASE } from "../api";
-import { usePolling } from "../hooks/usePolling";
+import { API_BASE } from "../api";
+import PageShell from "../components/primitives/PageShell";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 import DiscordIdentity from "../components/DiscordIdentity";
 import DiscordAvatar from "../components/DiscordAvatar";
 
@@ -258,15 +260,11 @@ function MessageRow({ message, mentions }) {
 
 export default function TicketTranscript() {
   const { ticketNumber } = useParams();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  usePolling(
-    () => apiFetch(`/tickets/${ticketNumber}`).then(d => { setData(d); setError(null); }).catch(err => setError(err.message)),
-    POLL_MS,
-    [ticketNumber]
-  );
+  const query = useApiQuery(["ticket", ticketNumber], `/tickets/${ticketNumber}`, { refetchInterval: POLL_MS });
+  const data = query.data;
+  const error = query.error?.message;
 
   async function copyTranscript() {
     const text = buildTranscriptText(data.ticket, data.messages, data.mentions);
@@ -292,18 +290,16 @@ export default function TicketTranscript() {
 
   if (error && !data) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcript</h1></div>
-        <div className="error-banner">{error}</div>
-      </div>
+      <PageShell title="Ticket Transcript">
+        <Banner>{error}</Banner>
+      </PageShell>
     );
   }
   if (!data) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcript</h1></div>
+      <PageShell title="Ticket Transcript">
         <p className="muted">Loading…</p>
-      </div>
+      </PageShell>
     );
   }
 
@@ -321,7 +317,7 @@ export default function TicketTranscript() {
       <div className="page-header" style={{ marginTop: 12 }}>
         <h1>Ticket #{ticket.ticket_number}</h1>
       </div>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       <div className="card-grid" style={{ marginBottom: 20 }}>
         <div className="stat-tile">
           <div className="muted">Opened By</div>

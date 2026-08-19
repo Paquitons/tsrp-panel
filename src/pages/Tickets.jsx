@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiFetch } from "../api";
-import { usePolling } from "../hooks/usePolling";
 import DiscordIdentity from "../components/DiscordIdentity";
+import PageShell from "../components/primitives/PageShell";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 
 const LIST_POLL_MS = 15_000;
 
@@ -18,27 +19,24 @@ function formatDate(ms) {
 // that relied on Discord's own CDN links staying valid forever.
 // ==================================================================
 export default function Tickets() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  usePolling(() => apiFetch("/tickets?limit=100").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), LIST_POLL_MS);
+  const query = useApiQuery(["tickets"], "/tickets?limit=100", { refetchInterval: LIST_POLL_MS });
+  const data = query.data;
 
-  if (error && !data) {
+  if (query.isError && !data) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcripts</h1></div>
-        <div className="error-banner">{error}</div>
-      </div>
+      <PageShell title="Ticket Transcripts">
+        <Banner>{query.error.message}</Banner>
+      </PageShell>
     );
   }
-  if (!data) {
+  if (query.isLoading) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcripts</h1></div>
+      <PageShell title="Ticket Transcripts">
         <p className="muted">Loading…</p>
-      </div>
+      </PageShell>
     );
   }
 
@@ -52,9 +50,8 @@ export default function Tickets() {
     : data.tickets;
 
   return (
-    <div className="content">
-      <div className="page-header"><h1>Ticket Transcripts</h1></div>
-      {error && <div className="error-banner">{error}</div>}
+    <PageShell title="Ticket Transcripts">
+      {query.isError && <Banner>{query.error.message}</Banner>}
 
       <input
         placeholder="Search by ticket #, opener, or close reason..."
@@ -89,6 +86,6 @@ export default function Tickets() {
           </div>
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }
