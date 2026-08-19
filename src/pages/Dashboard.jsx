@@ -499,7 +499,7 @@ export default function Dashboard() {
 
       {/* ---------- Hero: greeting, shift status, on-duty, quick actions -- everything a staff member needs at the start of an SSU, with zero scrolling ---------- */}
       <div className="card dashboard-hero">
-        {shiftError && <div className="error-banner">{shiftError}</div>}
+        {shiftError && <Banner>{shiftError}</Banner>}
 
         <div className="hero-top">
           <div className="hero-greeting">
@@ -596,8 +596,8 @@ export default function Dashboard() {
         <div className="dashboard-col">
           <div className="card">
             <h2>Create New Log</h2>
-            {createError && <div className="error-banner">{createError}</div>}
-            {createSuccess && <div className="success-banner">Log created successfully.</div>}
+            {createError && <Banner>{createError}</Banner>}
+            {createSuccess && <Banner variant="success">Log created successfully.</Banner>}
             {createCooldownNote && <div className="muted" style={{ marginTop: -4, marginBottom: 8 }}>{createCooldownNote}</div>}
             <form onSubmit={createLog}>
               <label>User</label>
