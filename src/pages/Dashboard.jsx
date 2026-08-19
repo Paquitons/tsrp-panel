@@ -15,10 +15,20 @@ import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
 import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon, MegaphoneIcon } from "../components/icons";
+import { useLiveEvents } from "../hooks/useLiveEvents";
 
 const ALL_TYPES = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
-const POLL_MS = 3_000; // fast poll so the panel feels live without a full push/WebSocket layer
+const POLL_MS = 3_000; // shift/leaderboard/logs: personal or search-dependent, not covered by the shared SSE push below
+// On-duty roster, live players, and the activity feed now arrive primarily
+// via useLiveEvents' server push (panel-api's liveEvents.js, one shared
+// compute loop for every connected client instead of each open tab firing
+// its own requests). This interval is now just the automatic fallback if
+// that stream is ever down -- much longer than before, since it's a
+// safety net rather than the primary path. Never trusted as the ONLY path
+// to correct state, matching this whole rewrite's "don't trust a single
+// response" philosophy applied to the transport layer too.
+const LIVE_FALLBACK_POLL_MS = 20_000;
 
 const ACTIVITY_META = {
   join:      { color: "#69f0ae" },
@@ -399,6 +409,20 @@ export default function Dashboard() {
   const [playerSearch, setPlayerSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
 
+  // ---------- Shared server push: on-duty roster, live players, activity ----------
+  // See useLiveEvents' own comment for why this isn't the browser's native
+  // EventSource. Syncs straight into the same state the fallback poll
+  // below also writes to, so every render site below is unaffected by
+  // which path most recently updated it.
+  const { snapshot: liveSnapshot } = useLiveEvents(true);
+  useEffect(() => {
+    if (!liveSnapshot) return;
+    setOnDutyStaff(liveSnapshot.onDuty);
+    setEvents(liveSnapshot.activity.events);
+    setLivePlayers(liveSnapshot.players.players);
+    setQueueCount(liveSnapshot.players.queueCount);
+  }, [liveSnapshot]);
+
   async function fetchLivePlayers() {
     try {
       const { players, queueCount } = await apiFetch("/activity/players");
@@ -427,6 +451,10 @@ export default function Dashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // ---------- Initial load + polling ----------
+  // onDuty/activity/players are seeded once here (so they're not empty
+  // while the SSE connection is still opening) and then re-polled only on
+  // the much slower LIVE_FALLBACK_POLL_MS cadence -- useLiveEvents' push
+  // is the primary path for those three now.
   useEffect(() => {
     refreshShift();
     refreshOnDuty();
@@ -434,15 +462,20 @@ export default function Dashboard() {
     refreshLogs();
     fetchActivity();
     fetchLivePlayers();
-    const interval = setInterval(() => {
+    const fastInterval = setInterval(() => {
       refreshShift();
-      refreshOnDuty();
       refreshLeaderboard();
       refreshLogs();
+    }, POLL_MS);
+    const fallbackInterval = setInterval(() => {
+      refreshOnDuty();
       fetchActivity();
       fetchLivePlayers();
-    }, POLL_MS);
-    return () => clearInterval(interval);
+    }, LIVE_FALLBACK_POLL_MS);
+    return () => {
+      clearInterval(fastInterval);
+      clearInterval(fallbackInterval);
+    };
   }, []);
 
   useEffect(() => { refreshLogs(); }, [logSearch]);
