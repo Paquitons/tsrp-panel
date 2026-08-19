@@ -5,6 +5,8 @@ import PublicNav from "../components/PublicNav";
 import MoneyBreakdown from "../components/MoneyBreakdown";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { usePolling } from "../hooks/usePolling";
+import AsyncBoundary from "../components/primitives/AsyncBoundary";
+import Card from "../components/primitives/Card";
 
 const ECONOMY_POLL_MS = 20_000; // "moderately active" tier -- aggregate stats, not a tight loop
 
@@ -28,39 +30,37 @@ export default function Economy() {
         <p className="muted">A snapshot of where the money in TSRP's economy actually sits.</p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {!data && !error && <p className="muted">Loading…</p>}
-
-      {data && (
+      <AsyncBoundary isLoading={!data && !error} isError={!!error} error={error && { message: error }}>
+        {() => (
         <>
           <section className="econ-stats">
-            <div className="home-stat-tile">
+            <Card variant="stat">
               <span className="home-stat-label">Total Money Supply</span>
               <span className="home-stat-value">{fmt(data.totalMoneySupply)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Player Wallets</span>
               <span className="home-stat-value">{data.walletCount.toLocaleString()}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Businesses</span>
               <span className="home-stat-value">{data.businessCount.toLocaleString()}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Stock Market Cap</span>
               <span className="home-stat-value">{fmt(data.stockMarketCap)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Trades (24h)</span>
               <span className="home-stat-value">{data.tradesLast24h.toLocaleString()}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Volume (24h)</span>
               <span className="home-stat-value">{fmt(data.volumeLast24h)}</span>
-            </div>
+            </Card>
           </section>
 
-          <section className="board-card">
+          <Card variant="board" as="section">
             <h2>Where the Money Sits</h2>
             <MoneyBreakdown
               total={data.totalMoneySupply}
@@ -72,24 +72,25 @@ export default function Economy() {
                 stockMarket: data.stockMarketBalance,
               }}
             />
-          </section>
+          </Card>
 
           <div className="econ-links">
-            <Link to={`${base}/stocks`} className="econ-link-card">
+            <Card variant="link" as={Link} to={`${base}/stocks`}>
               <h3>Stock Market</h3>
               <p className="muted">Browse every listed stock, with live prices and history.</p>
-            </Link>
-            <Link to={`${base}/leaderboards`} className="econ-link-card">
+            </Card>
+            <Card variant="link" as={Link} to={`${base}/leaderboards`}>
               <h3>Leaderboards</h3>
               <p className="muted">See the richest players and top businesses.</p>
-            </Link>
-            <Link to={`${base}/economy/news`} className="econ-link-card">
+            </Card>
+            <Card variant="link" as={Link} to={`${base}/economy/news`}>
               <h3>Economy News</h3>
               <p className="muted">Market moves, lottery wins, and new businesses.</p>
-            </Link>
+            </Card>
           </div>
         </>
-      )}
+        )}
+      </AsyncBoundary>
     </div>
   );
 }

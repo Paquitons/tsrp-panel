@@ -6,6 +6,7 @@ import Breadcrumbs from "../components/Breadcrumbs";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { usePolling } from "../hooks/usePolling";
 import { pctChange, changeClass } from "../utils";
+import AsyncBoundary from "../components/primitives/AsyncBoundary";
 
 const STOCKS_POLL_MS = 5_000; // "highly active" tier -- live prices
 
@@ -29,11 +30,15 @@ export default function StockMarket() {
         <p className="muted">Every stock currently listed on TSRP's market.</p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {!stocks && !error && <p className="muted">Loading…</p>}
-      {stocks?.length === 0 && <p className="muted">No stocks are listed right now.</p>}
-
-      {stocks?.length > 0 && (
+      <AsyncBoundary
+        isLoading={!stocks && !error}
+        isError={!!error}
+        error={error && { message: error }}
+        data={stocks}
+        isEmpty={s => s?.length === 0}
+        emptyMessage="No stocks are listed right now."
+      >
+        {() => (
         <div className="roster-list">
           {stocks.map(s => (
             <Link to={`${base}/stocks/${s.ticker}`} className="roster-row stock-row" key={s.ticker}>
@@ -47,7 +52,8 @@ export default function StockMarket() {
             </Link>
           ))}
         </div>
-      )}
+        )}
+      </AsyncBoundary>
     </div>
   );
 }

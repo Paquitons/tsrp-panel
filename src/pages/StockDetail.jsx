@@ -8,6 +8,7 @@ import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { pctChange, changeClass, CHART_RANGE_OPTIONS } from "../utils";
+import Card from "../components/primitives/Card";
 
 const STOCK_DETAIL_POLL_MS = 5_000; // "highly active" tier -- live price + chart
 
@@ -70,57 +71,57 @@ export default function StockDetail() {
             </div>
           </div>
 
-          <section className="board-card">
+          <Card variant="board" as="section">
             <div className="modal-title-row" style={{ marginBottom: 8 }}>
               <h2 style={{ margin: 0 }}>Price History</h2>
               <CustomSelect value={range} onChange={setRange} options={CHART_RANGE_OPTIONS} />
             </div>
             <PriceChart history={stock.history} />
-          </section>
+          </Card>
 
           <section className="econ-stats stock-perf-stats">
-            <div className="home-stat-tile">
+            <Card variant="stat">
               <span className="home-stat-label">24h Change</span>
               <span className={`home-stat-value ${changeClass(stock.performance.daily)}`}>{pctChange(stock.performance.daily)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">7-Day Change</span>
               <span className={`home-stat-value ${changeClass(stock.performance.weekly)}`}>{pctChange(stock.performance.weekly)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">30-Day Change</span>
               <span className={`home-stat-value ${changeClass(stock.performance.monthly)}`}>{pctChange(stock.performance.monthly)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Market Value</span>
               <span className="home-stat-value">{fmt(stock.marketCap)}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">All-Time High</span>
               <span className="home-stat-value">{stock.high != null ? fmt(stock.high) : "--"}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">All-Time Low</span>
               <span className="home-stat-value">{stock.low != null ? fmt(stock.low) : "--"}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Total Shares</span>
               <span className="home-stat-value">{stock.sharesOutstanding.toLocaleString()}</span>
-            </div>
-            <div className="home-stat-tile">
+            </Card>
+            <Card variant="stat">
               <span className="home-stat-label">Available Shares</span>
               <span className="home-stat-value">{stock.sharesAvailable.toLocaleString()}</span>
-            </div>
+            </Card>
           </section>
 
           {stock.description && (
-            <section className="board-card">
+            <Card variant="board" as="section">
               <h2>About {stock.name}</h2>
               <p>{stock.description}</p>
-            </section>
+            </Card>
           )}
 
-          <section className="board-card">
+          <Card variant="board" as="section">
             <h2>Recent Company Events</h2>
             {events.length === 0 && <p className="muted">No company events yet -- price has only moved from normal daily market movement.</p>}
             {events.map((e, i) => (
@@ -132,7 +133,7 @@ export default function StockDetail() {
                 </div>
               </div>
             ))}
-          </section>
+          </Card>
         </>
       )}
     </div>

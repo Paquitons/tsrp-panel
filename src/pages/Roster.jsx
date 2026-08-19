@@ -3,6 +3,8 @@ import { apiFetch } from "../api";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PublicNav from "../components/PublicNav";
 import { usePolling } from "../hooks/usePolling";
+import AsyncBoundary from "../components/primitives/AsyncBoundary";
+import Card from "../components/primitives/Card";
 
 const LEADERSHIP_TIER = "leadership";
 const ROSTER_POLL_MS = 30_000; // "moderately active" tier -- staffCache itself only refreshes every 5min server-side, this just picks that up promptly
@@ -52,10 +54,8 @@ export default function Roster() {
         </p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {!staff && !error && <p className="muted">Loading…</p>}
-
-      {staff && (
+      <AsyncBoundary isLoading={!staff && !error} isError={!!error} error={error && { message: error }}>
+        {() => (
         <>
           <div className="roster-toolbar">
             <input
@@ -83,11 +83,11 @@ export default function Roster() {
               <h2 className="roster-tier-head">Leadership</h2>
               <div className="roster-leadership-grid">
                 {leadership.map(m => (
-                  <div className="roster-leader-card" key={m.discordId}>
+                  <Card variant="leader" key={m.discordId}>
                     <DiscordAvatar discordId={m.discordId} avatarHash={m.avatarHash} size={56} />
                     <span className="roster-leader-name">{m.username}</span>
                     <span className="roster-leader-rank">{m.rankLabel}</span>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </section>
@@ -108,7 +108,8 @@ export default function Roster() {
             </section>
           ))}
         </>
-      )}
+        )}
+      </AsyncBoundary>
     </div>
   );
 }
