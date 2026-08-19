@@ -6,6 +6,8 @@ import PublicNav from "../components/PublicNav";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { usePolling } from "../hooks/usePolling";
 import { pctChange } from "../utils";
+import AsyncBoundary from "../components/primitives/AsyncBoundary";
+import Card from "../components/primitives/Card";
 
 const CURRENCY = "$";
 const LEADERBOARDS_POLL_MS = 20_000; // "moderately active" tier
@@ -43,12 +45,10 @@ export default function Leaderboards() {
         <p className="muted">Where the money in TSRP actually is right now.</p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {!data && !error && <p className="muted">Loading…</p>}
-
-      {data && (
+      <AsyncBoundary isLoading={!data && !error} isError={!!error} error={error && { message: error }}>
+        {() => (
         <div className="board-grid">
-          <section className="board-card">
+          <Card variant="board" as="section">
             <h2>Richest Players</h2>
             <p className="muted card-subtitle">By total net worth -- cash, bank, businesses, property, and investments, minus loans.</p>
             {data.players.length === 0 && <p className="muted">No wallets yet.</p>}
@@ -57,13 +57,13 @@ export default function Leaderboards() {
                 key={p.discordId}
                 rank={i + 1}
                 avatar={<DiscordAvatar discordId={p.discordId} avatarHash={p.avatarHash} size={26} />}
-                name={p.nickname || p.username || `Player #${p.discordId.slice(-4)}`}
+                name={p.nickname || p.username || "Unknown Player"}
                 value={fmt(p.netWorth)}
               />
             ))}
-          </section>
+          </Card>
 
-          <section className="board-card">
+          <Card variant="board" as="section">
             <h2>Top Businesses</h2>
             {data.businesses.length === 0 && <p className="muted">No businesses yet.</p>}
             {data.businesses.map((b, i) => (
@@ -75,9 +75,9 @@ export default function Leaderboards() {
                 value={fmt(b.treasury)}
               />
             ))}
-          </section>
+          </Card>
 
-          <section className="board-card board-card-wide">
+          <Card variant="board" className="board-card-wide" as="section">
             <div className="home-section-head">
               <h2>Stock Market</h2>
               <Link to={`${base}/stocks`} className="home-section-link">View all</Link>
@@ -117,9 +117,10 @@ export default function Leaderboards() {
                 ))}
               </div>
             </div>
-          </section>
+          </Card>
         </div>
-      )}
+        )}
+      </AsyncBoundary>
     </div>
   );
 }

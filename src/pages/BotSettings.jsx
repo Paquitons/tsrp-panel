@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
-import { usePolling } from "../hooks/usePolling";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 
 const ADMIN_POLL_MS = 15_000;
 
@@ -13,19 +14,20 @@ const ADMIN_POLL_MS = 15_000;
 // careful handling than a generic number editor).
 // ==================================================================
 export default function BotSettings() {
-  const [settings, setSettings] = useState(null);
   const [pending, setPending] = useState({}); // key -> locally-edited value, not yet saved
   const [saving, setSaving] = useState(null); // key currently being saved/reset
-  const [error, setError] = useState(null);
+  const [actionError, setActionError] = useState(null);
   const [notice, setNotice] = useState(null);
 
-  function load() {
-    apiFetch("/super-admin/bot-settings").then(({ settings }) => setSettings(settings)).catch(err => setError(err.message));
-  }
   // Safe to poll even with unsaved edits in `pending` -- that's a
-  // separate piece of state from `settings`, never overwritten by a
-  // refresh the way a form bound directly to fetched state would be.
-  usePolling(load, ADMIN_POLL_MS);
+  // separate piece of state from the query's cached `settings`, never
+  // overwritten by a refresh the way a form bound directly to fetched
+  // state would be.
+  const query = useApiQuery(["super-admin", "bot-settings"], "/super-admin/bot-settings", {
+    refetchInterval: ADMIN_POLL_MS,
+    select: d => d.settings,
+  });
+  const settings = query.data;
 
   function flash(msg) {
     setNotice(msg);
@@ -36,14 +38,14 @@ export default function BotSettings() {
     const value = pending[entry.key];
     if (value === undefined) return;
     setSaving(entry.key);
-    setError(null);
+    setActionError(null);
     try {
       await apiFetch(`/super-admin/bot-settings/${entry.key}`, { method: "PATCH", body: { value: entry.type === "number" ? Number(value) : value } }); // "text" and "boolean" both pass the value through as-is
       setPending(p => { const next = { ...p }; delete next[entry.key]; return next; });
       flash(`${entry.label} saved.`);
-      load();
+      query.refetch();
     } catch (err) {
-      setError(err.message);
+      setActionError(err.message);
     } finally {
       setSaving(null);
     }
@@ -52,20 +54,20 @@ export default function BotSettings() {
   async function reset(entry) {
     if (!confirm(`Reset "${entry.label}" to its default (${entry.default})?`)) return;
     setSaving(entry.key);
-    setError(null);
+    setActionError(null);
     try {
       await apiFetch(`/super-admin/bot-settings/${entry.key}/reset`, { method: "POST" });
       setPending(p => { const next = { ...p }; delete next[entry.key]; return next; });
       flash(`${entry.label} reset to default.`);
-      load();
+      query.refetch();
     } catch (err) {
-      setError(err.message);
+      setActionError(err.message);
     } finally {
       setSaving(null);
     }
   }
 
-  if (error && !settings) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
+  if (query.isError && !settings) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
   if (!settings) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
 
   const byCategory = {};
@@ -83,8 +85,8 @@ export default function BotSettings() {
         can break permissions bot-wide -- the one exception is the Ticket Category ID under Moderation, which
         controls both where tickets are created and what's exempt from AutoMod.
       </p>
-      {error && <div className="error-banner">{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {actionError && <Banner>{actionError}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       {Object.entries(byCategory).map(([category, entries]) => (
         <div key={category}>

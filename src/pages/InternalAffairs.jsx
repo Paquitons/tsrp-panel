@@ -8,53 +8,31 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import DiscordIdentity from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Avatar from "../components/Avatar";
-
-// Same "expires in Xd Yh" / "expires in Xh Ym" shape as HrPanel's LOA/strike
-// list -- kept as its own local copy rather than shared, matching how that
-// page already does it.
-function expiresLabel(expiresAt) {
-  const msLeft = expiresAt - Date.now();
-  if (msLeft <= 0) return "expiring now";
-  const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  const mins = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
-  if (days > 0) return `${days}d ${hours}h left`;
-  if (hours > 0) return `${hours}h ${mins}m left`;
-  return `${mins}m left`;
-}
+import Card from "../components/primitives/Card";
+import PageShell from "../components/primitives/PageShell";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
+import { expiresLabel } from "../utils";
 
 export default function InternalAffairs() {
   const { user } = useAuth();
   const canAccess = user?.tier === "ia" || user?.tier === "management" || user?.tier === "director";
 
   // ---------- Kick Rejoin Cooldowns ----------
-  const [cooldowns, setCooldowns] = useState([]);
-  const [cooldownsLoading, setCooldownsLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
 
-  async function refreshCooldowns() {
-    try {
-      const { cooldowns } = await apiFetch("/punishments/kick-cooldowns/active");
-      setCooldowns(cooldowns);
-    } catch { /* ignore -- keep showing the last known list */ }
-    finally {
-      setCooldownsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (!canAccess) return;
-    refreshCooldowns();
-    const interval = setInterval(refreshCooldowns, 15_000);
-    return () => clearInterval(interval);
-  }, [canAccess]);
+  const cooldownsQuery = useApiQuery(["punishments", "kick-cooldowns"], canAccess && "/punishments/kick-cooldowns/active", {
+    refetchInterval: 15_000,
+    select: d => d.cooldowns,
+  });
+  const cooldowns = cooldownsQuery.data ?? [];
 
   async function removeCooldown(id, label) {
     if (!confirm(`Remove ${label}'s rejoin cooldown early? They'll be able to rejoin normally right away.`)) return;
     setRemovingId(id);
     try {
       await apiFetch(`/punishments/kick-cooldowns/${id}`, { method: "DELETE" });
-      await refreshCooldowns();
+      await cooldownsQuery.refetch();
     } catch (err) {
       alert(err.message);
     } finally {
@@ -145,26 +123,20 @@ export default function InternalAffairs() {
 
   if (!canAccess) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Internal Affairs</h1></div>
-        <div className="error-banner">You need Internal Affairs access to view this page.</div>
-      </div>
+      <PageShell title="Internal Affairs">
+        <Banner>You need Internal Affairs access to view this page.</Banner>
+      </PageShell>
     );
   }
 
   return (
-    <div className="content">
-      <div className="page-header">
-        <h1>Internal Affairs</h1>
-        <p className="muted">Issue strikes and suggest promotions. Need backup right now? Use Request Staff from the Dashboard.</p>
-      </div>
-
+    <PageShell title="Internal Affairs" subtitle="Issue strikes and suggest promotions. Need backup right now? Use Request Staff from the Dashboard.">
       <div className="card-grid">
-        <div className="card">
+        <Card>
           <h2>Issue a Strike</h2>
           <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
-          {strikeError && <div className="error-banner">{strikeError}</div>}
-          {strikeSuccess && <div className="success-banner">Strike issued.</div>}
+          {strikeError && <Banner>{strikeError}</Banner>}
+          {strikeSuccess && <Banner variant="success">Strike issued.</Banner>}
           <form onSubmit={submitStrike}>
             <label>Staff Member</label>
             <div className="autocomplete-wrap">
@@ -190,13 +162,13 @@ export default function InternalAffairs() {
             <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
             <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
           </form>
-        </div>
+        </Card>
 
-        <div className="card">
+        <Card>
           <h2>Suggest a Rank Change</h2>
           <p className="muted card-subtitle">Goes to Management+ for approval.</p>
-          {promoError && <div className="error-banner">{promoError}</div>}
-          {promoSuccess && <div className="success-banner">Submitted.</div>}
+          {promoError && <Banner>{promoError}</Banner>}
+          {promoSuccess && <Banner variant="success">Submitted.</Banner>}
           <form onSubmit={submitPromotion}>
             <label>Action</label>
             <CustomSelect
@@ -242,14 +214,14 @@ export default function InternalAffairs() {
             <AutoGrowTextarea required value={promoReason} onChange={e => setPromoReason(e.target.value)} />
             <button className="primary" type="submit" disabled={promoSubmitting || rankOptions.length === 0}>{promoSubmitting ? "Submitting…" : "Submit for Approval"}</button>
           </form>
-        </div>
+        </Card>
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
+      <Card style={{ marginTop: 20 }}>
         <h2>Active Kick Rejoin Cooldowns ({cooldowns.length})</h2>
         <p className="muted card-subtitle">Everyone currently on a rejoin cooldown from a logged kick -- started automatically from the Dashboard's kick log.</p>
-        {cooldownsLoading && <p className="muted">Loading…</p>}
-        {!cooldownsLoading && cooldowns.length === 0 && <p className="muted">Nobody is currently on a rejoin cooldown.</p>}
+        {cooldownsQuery.isLoading && <p className="muted">Loading…</p>}
+        {!cooldownsQuery.isLoading && cooldowns.length === 0 && <p className="muted">Nobody is currently on a rejoin cooldown.</p>}
         {cooldowns.length > 0 && (
           <div className="log-card-list">
             {cooldowns.map(c => (
@@ -294,7 +266,7 @@ export default function InternalAffairs() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </Card>
+    </PageShell>
   );
 }

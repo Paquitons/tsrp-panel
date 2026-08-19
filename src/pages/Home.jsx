@@ -5,6 +5,7 @@ import { CHANGELOGS } from "../data/changelogs";
 import { colorForIndex } from "../data/changelogColors";
 import PublicNav from "../components/PublicNav";
 import { usePolling } from "../hooks/usePolling";
+import Card from "../components/primitives/Card";
 
 // "Highly active" tier -- player count, queue, and server status are all
 // exactly the kind of thing Phase 3 wants to feel live (see usePolling).
@@ -55,20 +56,20 @@ export default function Home() {
       </section>
 
       <section className="home-stats">
-        <div className="home-stat-tile">
+        <Card variant="stat">
           <span className="home-stat-label">Players</span>
           <span className="home-stat-value">
             {status ? `${status.players}/${status.maxPlayers}` : "—"}
           </span>
-        </div>
-        <div className="home-stat-tile">
+        </Card>
+        <Card variant="stat">
           <span className="home-stat-label">In Queue</span>
           <span className="home-stat-value">{status ? status.queue : "—"}</span>
-        </div>
-        <div className="home-stat-tile">
+        </Card>
+        <Card variant="stat">
           <span className="home-stat-label">Staff On Duty</span>
           <span className="home-stat-value">{status ? status.staffOnDuty : "—"}</span>
-        </div>
+        </Card>
       </section>
 
       <section className="home-updates">

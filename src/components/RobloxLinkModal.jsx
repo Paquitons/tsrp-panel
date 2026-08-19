@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { apiFetch } from "../api";
 import PortalDropdown from "./PortalDropdown";
 import AutoGrowTextarea from "./AutoGrowTextarea";
+import Modal from "./primitives/Modal";
+import Banner from "./primitives/Banner";
 
 export default function RobloxLinkModal({ discordId, currentlyLinked, onClose, onLinked }) {
   const [query, setQuery] = useState("");
@@ -74,11 +76,10 @@ export default function RobloxLinkModal({ discordId, currentlyLinked, onClose, o
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>{currentlyLinked ? "Change Roblox Account" : "Link Roblox Account"}</h2>
+    <Modal onClose={onClose} labelledBy="roblox-link-modal-title">
+        <h2 id="roblox-link-modal-title">{currentlyLinked ? "Change Roblox Account" : "Link Roblox Account"}</h2>
 
-        {error && <div className="error-banner">{error}</div>}
+        {error && <Banner>{error}</Banner>}
 
         {!profile && (
           <form onSubmit={submitLookup}>
@@ -121,7 +122,7 @@ export default function RobloxLinkModal({ discordId, currentlyLinked, onClose, o
                 </div>
                 <div className="muted">@{profile.name} &middot; ID {profile.id}</div>
                 <div className="muted">Created {new Date(profile.created).toLocaleDateString()}</div>
-                {profile.isBanned && <div className="error-banner" style={{ marginTop: 8 }}>This account is currently banned/terminated on Roblox.</div>}
+                {profile.isBanned && <Banner style={{ marginTop: 8 }}>This account is currently banned/terminated on Roblox.</Banner>}
               </div>
             </div>
 
@@ -139,12 +140,12 @@ export default function RobloxLinkModal({ discordId, currentlyLinked, onClose, o
 
         {conflicts && (
           <>
-            <div className="error-banner">
+            <Banner>
               <strong>Before you continue:</strong>
               <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
                 {conflicts.map((c, i) => <li key={i}>{c.message}</li>)}
               </ul>
-            </div>
+            </Banner>
             <div className="button-row">
               <button className="danger" type="button" disabled={submitting} onClick={() => confirmLink(true)}>
                 {submitting ? "Saving…" : "Proceed Anyway"}
@@ -153,7 +154,6 @@ export default function RobloxLinkModal({ discordId, currentlyLinked, onClose, o
             </div>
           </>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

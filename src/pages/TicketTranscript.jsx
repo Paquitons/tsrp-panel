@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { apiFetch, API_BASE } from "../api";
-import { usePolling } from "../hooks/usePolling";
+import { API_BASE } from "../api";
+import PageShell from "../components/primitives/PageShell";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 import DiscordIdentity from "../components/DiscordIdentity";
 import DiscordAvatar from "../components/DiscordAvatar";
 
@@ -127,12 +129,92 @@ function formatBytes(n) {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// Same token apiFetch attaches as an Authorization header -- passed as a
-// query param here instead, since a plain <img>/<a> tag can't set custom
-// headers (see tsrp-panel-api's routes/tickets.js requireAuthFlexible).
-function attachmentUrl(id) {
+// Fetches an attachment's bytes via a normal header-authenticated request
+// (never a ?token= query param -- that would put the session JWT in the
+// URL, server access logs, browser history, and Referer headers) and hands
+// back an object URL for either inline <img> display or a download. The
+// caller owns revoking it once done with it.
+async function fetchAttachmentBlobUrl(id) {
   const token = localStorage.getItem("tsrp_token");
-  return `${API_BASE}/tickets/attachments/${id}?token=${encodeURIComponent(token ?? "")}`;
+  const res = await fetch(`${API_BASE}/tickets/attachments/${id}`, {
+    headers: { Authorization: `Bearer ${token ?? ""}` },
+  });
+  if (!res.ok) throw new Error(`Attachment request failed with status ${res.status}`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+function ImageAttachment({ attachment }) {
+  const [url, setUrl] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+    fetchAttachmentBlobUrl(attachment.id)
+      .then(u => { if (cancelled) { URL.revokeObjectURL(u); return; } objectUrl = u; setUrl(u); })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [attachment.id]);
+
+  if (failed) {
+    return (
+      <div className="muted" style={{ fontSize: "var(--text-xs)", fontStyle: "italic" }}>
+        📎 {attachment.filename} (failed to load)
+      </div>
+    );
+  }
+  if (!url) {
+    return <div className="muted" style={{ fontSize: "var(--text-xs)" }}>Loading image…</div>;
+  }
+  return (
+    <a href={url} target="_blank" rel="noreferrer">
+      <img
+        src={url}
+        alt={attachment.filename}
+        style={{ maxWidth: 360, maxHeight: 360, borderRadius: "var(--radius-md)", display: "block", marginTop: 4 }}
+      />
+    </a>
+  );
+}
+
+function FileAttachment({ attachment }) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleClick() {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      const url = await fetchAttachmentBlobUrl(attachment.id);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = attachment.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Couldn't download this attachment.");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={downloading}
+      style={{
+        display: "inline-block", marginTop: 4, padding: "4px 10px", borderRadius: "var(--radius-full)",
+        background: "var(--surface-sunken)", border: "1px solid var(--border-subtle)", fontSize: "var(--text-xs)",
+        cursor: downloading ? "default" : "pointer",
+      }}
+    >
+      📎 {attachment.filename} {attachment.sizeBytes ? `(${formatBytes(attachment.sizeBytes)})` : ""}{downloading ? " …" : ""}
+    </button>
+  );
 }
 
 function AttachmentView({ attachment }) {
@@ -146,32 +228,7 @@ function AttachmentView({ attachment }) {
   }
 
   const isImage = (attachment.contentType || "").startsWith("image/");
-  const url = attachmentUrl(attachment.id);
-
-  if (isImage) {
-    return (
-      <a href={url} target="_blank" rel="noreferrer">
-        <img
-          src={url}
-          alt={attachment.filename}
-          style={{ maxWidth: 360, maxHeight: 360, borderRadius: "var(--radius-md)", display: "block", marginTop: 4 }}
-        />
-      </a>
-    );
-  }
-
-  return (
-    <a
-      href={url}
-      download={attachment.filename}
-      style={{
-        display: "inline-block", marginTop: 4, padding: "4px 10px", borderRadius: "var(--radius-full)",
-        background: "var(--surface-sunken)", border: "1px solid var(--border-subtle)", fontSize: "var(--text-xs)",
-      }}
-    >
-      📎 {attachment.filename} {attachment.sizeBytes ? `(${formatBytes(attachment.sizeBytes)})` : ""}
-    </a>
-  );
+  return isImage ? <ImageAttachment attachment={attachment} /> : <FileAttachment attachment={attachment} />;
 }
 
 function MessageRow({ message, mentions }) {
@@ -203,15 +260,11 @@ function MessageRow({ message, mentions }) {
 
 export default function TicketTranscript() {
   const { ticketNumber } = useParams();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  usePolling(
-    () => apiFetch(`/tickets/${ticketNumber}`).then(d => { setData(d); setError(null); }).catch(err => setError(err.message)),
-    POLL_MS,
-    [ticketNumber]
-  );
+  const query = useApiQuery(["ticket", ticketNumber], `/tickets/${ticketNumber}`, { refetchInterval: POLL_MS });
+  const data = query.data;
+  const error = query.error?.message;
 
   async function copyTranscript() {
     const text = buildTranscriptText(data.ticket, data.messages, data.mentions);
@@ -237,18 +290,16 @@ export default function TicketTranscript() {
 
   if (error && !data) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcript</h1></div>
-        <div className="error-banner">{error}</div>
-      </div>
+      <PageShell title="Ticket Transcript">
+        <Banner>{error}</Banner>
+      </PageShell>
     );
   }
   if (!data) {
     return (
-      <div className="content">
-        <div className="page-header"><h1>Ticket Transcript</h1></div>
+      <PageShell title="Ticket Transcript">
         <p className="muted">Loading…</p>
-      </div>
+      </PageShell>
     );
   }
 
@@ -266,7 +317,7 @@ export default function TicketTranscript() {
       <div className="page-header" style={{ marginTop: 12 }}>
         <h1>Ticket #{ticket.ticket_number}</h1>
       </div>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       <div className="card-grid" style={{ marginBottom: 20 }}>
         <div className="stat-tile">
           <div className="muted">Opened By</div>

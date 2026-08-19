@@ -7,6 +7,7 @@ import DiscordAvatar from "../components/DiscordAvatar";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { usePolling } from "../hooks/usePolling";
 import { changeClass } from "../utils";
+import AsyncBoundary from "../components/primitives/AsyncBoundary";
 
 const NEWS_POLL_MS = 15_000; // "moderately active" -- new items land unpredictably, not continuously
 
@@ -100,15 +101,20 @@ export default function EconomyNews() {
         <p className="muted">Market moves, lottery wins, and new businesses, most recent first.</p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {!news && !error && <p className="muted">Loading…</p>}
-      {news?.length === 0 && <p className="muted">No economy news yet.</p>}
-
-      {news?.length > 0 && (
+      <AsyncBoundary
+        isLoading={!news && !error}
+        isError={!!error}
+        error={error && { message: error }}
+        data={news}
+        isEmpty={n => n?.length === 0}
+        emptyMessage="No economy news yet."
+      >
+        {() => (
         <div className="roster-list">
           {news.map((item, i) => <NewsItem item={item} base={base} key={i} />)}
         </div>
-      )}
+        )}
+      </AsyncBoundary>
     </div>
   );
 }

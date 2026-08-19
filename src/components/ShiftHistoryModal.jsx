@@ -1,6 +1,8 @@
 import { useEffect, useState, Fragment } from "react";
 import { apiFetch } from "../api";
 import { formatDuration } from "../utils";
+import Modal from "./primitives/Modal";
+import Banner from "./primitives/Banner";
 
 export default function ShiftHistoryModal({ onClose }) {
   const [history, setHistory] = useState([]);
@@ -36,10 +38,9 @@ export default function ShiftHistoryModal({ onClose }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal shift-history-modal" onClick={e => e.stopPropagation()}>
+    <Modal onClose={onClose} className="shift-history-modal" labelledBy="shift-history-modal-title">
         <div className="modal-title-row">
-          <h2>Shift History</h2>
+          <h2 id="shift-history-modal-title">Shift History</h2>
           <button className="secondary small" onClick={onClose}>Close</button>
         </div>
 
@@ -74,7 +75,7 @@ export default function ShiftHistoryModal({ onClose }) {
                       <tr>
                         <td colSpan={5} className="report-row">
                           {reportLoading === s.id && <p className="muted">Loading report…</p>}
-                          {report?.error && <div className="error-banner">{report.error}</div>}
+                          {report?.error && <Banner>{report.error}</Banner>}
                           {report && !report.error && (
                             <div className="shift-report">
                               <div className="report-stats">
@@ -112,7 +113,6 @@ export default function ShiftHistoryModal({ onClose }) {
           </table>
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

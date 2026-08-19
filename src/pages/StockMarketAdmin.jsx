@@ -7,6 +7,8 @@ import StockPriceChart from "../components/StockPriceChart";
 import Tabs from "../components/Tabs";
 import { usePolling } from "../hooks/usePolling";
 import { toDateTimeInputValue, parseDateTimeInput, CHART_RANGE_OPTIONS } from "../utils";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 // Read-only list/log views poll at the "moderately active" tier; anything
 // with editable fields (stock detail, market controls) deliberately does
@@ -94,7 +96,7 @@ function OverviewTab() {
 
   usePolling(() => apiFetch("/super-admin/stock-market/overview").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
-  if (error) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
+  if (error) return <Banner style={{ marginTop: 16 }}>{error}</Banner>;
   if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
 
   return (
@@ -166,7 +168,7 @@ function StocksTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
       <div className="form-inline-row" style={{ marginTop: 16 }}>
         <div className="form-inline-field">
           <label>Search</label>
@@ -222,10 +224,9 @@ function CreateStockModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>List a New Stock</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="list-stock-modal-title">
+        <h2 id="list-stock-modal-title">List a New Stock</h2>
+        {error && <Banner>{error}</Banner>}
         <form onSubmit={submit}>
           <div className="form-row">
             <div><label>Ticker</label><input required value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} placeholder="e.g. TSRP" maxLength={8} /></div>
@@ -246,8 +247,7 @@ function CreateStockModal({ onClose, onCreated }) {
             <button className="secondary" type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -340,8 +340,8 @@ function StockDetail({ ticker, onBack }) {
       <div className="button-row" style={{ marginTop: 16 }}>
         <button className="secondary" type="button" onClick={onBack}>&larr; Back to Stocks</button>
       </div>
-      {error && <div className="error-banner">{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       <div className="modal-title-row" style={{ marginTop: 12 }}>
         <h2 style={{ margin: 0 }}>{stock.name} ({stock.ticker})</h2>
@@ -595,8 +595,8 @@ function MarketControlsTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       <h2 style={{ marginTop: 16 }}>Trading Status</h2>
       <p className="muted card-subtitle">Pausing blocks buy/sell but prices keep moving. Freezing the market stops price movement too -- a harder stop.</p>
@@ -715,8 +715,8 @@ function MarketEventsTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
         Draft a market event, adjust it, then approve it to apply immediately -- or schedule it for later and let it apply on its own.
@@ -839,7 +839,7 @@ function EditMarketEventForm({ event, onSaved, onCancel }) {
 
   return (
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border-subtle)" }}>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       <label>Headline</label>
       <input value={headline} onChange={e => setHeadline(e.target.value)} />
       <label>Body (optional)</label>
@@ -898,10 +898,9 @@ function CreateMarketEventModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>New Market Event</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="market-event-modal-title">
+        <h2 id="market-event-modal-title">New Market Event</h2>
+        {error && <Banner>{error}</Banner>}
         <form onSubmit={submit}>
           <label>Type</label>
           <CustomSelect
@@ -931,8 +930,7 @@ function CreateMarketEventModal({ onClose, onCreated }) {
             <button className="secondary" type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -977,7 +975,7 @@ function NewsTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
       <h2 style={{ marginTop: 16 }}>Post News</h2>
       <form onSubmit={post}>
         <label>Headline</label>
@@ -1123,8 +1121,8 @@ function InsightsTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
         A private DM digest -- trending stocks, buy/sell reads, risk, unusual activity, upcoming events, your
@@ -1202,7 +1200,7 @@ function AuditLogTab() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>Every Super Admin stock market action -- who, what, and when.</p>
       <div className="loa-list">
         {log.map(entry => (

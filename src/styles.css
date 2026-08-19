@@ -797,6 +797,28 @@ button.small {
   animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
+.warning-banner {
+  background: rgba(249, 168, 37, 0.1);
+  border: 1px solid rgba(249, 168, 37, 0.3);
+  color: #ffd27f;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-base);
+  animation: fadeInUp var(--duration-base) var(--ease-out) both;
+}
+
+.info-banner {
+  background: rgba(100, 181, 246, 0.1);
+  border: 1px solid rgba(100, 181, 246, 0.28);
+  color: #a8d4fb;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-base);
+  animation: fadeInUp var(--duration-base) var(--ease-out) both;
+}
+
 /* ---------- Badges ---------- */
 
 .badge {
@@ -1233,14 +1255,19 @@ code {
   gap: var(--space-3);
 }
 
-.log-card {
+/* .log-card and .loa-card were byte-identical rules -- one styles a
+   punishment log entry, the other an LOA request, but visually they're
+   the same "sunken row" card. Merged into one shared declaration instead
+   of two copies that would silently drift the next time either one gets
+   tweaked. */
+.log-card, .loa-card {
   background: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
   transition: border-color var(--duration-fast) var(--ease);
 }
-.log-card:hover { border-color: var(--border-default); }
+.log-card:hover, .loa-card:hover { border-color: var(--border-default); }
 
 .log-card-issuer-row {
   display: flex;
@@ -1733,7 +1760,13 @@ code {
   transition: background var(--duration-fast) var(--ease);
 }
 .custom-select-option:hover { background: var(--surface-hover); }
-.custom-select-option.selected { color: var(--accent); font-weight: 600; }
+/* Was ".custom-select-option.selected" -- a class the component never
+   actually applied (it renders "custom-select-option-selected" as one
+   hyphenated class), so this rule was dead CSS that never matched
+   anything. Fixed to the real class name, and added the keyboard-nav
+   highlighted state alongside it. */
+.custom-select-option-selected { color: var(--accent); font-weight: 600; }
+.custom-select-option-highlighted { background: var(--surface-hover); }
 
 /* ---------- Dashboard hero (greeting + shift status + quick actions) ---------- */
 
@@ -2018,15 +2051,6 @@ code {
   flex-direction: column;
   gap: var(--space-3);
 }
-
-.loa-card {
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  transition: border-color var(--duration-fast) var(--ease);
-}
-.loa-card:hover { border-color: var(--border-default); }
 
 .loa-card-top {
   display: flex;

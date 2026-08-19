@@ -4,6 +4,8 @@ import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdenti
 import AccountPicker from "../components/AccountPicker";
 import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 const CURRENCY = "$";
 const GAMES = ["slots", "roulette", "blackjack"];
@@ -92,7 +94,7 @@ export function EconomyOverviewPanel() {
     }
   }
 
-  if (error && !data) return <div className="error-banner">{error}</div>;
+  if (error && !data) return <Banner>{error}</Banner>;
   if (!data) return <p className="muted">Loading…</p>;
 
   const capPercent = data.moneySupplyCap ? Math.min(100, (data.totalMoneySupply / data.moneySupplyCap) * 100) : 0;
@@ -100,8 +102,8 @@ export function EconomyOverviewPanel() {
   return (
     <>
       <p className="muted card-subtitle">A live snapshot of the entire economy, updating automatically.</p>
-      {error && <div className="error-banner">{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
       <div className="card-grid">
         <div className="stat-tile"><div className="muted">Total Money Supply</div><div className="verification-identity-name">{fmt(data.totalMoneySupply)}</div></div>
         <div className="stat-tile"><div className="muted">In Player Wallets</div><div className="verification-identity-name">{fmt(data.totalWalletBalance)} <span className="muted">({data.walletCount})</span></div></div>
@@ -212,7 +214,7 @@ export function EconomyConfigPanel() {
     }
   }
 
-  if (error && !config) return <div className="error-banner">{error}</div>;
+  if (error && !config) return <Banner>{error}</Banner>;
   if (!config) return <p className="muted">Loading…</p>;
 
   const SYSTEM_LABELS = {
@@ -238,8 +240,8 @@ export function EconomyConfigPanel() {
   return (
     <>
       <p className="muted card-subtitle">Applies live -- no restart needed. Every player faucet and sink can be paused independently for testing or an event.</p>
-      {error && <div className="error-banner">{error}</div>}
-      {saved && <div className="success-banner">Saved.</div>}
+      {error && <Banner>{error}</Banner>}
+      {saved && <Banner variant="success">Saved.</Banner>}
 
       <h2>Taxes</h2>
       <p className="muted card-subtitle">
@@ -738,7 +740,7 @@ export function BusinessesPanel() {
   return (
     <>
       <p className="muted card-subtitle">Every player-owned business -- edit any setting, treasury, or ownership directly.</p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       <form onSubmit={search} className="form-inline-row">
         <div className="form-inline-field">
@@ -830,10 +832,9 @@ function BusinessEditModal({ business, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>Edit {business.name}</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="edit-business-modal-title">
+        <h2 id="edit-business-modal-title">Edit {business.name}</h2>
+        {error && <Banner>{error}</Banner>}
 
         <label>Name</label>
         <input value={name} onChange={e => setName(e.target.value)} />
@@ -894,8 +895,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
           <button className="primary" type="button" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save Changes"}</button>
           <button className="secondary" type="button" onClick={onClose}>Cancel</button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -920,7 +920,7 @@ export function CasinoControlsPanel() {
   return (
     <>
       <p className="muted card-subtitle">Configure payout rates, win probabilities, bet limits, and profiles per game -- changes apply on the next bet, no restart.</p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       {casinos.length === 0 && !error && <p className="muted">No casinos exist yet.</p>}
 
       {casinos.length > 0 && (
@@ -1046,8 +1046,8 @@ function CasinoGameControls({ casino }) {
         ))}
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
-      {saved && <div className="success-banner">Saved.</div>}
+      {error && <Banner>{error}</Banner>}
+      {saved && <Banner variant="success">Saved.</Banner>}
 
       <h2 style={{ marginTop: 12 }}>{GAME_LABELS[game]} Settings</h2>
       <label className="checkbox-label">
@@ -1166,7 +1166,7 @@ function CasinoChipOverview({ casino }) {
   return (
     <>
       <h2 style={{ marginTop: 20 }}>Membership &amp; Chips</h2>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       {stats && (
         <div className="card-grid">
           <div className="stat-tile"><div className="muted">Active Members</div><div className="verification-identity-name">{stats.activeMembers}</div></div>
@@ -1241,7 +1241,7 @@ export function LotteryPanel() {
   return (
     <>
       <p className="muted card-subtitle">One lottery runs at a time. Players buy in with `/lottery buy`; drawing pays the whole pot to one weighted-random winner.</p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       {data.current ? (
         <>
@@ -1326,7 +1326,7 @@ export function StorefrontsPanel() {
         temporary boosts, cooldown/jail reduction) are set by the owner in Discord via /storefrontowner --
         this view covers name, price, stock, and category.
       </p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
       {storefronts.length === 0 && !error && <p className="muted">No storefronts exist yet.</p>}
 
       {storefronts.length > 0 && (
@@ -1411,7 +1411,7 @@ function StorefrontProductsEditor({ storefront }) {
 
   return (
     <>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       <h2 style={{ marginTop: 16 }}>Products</h2>
       <form onSubmit={addProduct} className="form-row">
@@ -1579,7 +1579,7 @@ export function GovernmentCatalogPanel() {
         and what it actually does are all set by you. A storefront owner can only pick how many units to buy and
         what to resell them for; they can never change the description or the effect.
       </p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       {editingId === null && (
         <button className="secondary" type="button" onClick={startCreate} style={{ marginBottom: 16 }}>+ New Catalog Item</button>
@@ -1757,8 +1757,8 @@ export function DebtPanel() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       {leaderboard && (
         <div className="card-grid" style={{ marginTop: 16 }}>
@@ -1916,8 +1916,8 @@ export function InsurancePanel() {
 
   return (
     <>
-      {error && <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       <h2 style={{ marginTop: 16 }}>Insurance Companies</h2>
       <div className="loa-list">
@@ -2051,7 +2051,7 @@ export function TaxDashboardPanel() {
   usePolling(loadLedger, ADMIN_POLL_MS, [categoryFilter, payerTypeFilter]);
   usePolling(() => apiFetch("/super-admin/tax-dashboard/spending").then(setSpending).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
-  if (error && !overview) return <div className="error-banner">{error}</div>;
+  if (error && !overview) return <Banner>{error}</Banner>;
   if (!overview) return <p className="muted">Loading…</p>;
 
   return (
@@ -2060,7 +2060,7 @@ export function TaxDashboardPanel() {
         Every tax charge anywhere in the economy, and every dollar spent back out of the Government Treasury --
         the two halves of the closed loop. Rates live on the Economy Config tab.
       </p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       <div className="card-grid">
         <div className="stat-tile"><div className="muted">Total Collected (all time)</div><div className="verification-identity-name">{fmt(overview.totalCollected)}</div></div>

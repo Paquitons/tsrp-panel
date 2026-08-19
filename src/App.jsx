@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
@@ -12,7 +13,6 @@ import EconomyNews from "./pages/EconomyNews";
 import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
-import SuperAdmin from "./pages/SuperAdmin";
 import Changelog from "./pages/Changelog";
 import ChangelogEntry from "./pages/ChangelogEntry";
 import Verification from "./pages/Verification";
@@ -20,6 +20,15 @@ import Tickets from "./pages/Tickets";
 import TicketTranscript from "./pages/TicketTranscript";
 import NotFound, { PublicNotFound } from "./pages/NotFound";
 import Strike3Prompt from "./components/Strike3Prompt";
+
+// SuperAdmin statically imports SuperAdminEconomy.jsx (2,151 lines) and
+// StockMarketAdmin.jsx (1,224 lines) -- together the single largest chunk
+// of code in the whole panel, previously bundled into the same JS file
+// every visitor downloads on first load (including the public homepage,
+// before Vite's route-based splitting even applies) even though only one
+// hardcoded account can ever reach this route. React.lazy here means it's
+// its own chunk, fetched only when a super admin actually navigates here.
+const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
 
 // Every page that exists both at its normal public URL AND, for a
 // logged-in staff member who followed "Back to Website," at the same
@@ -78,7 +87,16 @@ function AppShell() {
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
-        {user?.isSuperAdmin && <Route path="/super-admin" element={<SuperAdmin />} />}
+        {user?.isSuperAdmin && (
+          <Route
+            path="/super-admin"
+            element={
+              <Suspense fallback={<div className="content"><p className="muted">Loading…</p></div>}>
+                <SuperAdmin />
+              </Suspense>
+            }
+          />
+        )}
         {user?.isSupportStaff && <Route path="/tickets" element={<Tickets />} />}
         {user?.isSupportStaff && <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />}
         <Route path="*" element={<NotFound />} />

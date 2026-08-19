@@ -116,7 +116,7 @@ export default function SuperAdmin() {
     return (
       <div className="content">
         <div className="page-header"><h1>Super Admin</h1></div>
-        <div className="error-banner">This page isn't available to your account.</div>
+        <Banner>This page isn't available to your account.</Banner>
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function SuperAdmin() {
         <p className="muted">Unrestricted testing and administration tools. Changes here bypass all normal validation.</p>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       <div className="card">
         <Tabs tabs={TABS} active={tab} onChange={setTab} />
@@ -342,7 +342,7 @@ function EconomyControl() {
   return (
     <>
       <p className="muted card-subtitle">Give, take, or set anyone's balance directly. No limits or checks.</p>
-      {error && <div className="error-banner">{error}</div>}
+      {error && <Banner>{error}</Banner>}
 
       <AccountPicker key={pickerKey} onSelect={selectTarget} placeholder="Search by username, nickname, or Discord ID" />
 

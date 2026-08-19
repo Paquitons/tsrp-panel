@@ -5,6 +5,8 @@ import { timeAgo } from "../utils";
 import DiscordAvatar from "./DiscordAvatar";
 import CustomSelect from "./CustomSelect";
 import AutoGrowTextarea from "./AutoGrowTextarea";
+import Modal from "./primitives/Modal";
+import Banner from "./primitives/Banner";
 
 const POLL_MS = 3_000;
 
@@ -107,10 +109,9 @@ export default function Strike3Prompt() {
   }
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal strike3-modal">
+    <Modal onClose={() => {}} closeOnBackdropClick={false} closeOnEscape={false} className="strike3-modal" labelledBy="strike3-modal-title">
         <div className="modal-title-row">
-          <h2>🚨 3rd Strike — Action Required</h2>
+          <h2 id="strike3-modal-title">🚨 3rd Strike — Action Required</h2>
         </div>
         <p className="modal-subheading">
           {prompts.length > 1
@@ -143,7 +144,7 @@ export default function Strike3Prompt() {
           ))}
         </div>
 
-        {error && <div className="error-banner">{error}</div>}
+        {error && <Banner>{error}</Banner>}
 
         {view === "summary" && (
           <div className="button-row">
@@ -180,7 +181,6 @@ export default function Strike3Prompt() {
             </div>
           </form>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

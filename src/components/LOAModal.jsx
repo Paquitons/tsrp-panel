@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { parseLocalDateInput, todayLocalISO } from "../utils";
-import DiscordAvatar from "./DiscordAvatar";
 import DiscordIdentity from "./DiscordIdentity";
 import AutoGrowTextarea from "./AutoGrowTextarea";
+import Modal from "./primitives/Modal";
+import Banner from "./primitives/Banner";
 
 export default function LOAModal({ onClose }) {
   const { user } = useAuth();
@@ -80,10 +81,9 @@ export default function LOAModal({ onClose }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal loa-modal" onClick={e => e.stopPropagation()}>
+    <Modal onClose={onClose} className="loa-modal" labelledBy="loa-modal-title">
         <div className="modal-title-row">
-          <h2>Leave of Absence</h2>
+          <h2 id="loa-modal-title">Leave of Absence</h2>
           <button className="secondary small" onClick={onClose}>Close</button>
         </div>
 
@@ -107,7 +107,7 @@ export default function LOAModal({ onClose }) {
           </div>
         ) : (
           <>
-            {submitError && <div className="error-banner">{submitError}</div>}
+            {submitError && <Banner>{submitError}</Banner>}
             <form onSubmit={submit} className="loa-form">
               <div className="loa-date-row">
                 <div>
@@ -173,7 +173,6 @@ export default function LOAModal({ onClose }) {
             ))}
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }
