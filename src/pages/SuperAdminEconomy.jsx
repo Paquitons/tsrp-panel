@@ -4,6 +4,8 @@ import DiscordIdentity, { discordDisplayName } from "../components/DiscordIdenti
 import AccountPicker from "../components/AccountPicker";
 import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 const CURRENCY = "$";
 const GAMES = ["slots", "roulette", "blackjack"];
@@ -830,10 +832,9 @@ function BusinessEditModal({ business, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>Edit {business.name}</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="edit-business-modal-title">
+        <h2 id="edit-business-modal-title">Edit {business.name}</h2>
+        {error && <Banner>{error}</Banner>}
 
         <label>Name</label>
         <input value={name} onChange={e => setName(e.target.value)} />
@@ -894,8 +895,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
           <button className="primary" type="button" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save Changes"}</button>
           <button className="secondary" type="button" onClick={onClose}>Cancel</button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

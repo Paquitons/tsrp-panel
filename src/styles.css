@@ -797,6 +797,28 @@ button.small {
   animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
+.warning-banner {
+  background: rgba(249, 168, 37, 0.1);
+  border: 1px solid rgba(249, 168, 37, 0.3);
+  color: #ffd27f;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-base);
+  animation: fadeInUp var(--duration-base) var(--ease-out) both;
+}
+
+.info-banner {
+  background: rgba(100, 181, 246, 0.1);
+  border: 1px solid rgba(100, 181, 246, 0.28);
+  color: #a8d4fb;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-base);
+  animation: fadeInUp var(--duration-base) var(--ease-out) both;
+}
+
 /* ---------- Badges ---------- */
 
 .badge {

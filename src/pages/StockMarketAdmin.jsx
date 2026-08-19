@@ -7,6 +7,8 @@ import StockPriceChart from "../components/StockPriceChart";
 import Tabs from "../components/Tabs";
 import { usePolling } from "../hooks/usePolling";
 import { toDateTimeInputValue, parseDateTimeInput, CHART_RANGE_OPTIONS } from "../utils";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 // Read-only list/log views poll at the "moderately active" tier; anything
 // with editable fields (stock detail, market controls) deliberately does
@@ -222,10 +224,9 @@ function CreateStockModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>List a New Stock</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="list-stock-modal-title">
+        <h2 id="list-stock-modal-title">List a New Stock</h2>
+        {error && <Banner>{error}</Banner>}
         <form onSubmit={submit}>
           <div className="form-row">
             <div><label>Ticker</label><input required value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} placeholder="e.g. TSRP" maxLength={8} /></div>
@@ -246,8 +247,7 @@ function CreateStockModal({ onClose, onCreated }) {
             <button className="secondary" type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -898,10 +898,9 @@ function CreateMarketEventModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>New Market Event</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="market-event-modal-title">
+        <h2 id="market-event-modal-title">New Market Event</h2>
+        {error && <Banner>{error}</Banner>}
         <form onSubmit={submit}>
           <label>Type</label>
           <CustomSelect
@@ -931,8 +930,7 @@ function CreateMarketEventModal({ onClose, onCreated }) {
             <button className="secondary" type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

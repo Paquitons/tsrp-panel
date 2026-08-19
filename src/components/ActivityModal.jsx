@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { formatClockTime } from "../utils";
 import PortalDropdown from "./PortalDropdown";
+import Modal from "./primitives/Modal";
 
 // Colored dot per event type -- no glyph/emoji, just a simple indicator.
 const TYPE_META = {
@@ -85,10 +86,9 @@ export default function ActivityModal({ onClose, onUserClick }) {
     });
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal activity-modal" onClick={e => e.stopPropagation()}>
+    <Modal onClose={onClose} className="activity-modal" labelledBy="activity-modal-title">
         <div className="modal-title-row">
-          <h2>What's Happening In-Game?</h2>
+          <h2 id="activity-modal-title">What's Happening In-Game?</h2>
           <button className="secondary small" onClick={onClose}>Close</button>
         </div>
 
@@ -129,7 +129,6 @@ export default function ActivityModal({ onClose, onUserClick }) {
             })
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

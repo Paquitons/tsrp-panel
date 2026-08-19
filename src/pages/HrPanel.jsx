@@ -11,6 +11,8 @@ import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
 import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 function groupByDiscordId(strikes) {
   const map = new Map();
@@ -741,10 +743,9 @@ export default function HrPanel() {
       </div>
 
       {extendingDiscordId && (
-        <div className="modal-backdrop" onClick={() => setExtendingDiscordId(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Change Return Date</h2>
-            {extendError && <div className="error-banner">{extendError}</div>}
+        <Modal onClose={() => setExtendingDiscordId(null)} labelledBy="extend-loa-modal-title">
+            <h2 id="extend-loa-modal-title">Change Return Date</h2>
+            {extendError && <Banner>{extendError}</Banner>}
             <form onSubmit={submitExtend}>
               <label>New Return Date</label>
               <input type="date" required min={todayLocalISO()} value={extendDate} onChange={e => setExtendDate(e.target.value)} />
@@ -753,8 +754,7 @@ export default function HrPanel() {
                 <button className="secondary" type="button" onClick={() => setExtendingDiscordId(null)}>Cancel</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

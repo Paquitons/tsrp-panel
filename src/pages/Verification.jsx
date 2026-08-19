@@ -7,6 +7,8 @@ import AccountPicker from "../components/AccountPicker";
 import Avatar from "../components/Avatar";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import RobloxLinkModal from "../components/RobloxLinkModal";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 
 const ACTION_LABELS = { link: "Linked", change: "Changed", unlink: "Unlinked" };
 
@@ -30,10 +32,9 @@ function UnlinkModal({ discordId, onClose, onUnlinked }) {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>Unlink Roblox Account</h2>
-        {error && <div className="error-banner">{error}</div>}
+    <Modal onClose={onClose} labelledBy="unlink-modal-title">
+        <h2 id="unlink-modal-title">Unlink Roblox Account</h2>
+        {error && <Banner>{error}</Banner>}
         <form onSubmit={submit}>
           <label>Reason (optional)</label>
           <AutoGrowTextarea value={reason} onChange={e => setReason(e.target.value)} />
@@ -42,8 +43,7 @@ function UnlinkModal({ discordId, onClose, onUnlinked }) {
             <button className="secondary" type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -14,6 +14,8 @@ import LOAModal from "../components/LOAModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
+import Modal from "../components/primitives/Modal";
+import Banner from "../components/primitives/Banner";
 import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon, MegaphoneIcon } from "../components/icons";
 import { useLiveEvents } from "../hooks/useLiveEvents";
 
@@ -693,9 +695,8 @@ export default function Dashboard() {
 
       {/* ---------- Player Lookup quick-search modal ---------- */}
       {lookupModalOpen && (
-        <div className="modal-backdrop" onClick={() => setLookupModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Player Lookup</h2>
+        <Modal onClose={() => setLookupModalOpen(false)} labelledBy="lookup-modal-title">
+            <h2 id="lookup-modal-title">Player Lookup</h2>
             <form onSubmit={openLookup}>
               <label>Roblox Username</label>
               <div className="autocomplete-wrap">
@@ -724,21 +725,18 @@ export default function Dashboard() {
                 <button className="secondary" type="button" onClick={() => setLookupModalOpen(false)}>Close</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* ---------- User profile popup ---------- */}
       {selectedUser && (
-        <div className="modal-backdrop" onClick={() => setSelectedUser(null)}>
-          <div className="modal user-panel-modal" onClick={e => e.stopPropagation()}>
+        <Modal onClose={() => setSelectedUser(null)} className="user-panel-modal">
             {selectedUser.type === "discord" ? (
               <UserPanel discordId={selectedUser.value} onClose={() => setSelectedUser(null)} />
             ) : (
               <UserPanel username={selectedUser.value} onClose={() => setSelectedUser(null)} />
             )}
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* ---------- Shift History modal ---------- */}
@@ -764,10 +762,9 @@ export default function Dashboard() {
 
       {/* ---------- Request Staff modal (IA+) ---------- */}
       {staffRequestModalOpen && (
-        <div className="modal-backdrop" onClick={() => setStaffRequestModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Request Staff</h2>
-            {staffRequestStatus && <div className={staffRequestStatus.ok ? "success-banner" : "error-banner"}>{staffRequestStatus.message}</div>}
+        <Modal onClose={() => setStaffRequestModalOpen(false)} labelledBy="staff-request-modal-title">
+            <h2 id="staff-request-modal-title">Request Staff</h2>
+            {staffRequestStatus && <Banner variant={staffRequestStatus.ok ? "success" : "error"}>{staffRequestStatus.message}</Banner>}
             <form onSubmit={sendStaffRequest}>
               <label>Reason (optional)</label>
               <AutoGrowTextarea value={staffRequestReason} onChange={e => setStaffRequestReason(e.target.value)} placeholder="Why do you need backup?" />
@@ -776,16 +773,14 @@ export default function Dashboard() {
                 <button className="secondary" type="button" onClick={() => setStaffRequestModalOpen(false)}>Close</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* ---------- Run Command modal (Management+) ---------- */}
       {commandModalOpen && (
-        <div className="modal-backdrop" onClick={() => setCommandModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Run Command</h2>
-            {commandStatus && <div className={commandStatus.ok ? "success-banner" : "error-banner"}>{commandStatus.message}</div>}
+        <Modal onClose={() => setCommandModalOpen(false)} labelledBy="command-modal-title">
+            <h2 id="command-modal-title">Run Command</h2>
+            {commandStatus && <Banner variant={commandStatus.ok ? "success" : "error"}>{commandStatus.message}</Banner>}
             <form onSubmit={sendCommand}>
               <label>ER:LC Command</label>
               <input required autoFocus value={commandText} onChange={e => setCommandText(e.target.value)} placeholder=":h Server message" />
@@ -794,15 +789,13 @@ export default function Dashboard() {
                 <button className="secondary" type="button" onClick={() => setCommandModalOpen(false)}>Close</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {resignModalOpen && (
-        <div className="modal-backdrop" onClick={() => setResignModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Resign</h2>
-            {resignError && <div className="error-banner">{resignError}</div>}
+        <Modal onClose={() => setResignModalOpen(false)} labelledBy="resign-modal-title">
+            <h2 id="resign-modal-title">Resign</h2>
+            {resignError && <Banner>{resignError}</Banner>}
             <form onSubmit={submitOwnResignation}>
               <label>Notes (optional)</label>
               <AutoGrowTextarea value={resignNotes} onChange={e => setResignNotes(e.target.value)} />
@@ -813,8 +806,7 @@ export default function Dashboard() {
                 <button className="secondary" type="button" onClick={() => setResignModalOpen(false)}>Cancel</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* ---------- Activity modal ---------- */}

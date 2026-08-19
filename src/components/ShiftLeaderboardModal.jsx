@@ -1,5 +1,6 @@
 import DiscordAvatar from "./DiscordAvatar";
 import { formatDuration, dutyFlagLabel } from "../utils";
+import Modal from "./primitives/Modal";
 
 export default function ShiftLeaderboardModal({
   leaderboard,
@@ -13,10 +14,9 @@ export default function ShiftLeaderboardModal({
   onClose,
 }) {
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal leaderboard-modal" onClick={e => e.stopPropagation()}>
+    <Modal onClose={onClose} className="leaderboard-modal" labelledBy="leaderboard-modal-title">
         <div className="modal-title-row">
-          <h2>Shift Leaderboard</h2>
+          <h2 id="leaderboard-modal-title">Shift Leaderboard</h2>
           <div className="button-row">
             {canManage && (
               <button className="secondary small" onClick={onReset} disabled={resetting}>
@@ -69,7 +69,6 @@ export default function ShiftLeaderboardModal({
             })}
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }
