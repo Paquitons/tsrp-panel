@@ -39,11 +39,26 @@ export default function PortalDropdown({ anchorRef, open, onClose, align = "left
     }
     function onReposition() { computeCoords(); }
 
+    // Previously had no keyboard dismissal at all -- children vary widely
+    // (autocomplete lists, filter checkboxes, custom pickers) so this
+    // doesn't impose a fixed listbox/option ARIA pattern the way
+    // CustomSelect does, but every one of those content types shares the
+    // same expectation that Escape closes a floating panel without
+    // requiring a mouse click elsewhere.
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose?.();
+      }
+    }
+
     document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("scroll", onReposition, true);
     window.addEventListener("resize", onReposition);
     return () => {
       document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("scroll", onReposition, true);
       window.removeEventListener("resize", onReposition);
     };

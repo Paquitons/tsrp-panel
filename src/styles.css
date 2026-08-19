@@ -1755,7 +1755,13 @@ code {
   transition: background var(--duration-fast) var(--ease);
 }
 .custom-select-option:hover { background: var(--surface-hover); }
-.custom-select-option.selected { color: var(--accent); font-weight: 600; }
+/* Was ".custom-select-option.selected" -- a class the component never
+   actually applied (it renders "custom-select-option-selected" as one
+   hyphenated class), so this rule was dead CSS that never matched
+   anything. Fixed to the real class name, and added the keyboard-nav
+   highlighted state alongside it. */
+.custom-select-option-selected { color: var(--accent); font-weight: 600; }
+.custom-select-option-highlighted { background: var(--surface-hover); }
 
 /* ---------- Dashboard hero (greeting + shift status + quick actions) ---------- */
 
