@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { apiFetch } from "../api";
-import { usePolling } from "../hooks/usePolling";
 import { formatDuration } from "../utils";
 import DiscordIdentity from "../components/DiscordIdentity";
 import Tabs from "../components/Tabs";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 
 const ADMIN_POLL_MS = 15_000;
 
@@ -24,17 +24,13 @@ function matchesFilter(member, filter) {
 }
 
 export default function HrQuotas() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
 
-  usePolling(
-    () => apiFetch("/shifts/quotas").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)),
-    ADMIN_POLL_MS
-  );
+  const query = useApiQuery(["shifts", "quotas"], "/shifts/quotas", { refetchInterval: ADMIN_POLL_MS });
+  const data = query.data;
 
-  if (error) return <div className="error-banner" style={{ marginTop: 16 }}>{error}</div>;
-  if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (query.isError) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
+  if (query.isLoading) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
 
   const quotaSeconds = data.quotaHours * 3600;
   const filtered = data.staff.filter(m => matchesFilter(m, filter));

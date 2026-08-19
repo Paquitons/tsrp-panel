@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { apiFetch } from "../api";
 import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
+import Banner from "../components/primitives/Banner";
+import { useApiQuery } from "../hooks/useApiQuery";
 import { expiresLabel } from "../utils";
 
 function fmtTime(ts) {
@@ -17,28 +19,16 @@ function statusClass(status) {
 
 export default function HrAutomodOffenses() {
   const search = useStaffSearch("/automod-offenses/members", "members");
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [selectedDiscordId, setSelectedDiscordId] = useState(null);
+  const [actionError, setActionError] = useState(null);
   const [notice, setNotice] = useState(null);
 
-  async function loadOffenses(discordId) {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await apiFetch(`/automod-offenses/${discordId}`);
-      setData(result);
-    } catch (err) {
-      setError(err.message);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const query = useApiQuery(["automod-offenses", selectedDiscordId], selectedDiscordId && `/automod-offenses/${selectedDiscordId}`);
+  const data = query.data;
 
   function pickMember(member) {
     search.pick(member);
-    loadOffenses(member.discordId);
+    setSelectedDiscordId(member.discordId);
   }
 
   function flash(msg) {
@@ -48,26 +38,26 @@ export default function HrAutomodOffenses() {
 
   async function clearOne(id) {
     const reason = prompt("Reason for clearing this offense (optional):") ?? undefined;
-    setError(null);
+    setActionError(null);
     try {
       await apiFetch(`/automod-offenses/${id}/clear`, { method: "POST", body: { reason } });
       flash("Offense cleared.");
-      loadOffenses(data.discordId);
+      query.refetch();
     } catch (err) {
-      setError(err.message);
+      setActionError(err.message);
     }
   }
 
   async function clearAll() {
     if (!confirm(`Clear every active offense for this user? Their escalation level will reset to zero.`)) return;
     const reason = prompt("Reason for clearing all offenses (optional):") ?? undefined;
-    setError(null);
+    setActionError(null);
     try {
       const { cleared } = await apiFetch(`/automod-offenses/${data.discordId}/clear-all`, { method: "POST", body: { reason } });
       flash(`Cleared ${cleared} offense(s).`);
-      loadOffenses(data.discordId);
+      query.refetch();
     } catch (err) {
-      setError(err.message);
+      setActionError(err.message);
     }
   }
 
@@ -96,9 +86,9 @@ export default function HrAutomodOffenses() {
         </PortalDropdown>
       </div>
 
-      {loading && <p className="muted">Loading…</p>}
-      {error && <div className="error-banner">{error}</div>}
-      {notice && <div className="success-banner">{notice}</div>}
+      {query.isLoading && <p className="muted">Loading…</p>}
+      {(query.isError || actionError) && <Banner>{actionError ?? query.error?.message}</Banner>}
+      {notice && <Banner variant="success">{notice}</Banner>}
 
       {data && (
         <>
