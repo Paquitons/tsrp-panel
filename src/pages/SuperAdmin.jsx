@@ -11,6 +11,7 @@ import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../uti
 import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel, TaxDashboardPanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
+import DiscordModSecurity from "./DiscordModSecurity";
 
 const TABS = [
   { value: "shifts", label: "Shift Editor" },
@@ -27,6 +28,7 @@ const TABS = [
   { value: "debt", label: "Debt & Loans" },
   { value: "insurance", label: "Insurance" },
   { value: "botsettings", label: "Bot Settings" },
+  { value: "modsecurity", label: "Discord Mod Security" },
 ];
 
 /**
@@ -172,6 +174,7 @@ export default function SuperAdmin() {
         {tab === "debt" && <DebtPanel />}
         {tab === "insurance" && <InsurancePanel />}
         {tab === "botsettings" && <BotSettings />}
+        {tab === "modsecurity" && <DiscordModSecurity />}
       </div>
 
       {tab === "shifts" && search.target && (
