@@ -417,12 +417,22 @@ export default function Dashboard() {
   // below also writes to, so every render site below is unaffected by
   // which path most recently updated it.
   const { snapshot: liveSnapshot } = useLiveEvents(true);
+  // When the bot's ERLC poller is down (or its reading has gone stale),
+  // the backend deliberately keeps serving the LAST GOOD snapshot rather
+  // than blanking the dashboard. That's the right call, but presenting a
+  // frozen player list as if it were live is not -- staff were reading a
+  // stale roster with nothing on screen to suggest it. `current` says
+  // which of the two this is; see erlcCache.isCurrent() on the backend.
+  const [liveDataCurrent, setLiveDataCurrent] = useState(true);
   useEffect(() => {
     if (!liveSnapshot) return;
     setOnDutyStaff(liveSnapshot.onDuty);
     setEvents(liveSnapshot.activity.events);
     setLivePlayers(liveSnapshot.players.players);
     setQueueCount(liveSnapshot.players.queueCount);
+    // Older backends don't send this field; treat its absence as current
+    // so a version skew can't show a permanent false warning.
+    setLiveDataCurrent(liveSnapshot.players.current !== false);
   }, [liveSnapshot]);
 
   async function fetchLivePlayers() {
@@ -567,6 +577,11 @@ export default function Dashboard() {
         <div className="dashboard-col">
           <div className="card">
             <h2>{playersCount} Player{playersCount === 1 ? "" : "s"} In-Game</h2>
+            {!liveDataCurrent && (
+              <p className="muted card-subtitle" style={{ color: "var(--warning, #f2932a)" }}>
+                ⚠️ Showing the last known reading — live in-game data isn't updating right now.
+              </p>
+            )}
             {queueCount > 0 && <p className="muted card-subtitle">{queueCount} in queue</p>}
             <CustomSelect value={teamFilter} onChange={setTeamFilter} options={teamOptions} />
             <input placeholder="Search players" value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} style={{ marginTop: 10 }} />
