@@ -22,6 +22,9 @@ import { API_BASE } from "../api";
  * hook is an optimization for latency, never the only path to correct
  * state.
  */
+const INITIAL_RECONNECT_DELAY_MS = 3_000;
+const MAX_RECONNECT_DELAY_MS = 30_000;
+
 export function useLiveEvents(enabled = true) {
   const [snapshot, setSnapshot] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -37,6 +40,7 @@ export function useLiveEvents(enabled = true) {
     let cancelled = false;
     let reconnectTimer = null;
     let abortController = null;
+    let reconnectDelayMs = INITIAL_RECONNECT_DELAY_MS;
 
     async function connectOnce() {
       const token = localStorage.getItem("tsrp_token");
@@ -48,9 +52,30 @@ export function useLiveEvents(enabled = true) {
           headers: { Authorization: `Bearer ${token}` },
           signal: abortController.signal,
         });
+
+        // A 401 is not a network problem and must not be retried. The
+        // backend has decided this session is no longer valid (expired,
+        // or actively revoked because the user was terminated, demoted or
+        // blacklisted). Retrying it on the 3s reconnect timer meant a
+        // revoked tab hammered /events/stream twenty times a minute
+        // forever -- burning the shared rate limit for everyone else on
+        // that IP -- while never telling the user anything, because this
+        // hook swallowed the failure instead of raising it. Routing it
+        // through the same session-invalid event every other API call
+        // uses (see api.js) logs the tab out, exactly as a 401 on any
+        // ordinary request already does.
+        if (res.status === 401) {
+          localStorage.removeItem("tsrp_token");
+          window.dispatchEvent(new CustomEvent("tsrp:session-invalid", {
+            detail: { message: "Your session has ended. Please log in again." },
+          }));
+          return; // deliberately no reconnect
+        }
+
         if (!res.ok || !res.body) throw new Error(`Live event stream failed with status ${res.status}`);
 
         setConnected(true);
+        reconnectDelayMs = INITIAL_RECONNECT_DELAY_MS; // a good connection clears any accumulated backoff
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
@@ -61,11 +86,28 @@ export function useLiveEvents(enabled = true) {
           buffer += decoder.decode(value, { stream: true });
 
           // SSE frames are separated by a blank line; each frame here is
-          // either a "data: {...}" line or a ": heartbeat" comment line.
+          // a "data: {...}" line, an "event: unauthorized" frame, or a
+          // ": heartbeat" comment line.
           let frameEnd;
           while ((frameEnd = buffer.indexOf("\n\n")) !== -1) {
             const frame = buffer.slice(0, frameEnd);
             buffer = buffer.slice(frameEnd + 2);
+
+            // The backend re-checks the session periodically on an
+            // already-open stream and sends this before closing, so a
+            // session revoked mid-stream logs the tab out immediately
+            // instead of looking like an ordinary disconnect (which
+            // would just reconnect, get a 401, and land above anyway --
+            // this is simply the direct path). See routes/events.js.
+            if (frame.startsWith("event: unauthorized")) {
+              localStorage.removeItem("tsrp_token");
+              window.dispatchEvent(new CustomEvent("tsrp:session-invalid", {
+                detail: { message: "Your session has been revoked. Please log in again." },
+              }));
+              cancelled = true;
+              return;
+            }
+
             if (!frame.startsWith("data:")) continue; // heartbeat comment or blank -- nothing to parse
             try {
               setSnapshot(JSON.parse(frame.slice(5).trim()));
@@ -80,7 +122,14 @@ export function useLiveEvents(enabled = true) {
       }
 
       if (!cancelled) {
-        reconnectTimer = setTimeout(connectOnce, 3_000);
+        // Backoff, not a fixed 3s. A backend that is down (restarting,
+        // deploying) would otherwise be hit by every open tab every 3
+        // seconds for as long as the outage lasts -- which is exactly
+        // when it can least afford the load, and is enough on its own to
+        // trip the API's rate limiter and slow its recovery. Capped so a
+        // long outage still reconnects promptly once it ends.
+        reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
+        reconnectTimer = setTimeout(connectOnce, reconnectDelayMs);
       }
     }
 
