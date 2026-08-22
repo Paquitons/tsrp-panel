@@ -341,12 +341,19 @@ html, body, #root {
   text-overflow: ellipsis;
 }
 
-.sidebar-profile-tier {
+.sidebar-profile-title {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--text-faint);
+  /* Rank titles run up to "Internal Affairs Supervisor" -- longer than the
+     five short permission-tier words this used to show, so it needs the
+     same truncation the username above it already has rather than pushing
+     the logout button out of the sidebar. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-logout-btn {

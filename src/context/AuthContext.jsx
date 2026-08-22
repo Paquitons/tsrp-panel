@@ -37,11 +37,25 @@ export function AuthProvider({ children }) {
   // focus) re-hits /auth/me even if the user hasn't clicked anything. A
   // revoked session fails this the same way it'd fail any other request,
   // which triggers the 401 handler above.
+  //
+  // It also refreshes the user object from the response, which is what
+  // keeps the sidebar's rank title current: the backend resolves that
+  // title from the person's live Discord role rather than the copy frozen
+  // into their session token, so a promotion shows up here within a
+  // minute instead of waiting for them to log in again. The response is
+  // otherwise identical to the token's own claims -- rank, tier and the
+  // permission flags all still come from the signed token, so this can't
+  // silently widen or narrow what the UI offers.
   useEffect(() => {
     async function revalidate() {
       if (!userRef.current) return;
       try {
-        await apiFetch("/auth/me");
+        const { user: fresh } = await apiFetch("/auth/me");
+        // Only re-set when something actually changed -- an unconditional
+        // setUser every 60s (and on every tab focus) would hand a brand
+        // new object to every consumer of this context and re-render the
+        // whole app for nothing.
+        if (fresh && !sameUser(userRef.current, fresh)) setUser(fresh);
       } catch {
         // api.js's 401 handler already cleared the token and dispatched
         // tsrp:session-invalid -- nothing else to do here.
@@ -106,6 +120,19 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+/**
+ * Shallow value-compare of two /auth/me payloads. Both are flat objects of
+ * primitives except allowedPunishmentTypes, which is an array of strings --
+ * hence the JSON compare rather than ===.
+ */
+function sameUser(a, b) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const k of keys) {
+    if (JSON.stringify(a[k]) !== JSON.stringify(b[k])) return false;
+  }
+  return true;
 }
 
 function describeError(code) {

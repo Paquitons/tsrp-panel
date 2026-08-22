@@ -84,7 +84,14 @@ export default function Nav() {
           <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatarHash} size={36} className="sidebar-profile-avatar" />
           <div className="sidebar-profile-info">
             <span className="sidebar-profile-name">{user?.username}</span>
-            {user?.tier && <span className="sidebar-profile-tier">{user.tier}</span>}
+            {/* Their rank TITLE ("Senior Supervisor", "Directors Board"),
+                not user.tier -- the tier is the coarse permission bucket
+                used by the nav gates above, and only has five values for
+                the whole 29-rank hierarchy, so it read "admin" for every
+                Supervisor and "director" for Founder alike. The backend
+                resolves this from the user's live Discord role on every
+                /auth/me, so a promotion shows up here without a re-login. */}
+            {user?.title && <span className="sidebar-profile-title" title={user.title}>{user.title}</span>}
           </div>
           <button className="sidebar-logout-btn" onClick={logout} aria-label="Log out" title="Log out">
             <LogoutIcon />
