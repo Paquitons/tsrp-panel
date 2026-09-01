@@ -1,5 +1,85 @@
 [
   {
+    "version": "1.16.0",
+    "slug": "v1-16-0",
+    "title": "TSRP Update",
+    "date": "2026-09-01",
+    "summary": "A rewritten rulebook, a new Supervisory tier alongside a rebuilt Internal Affairs, suggestions with opt-in discussion threads, standardized RP permission logs, and automatic detection of Discord moderation abuse.",
+    "sections": [
+      {
+        "heading": "Rewritten Rulebook",
+        "items": [
+          "The Discord and in game rules have been rewritten from scratch and split into five sections you can read one at a time, instead of two walls of text.",
+          "New Use of Force rule: force has to stay proportional to the threat, and once someone has surrendered, been disarmed or stopped resisting, you stop. Being justified in starting force does not justify what comes after it.",
+          "Fear RP now says plainly that a weapon pointed or drawn at you at close range is a real threat whether or not it is fired, and that a self defense claim needs a clip showing what you were defending against.",
+          "New Audio rule: no music, soundboards or recordings through in game voice or proximity chat at any time. The rule covers broadcasting audio at all, not what the audio contains, so audio that breaks no Roblox rule is still not allowed.",
+          "New Permission Based Roleplay rule: anything needing special setup, staff involvement, or that changes the server for people who did not choose to join in has to be approved before it starts, not after something goes wrong.",
+          "Law enforcement now has to give clear, audible commands and a real chance to respond before detaining anyone or using force, and cannot replace arrest procedure with punishment of their own once a suspect is subdued.",
+          "New Reporting and Evidence section: RDM, VDM and use of force reports are decided on video evidence where it exists. A kill log shows that someone died, not who started it or whether they had already surrendered.",
+          "Punishments are now written down for every rule, and the Discord ladder is published: warning, 10 minute timeout, 1 hour timeout, kick, ban, resetting after 24 hours. Staff decide how severe something is, not whether a rule applies to you.",
+          "Sections were added for pings, tickets, accounts and impersonation, and six rules that were advice, duplicates or unenforceable were removed."
+        ]
+      },
+      {
+        "heading": "Staff Structure",
+        "items": [
+          "A new Supervisory tier sits between Internal Affairs and Administration: Head Supervisor, Senior Supervisor, Junior Supervisor and Trial Supervisor.",
+          "Internal Affairs has been rebuilt as a separate tier above Supervisory, with IA Supervisor, IA Officer, Internal Affairs and Trial Internal Affairs.",
+          "Every promotion, leave request and removal already on record was migrated to the new names, so old entries still read as the rank they actually meant.",
+          "Internal Affairs now handles Staff Complaint tickets and can see and work them. Management keeps the access it had, and no other staff gained any."
+        ]
+      },
+      {
+        "heading": "New: Suggestions",
+        "items": [
+          "/suggest posts your suggestion to the suggestions channel with your name and avatar, and vote reactions for support or opposition.",
+          "Each suggestion carries a Discuss button. A thread is only created when somebody actually presses it, so the channel does not fill with empty threads nobody used.",
+          "Pressing Discuss a second time takes you to the existing thread rather than starting another one, and the discussion stays readable after a suggestion is approved or rejected.",
+          "A per person cooldown stops one member flooding the channel, and it never blocks anybody else from posting."
+        ]
+      },
+      {
+        "heading": "New: RP Permission Logs",
+        "items": [
+          "/rplog replaces the format staff typed by hand. It records the Roblox username, the type of roleplay, where it is happening, how long it lasts, and any notes.",
+          "The staff member is filled in automatically from whoever runs the command, shown by name and avatar.",
+          "RP type is chosen from a list rather than typed, so the same roleplay stops being logged five different ways. Typing roadworks, road work or pothole all find the same standard type.",
+          "Location is now its own field instead of being written into the RP type, so it can actually be read at a glance.",
+          "An accidental double submission is refused instead of posting the same permission twice."
+        ]
+      },
+      {
+        "heading": "New: Discord Mod Security",
+        "items": [
+          "The bot now watches Discord's own audit log for bursts of moderation activity by one person: mass bans, kicks, timeouts, role changes and channel deletions.",
+          "Leadership is alerted immediately, and a serious enough flag can automatically pull the flagged moderator's own moderator roles. That is always reversible with /modsecurity restore, and is never a kick or a ban.",
+          "Founders and Co-Founders are never flagged, since they are usually the ones legitimately carrying out the largest actions. Their actions are still recorded, so the audit trail stays complete.",
+          "A single ordinary ban or kick never triggers anything. Every rule needs a burst."
+        ]
+      },
+      {
+        "heading": "Departments and Community",
+        "items": [
+          "Department of Homeland Security has been rewritten with its new divisions and a working invite.",
+          "The Coast Guard invite was expired and has been replaced with one that works.",
+          "SWAT has a new invite, and the Department of Justice has been removed.",
+          "Washoe County has been added to the Civilian Hub."
+        ]
+      },
+      {
+        "heading": "Fixes and Reliability",
+        "items": [
+          "Fixed the long standing problem where /startup could post the same announcement more than once and ping @everyone repeatedly. The root cause was a network retry recreating a message the bot had already sent, and it affected announcement cards as well as pings.",
+          "Fixed a race where two copies of the bot could both start up and each begin posting, doubling everything.",
+          "Fixed promotions and demotions silently removing a staff blacklist, which is applied when abuse is confirmed and is what stops that person logging into the panel.",
+          "Fixed info panels reposting themselves after a brief connection problem, leaving duplicates behind.",
+          "The panel sidebar now shows your actual rank, such as Senior Supervisor or Directors Board, instead of a broad permission label that read Admin for every supervisor and Director for everyone above management. It updates on its own when your rank changes.",
+          "Roughly twenty background timers could previously overlap with themselves if one run took longer than its interval. They now wait for the previous run to finish."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.15.1",
     "slug": "v1-15-1",
     "title": "TSRP Update",
