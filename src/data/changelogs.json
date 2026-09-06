@@ -1,5 +1,24 @@
 [
   {
+    "version": "1.17.1",
+    "slug": "v1-17-1",
+    "title": "TSRP Update",
+    "date": "2026-09-06",
+    "summary": "The Department Hub and Civilian Hub no longer fall back to their old built-in content when the bot restarts.",
+    "sections": [
+      {
+        "heading": "Fixed: the hubs reverted after a restart",
+        "items": [
+          "Changes to the Department Hub and Civilian Hub were always being saved properly. The bot was reading them a moment too late at startup, so it posted both hubs from the content built into it and left them that way until the next change was made.",
+          "That is why making any change appeared to fix it. The change was not repairing anything; it was triggering the update that startup had skipped.",
+          "The saved content is now loaded before the hubs are posted, and the bot no longer depends on the order those two things happen in, so this cannot come back the same way.",
+          "Nothing needs to be redone. The first restart after this update posts both hubs from the saved content.",
+          "If the database is briefly unreachable, the hubs keep showing the last known good content rather than reverting to what the bot shipped with. Anything that has never been changed still shows its normal content, as before."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.17.0",
     "slug": "v1-17-0",
     "title": "TSRP Update",
