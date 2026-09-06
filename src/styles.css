@@ -3170,23 +3170,35 @@ code {
 .dc-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dc-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--text-xs); color: var(--text-secondary); }
 .dc-field input, .dc-field textarea { width: 100%; font-family: inherit; }
-.dc-field textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+.dc-field textarea { resize: vertical; height: 200px; max-height: 340px; overflow-y: auto; line-height: 1.5; }
 .dc-count { align-self: flex-end; color: var(--text-faint); font-size: var(--text-xs); }
 .dc-active { margin-top: -2px; }
 .dc-note { font-size: var(--text-xs); }
 .dc-add { margin-top: 12px; }
 
 .dc-preview {
-  border: 1px dashed var(--border-default); border-radius: var(--radius-sm);
-  padding: 12px; background: var(--surface-hover);
+  border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  background: var(--surface-hover); overflow: hidden;
 }
 .dc-preview-label {
   font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 8px;
+  color: var(--text-faint); padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
 }
-.dc-preview-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.dc-preview-blurb { white-space: pre-wrap; font-size: var(--text-sm); margin: 0 0 8px; line-height: 1.5; }
-.dc-preview-link { font-size: var(--text-xs); word-break: break-all; }
+/* Capped and scrollable: an advertisement can run to 1800 characters, and
+   letting it push the Save button off the screen makes the editor unusable
+   on a phone. */
+.dc-preview-body {
+  padding: 12px; max-height: 260px; overflow-y: auto;
+  font-size: var(--text-sm); line-height: 1.5; word-break: break-word;
+}
+.dc-preview-body p { margin: 0; }
+.dc-preview-body p + p { margin-top: 2px; }
+.dc-preview-gap { height: .6em; }
+.dc-preview-body code {
+  background: var(--surface); border: 1px solid var(--border-subtle);
+  border-radius: 3px; padding: 0 4px; font-size: .92em;
+}
 
 .dc-audit-scroll { overflow-x: auto; margin-top: 16px; }
 .dc-audit { width: 100%; border-collapse: collapse; font-size: var(--text-xs); }

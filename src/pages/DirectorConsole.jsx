@@ -32,20 +32,48 @@ function fmt(ts) {
   return ts ? new Date(ts).toLocaleString() : "";
 }
 
-/** Renders an entry the way the hub dropdown and its message will read. */
-function Preview({ entry }) {
-  const whitelisted = entry.description === "Whitelisted";
+// Discord's inline markdown, rendered as elements rather than HTML so
+// staff-authored text can never inject markup. Covers what these blurbs
+// actually use: bold, italic, underline and inline code.
+const MD = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|`[^`\n]+`)/g;
+
+function renderInline(text, keyPrefix) {
+  return text.split(MD).filter(Boolean).map((tok, i) => {
+    const k = `${keyPrefix}-${i}`;
+    if (tok.startsWith("**") && tok.endsWith("**")) return <strong key={k}>{tok.slice(2, -2)}</strong>;
+    if (tok.startsWith("__") && tok.endsWith("__")) return <u key={k}>{tok.slice(2, -2)}</u>;
+    if (tok.startsWith("*") && tok.endsWith("*")) return <em key={k}>{tok.slice(1, -1)}</em>;
+    if (tok.startsWith("`") && tok.endsWith("`")) return <code key={k}>{tok.slice(1, -1)}</code>;
+    return <span key={k}>{tok}</span>;
+  });
+}
+
+/**
+ * Builds the exact message the bot posts, then renders it.
+ *
+ * The string here is the same one handleCivilianHubSelect and
+ * handleDepartmentHubSelect build in infoPanels.js: the bolded name, the
+ * advertisement, a blank line, then the invite. Anything the preview adds
+ * that Discord would not show, or leaves out that it would, makes the
+ * preview a lie, so it mirrors that shape rather than inventing a layout.
+ */
+function discordMessage({ label, blurb, link }, hub) {
+  const noun = hub === "department" ? "department" : "career";
+  const body = blurb ? `${blurb}\n\n` : "";
+  const tail = link || `No invite link has been set for this ${noun} yet. Contact a Director.`;
+  return `**${label || "Untitled"}**\n${body}${tail}`;
+}
+
+function Preview({ entry, hub }) {
+  const text = discordMessage(entry, hub);
   return (
     <div className="dc-preview">
-      <div className="dc-preview-label">Preview</div>
-      <div className="dc-preview-row">
-        <strong>{entry.label || "Untitled"}</strong>
-        {whitelisted && <span className="dc-tag">WL</span>}
+      <div className="dc-preview-label">Discord preview</div>
+      <div className="dc-preview-body">
+        {text.split("\n").map((line, i) =>
+          line ? <p key={i}>{renderInline(line, i)}</p> : <p key={i} className="dc-preview-gap" />
+        )}
       </div>
-      <p className="dc-preview-blurb">{entry.blurb || "No description yet."}</p>
-      {entry.link
-        ? <code className="dc-preview-link">{entry.link}</code>
-        : <span className="muted dc-preview-link">No invite link set. The hub will say so instead of showing a broken link.</span>}
     </div>
   );
 }
@@ -134,7 +162,7 @@ function EntryEditor({ hub, entry, onSaved, onError }) {
             Shown in the hub
           </label>
 
-          <Preview entry={{ ...draft }} />
+          <Preview entry={draft} hub={hub} />
 
           <div className="button-row">
             <button className="primary" type="button" disabled={!dirty || busy} onClick={save}>
@@ -195,7 +223,7 @@ function AddEntry({ hub, onSaved, onError }) {
           <textarea rows={8} value={draft.blurb} onChange={e => set("blurb", e.target.value)} maxLength={1800} />
           <span className="dc-count">{draft.blurb.length} / 1800</span>
         </label>
-        <Preview entry={draft} />
+        <Preview entry={draft} hub={hub} />
         <div className="button-row">
           <button className="primary" type="button" disabled={busy || !draft.entryKey || !draft.label || !draft.blurb} onClick={create}>
             {busy ? "Adding…" : "Add to hub"}
@@ -235,9 +263,7 @@ function HubSection({ hub, onNotice, onError }) {
   return (
     <>
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
-        These entries are what the {hub === "department" ? "Department" : "Civilian"} Hub shows in Discord. Saving a
-        change updates the hub itself, and the bot re-renders the panel within about fifteen seconds. Hiding an entry
-        keeps its content so it can be brought back later.
+        Live content for the {hub === "department" ? "Department" : "Civilian"} Hub in Discord.
       </p>
 
       <div className="dc-list">
