@@ -3195,6 +3195,10 @@ code {
 .dc-preview-body p { margin: 0; }
 .dc-preview-body p + p { margin-top: 2px; }
 .dc-preview-gap { height: .6em; }
+.dc-preview-li { display: flex; gap: 8px; padding-left: 4px; }
+.dc-preview-dot { color: var(--text-faint); flex-shrink: 0; }
+.dc-preview-body a { color: var(--accent, #5b8def); text-decoration: none; word-break: break-all; }
+.dc-preview-body a:hover { text-decoration: underline; }
 .dc-preview-body code {
   background: var(--surface); border: 1px solid var(--border-subtle);
   border-radius: 3px; padding: 0 4px; font-size: .92em;

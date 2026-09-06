@@ -32,20 +32,39 @@ function fmt(ts) {
   return ts ? new Date(ts).toLocaleString() : "";
 }
 
-// Discord's inline markdown, rendered as elements rather than HTML so
+// Discord's markdown, rendered as elements rather than HTML so
 // staff-authored text can never inject markup. Covers what these blurbs
-// actually use: bold, italic, underline and inline code.
-const MD = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|`[^`\n]+`)/g;
+// actually use: bold, italic, underline, inline code, bullet lists and
+// bare invite links.
+const MD = /(https?:\/\/[^\s]+|\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|`[^`\n]+`)/g;
+const BULLET = /^\s*[-*]\s+(.*)$/;
 
 function renderInline(text, keyPrefix) {
   return text.split(MD).filter(Boolean).map((tok, i) => {
     const k = `${keyPrefix}-${i}`;
+    if (/^https?:\/\//.test(tok)) {
+      return <a key={k} href={tok} target="_blank" rel="noreferrer noopener">{tok}</a>;
+    }
     if (tok.startsWith("**") && tok.endsWith("**")) return <strong key={k}>{tok.slice(2, -2)}</strong>;
     if (tok.startsWith("__") && tok.endsWith("__")) return <u key={k}>{tok.slice(2, -2)}</u>;
     if (tok.startsWith("*") && tok.endsWith("*")) return <em key={k}>{tok.slice(1, -1)}</em>;
     if (tok.startsWith("`") && tok.endsWith("`")) return <code key={k}>{tok.slice(1, -1)}</code>;
     return <span key={k}>{tok}</span>;
   });
+}
+
+function renderLine(line, i) {
+  if (!line) return <p key={i} className="dc-preview-gap" />;
+  const bullet = line.match(BULLET);
+  if (bullet) {
+    return (
+      <p key={i} className="dc-preview-li">
+        <span className="dc-preview-dot">&bull;</span>
+        <span>{renderInline(bullet[1], i)}</span>
+      </p>
+    );
+  }
+  return <p key={i}>{renderInline(line, i)}</p>;
 }
 
 /**
@@ -70,9 +89,7 @@ function Preview({ entry, hub }) {
     <div className="dc-preview">
       <div className="dc-preview-label">Discord preview</div>
       <div className="dc-preview-body">
-        {text.split("\n").map((line, i) =>
-          line ? <p key={i}>{renderInline(line, i)}</p> : <p key={i} className="dc-preview-gap" />
-        )}
+        {text.split("\n").map(renderLine)}
       </div>
     </div>
   );
