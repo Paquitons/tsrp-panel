@@ -1,5 +1,31 @@
 [
   {
+    "version": "1.16.1",
+    "slug": "v1-16-1",
+    "title": "TSRP Update",
+    "date": "2026-09-06",
+    "summary": "A fix for /rplog, which was invisible to the staff it was built for, and much faster ticket transcripts.",
+    "sections": [
+      {
+        "heading": "Fixed: /rplog was hidden from staff",
+        "items": [
+          "The command was registered in a way that told Discord to only show it to people with the Manage Messages permission. Ordinary staff roles do not carry that permission, so /rplog never appeared in the command list for the people it exists for, with no error to explain why.",
+          "It is now visible to everyone, and who may actually log a permission is decided by the bot as it always was: the staff roles set for it, or the whole staff team.",
+          "Nothing about how a log is written, validated or posted has changed."
+        ]
+      },
+      {
+        "heading": "Faster Ticket Transcripts",
+        "items": [
+          "Opening a transcript looked up every person named in it against Discord before showing anything, so a long ticket could sit loading for ten seconds or more, and reopening it later cost the same wait again.",
+          "Names are now remembered between views, including for people who have left the server, which is what made older transcripts the slowest of all. A 1,500 message transcript that took roughly fifteen seconds now opens in well under a second.",
+          "Long transcripts appear immediately and fill in as you read rather than waiting for the whole ticket to be built, and images load as you scroll to them.",
+          "Everything a transcript shows is unchanged: mentions, avatars, timestamps, attachments and the copy and download buttons all work exactly as before."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.16.0",
     "slug": "v1-16-0",
     "title": "TSRP Update",
