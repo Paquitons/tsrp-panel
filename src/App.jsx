@@ -29,6 +29,7 @@ import Strike3Prompt from "./components/Strike3Prompt";
 // hardcoded account can ever reach this route. React.lazy here means it's
 // its own chunk, fetched only when a super admin actually navigates here.
 const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
+const DirectorConsole = lazy(() => import("./pages/DirectorConsole"));
 
 // Every page that exists both at its normal public URL AND, for a
 // logged-in staff member who followed "Back to Website," at the same
@@ -87,6 +88,16 @@ function AppShell() {
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
+        {user?.isDirectorOrAbove && (
+          <Route
+            path="/director"
+            element={
+              <Suspense fallback={<div className="content"><p className="muted">Loading…</p></div>}>
+                <DirectorConsole />
+              </Suspense>
+            }
+          />
+        )}
         {user?.isSuperAdmin && (
           <Route
             path="/super-admin"
