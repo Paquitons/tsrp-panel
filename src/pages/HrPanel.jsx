@@ -645,10 +645,12 @@ export default function HrPanel() {
 
         <div className="dashboard-col">
           <div className="card">
-            <h2>Active Fast Pass Trials ({fastPassTrials.length})</h2>
-            <p className="muted card-subtitle">Every Fast Pass hire starts a 7-day trial, tracked automatically from /fastpass.</p>
+            <h2>Fast Pass ({fastPassTrials.length})</h2>
+            <p className="muted card-subtitle">
+              /fastpass approves an applicant into training. Passing them with /passtraining onboards them and starts the 7-day trial from that moment.
+            </p>
             {fastPassTrials.length === 0 ? (
-              <p className="muted">Nobody is currently on a Fast Pass trial.</p>
+              <p className="muted">Nobody is currently awaiting training or on a Fast Pass trial.</p>
             ) : (
               <div className="loa-list">
                 {fastPassTrials.map(t => (
@@ -665,13 +667,24 @@ export default function HrPanel() {
                           showId={false}
                         />
                       </span>
-                      <span className={t.effectiveStatus === "active" ? "loa-status-approved" : "muted"}>
-                        {t.effectiveStatus === "active" ? expiresLabel(t.expires_at) : "expired"}
-                      </span>
+                      {t.awaitingTraining ? (
+                        <span className="loa-status-pending">Awaiting training</span>
+                      ) : (
+                        <span className={t.effectiveStatus === "active" ? "loa-status-approved" : "muted"}>
+                          {t.effectiveStatus === "active" ? expiresLabel(t.expires_at) : "expired"}
+                        </span>
+                      )}
                     </div>
                     <div className="muted" style={{ marginBottom: 4 }}>
-                      Issued {new Date(t.issued_at).toLocaleDateString()} by{" "}
+                      Approved {new Date(t.issued_at).toLocaleDateString()} by{" "}
                       {t.issuer_nickname || t.issuer_username || "Unknown Member"}
+                    </div>
+                    <div className="muted" style={{ marginBottom: 4, fontSize: "var(--text-xs)" }}>
+                      {t.awaitingTraining
+                        ? `Waiting since ${new Date(t.awaiting_training_since).toLocaleDateString()}. Their trial starts when a trainer passes them.`
+                        : t.training_passed_at
+                          ? `Passed training ${new Date(t.training_passed_at).toLocaleDateString()}, trial running since then.`
+                          : "Trial running."}
                     </div>
                   </div>
                 ))}
