@@ -1,5 +1,40 @@
 [
   {
+    "version": "1.17.0",
+    "slug": "v1-17-0",
+    "title": "TSRP Update",
+    "date": "2026-09-06",
+    "summary": "Fast Pass applicants now complete training before their trial starts, and the whole handover happens on its own.",
+    "sections": [
+      {
+        "heading": "Fast Pass Now Runs Through Training",
+        "items": [
+          "/fastpass gives the applicant the Awaiting Training role and records them as awaiting training. They are not staff yet: no staff roles, no nickname change, and no trial clock running.",
+          "A trainer then runs /passtraining exactly as they would for any other trainee. That is what makes them a Junior Moderator and starts the 7-day trial, timed from when they passed rather than from when they were approved.",
+          "Nobody has to run anything in between, and trainers do not need to know or check whether someone came in through Fast Pass. The bot works that out and adds the trial details to the result card and the welcome message on its own.",
+          "The approval date and the training date are both kept, so it is always clear how long someone waited between the two.",
+          "Running /fastpass on the same person twice just reports that they are already awaiting training, and when since."
+        ]
+      },
+      {
+        "heading": "Failing, Leaving and Everything Else",
+        "items": [
+          "Failing training changes nothing about the Fast Pass. They keep the role and the approval, so passing them on a second attempt starts the trial then. The result card says so, so the trainer knows.",
+          "If someone leaves the server, is terminated, or otherwise stops being eligible while waiting for training, their Fast Pass closes itself and the Awaiting Training role is taken back. Nothing to clean up by hand.",
+          "Nobody still waiting on training can be sent a trial decision, since their trial has not started."
+        ]
+      },
+      {
+        "heading": "In the Panel",
+        "items": [
+          "The HR Panel's Fast Pass list now shows both stages. Somebody approved on Monday and trained on Thursday is on the list for those three days, marked as awaiting training, instead of disappearing until their trial begins.",
+          "A running trial now also shows the date they passed training, next to when the trial ends.",
+          "Discord and the panel are reading the same record, so they cannot disagree about what stage somebody is at."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.16.1",
     "slug": "v1-16-1",
     "title": "TSRP Update",
