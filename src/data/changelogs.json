@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.17.2",
+    "slug": "v1-17-2",
+    "title": "TSRP Update",
+    "date": "2026-09-06",
+    "summary": "Typing in a pop-up window on the staff panel works again.",
+    "sections": [
+      {
+        "heading": "Fixed: typing in panel pop-ups",
+        "items": [
+          "Expanding \"What's Happening In-Game?\" and typing in its search box did nothing. Anything typed was dropped straight away.",
+          "The same thing affected every pop-up window on the panel, and was worst on the Dashboard because it updates constantly in the background.",
+          "Typing, backspace and searching all work normally again."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.17.1",
     "slug": "v1-17-1",
     "title": "TSRP Update",
