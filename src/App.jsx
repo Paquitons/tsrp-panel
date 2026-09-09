@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboards from "./pages/Leaderboards";
 import Roster from "./pages/Roster";
+import Permissions from "./pages/Permissions";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Economy from "./pages/Economy";
@@ -92,6 +93,7 @@ function AppShell() {
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
+        {user?.isManagementOrAbove && <Route path="/permissions" element={<Permissions />} />}
         {user?.isDirectorOrAbove && (
           <Route
             path="/director"

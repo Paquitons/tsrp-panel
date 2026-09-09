@@ -3279,3 +3279,56 @@ code {
   color: var(--text-faint);
   font-size: var(--text-sm);
 }
+
+/* ==================================================================
+   In-Game Permissions
+   A findings list, not a dashboard: severity is carried by a stripe and
+   a tag rather than by a colour on every surface, so the critical rows
+   are the ones the eye lands on.
+   ================================================================== */
+.perm-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 4px; }
+
+.perm-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+.perm-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+.perm-critical { border-left-color: var(--danger); }
+.perm-warning  { border-left-color: var(--warning); }
+.perm-notice   { border-left-color: var(--border-default); }
+
+.perm-who { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.perm-roblox { font-weight: 600; font-size: var(--text-sm); word-break: break-word; }
+.perm-nolink { font-size: var(--text-xs); font-style: italic; }
+
+.perm-what { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: var(--text-xs); }
+.perm-levels strong { color: var(--text-primary); }
+.perm-rank { text-transform: capitalize; }
+.perm-detail { word-break: break-word; }
+
+.perm-meta { display: flex; align-items: center; gap: 10px; font-size: var(--text-xs); white-space: nowrap; }
+
+.perm-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  width: fit-content;
+}
+.perm-tag-critical { color: var(--danger); border-color: var(--danger); }
+.perm-tag-warning  { color: var(--warning); border-color: var(--warning); }
+
+@media (max-width: 720px) {
+  .perm-row { grid-template-columns: 1fr; gap: 8px; }
+  .perm-meta { justify-content: space-between; }
+}
