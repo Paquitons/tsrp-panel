@@ -1,40 +1,39 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import Banner from "./primitives/Banner";
 
 // ==================================================================
-// "Is this you?"
+// The identity gate.
 //
-// Sits between logging in and the panel. It asks one question, shows
-// the Roblox account currently attached to the staff profile, and takes
-// one of two answers.
+// Two questions, and which one somebody gets depends on whether Roblox
+// has ever proved their account.
 //
-// Yes is a confirmation, not proof, and it is worth having anyway: it is
-// how somebody notices their link has been changed underneath them. No
-// sends them to Roblox, which is the only thing that actually proves an
-// account, and the only thing that unlocks in-game power.
+//   Never verified   They sign in with Roblox. They are not shown an
+//                    account and not asked to confirm one, because
+//                    nothing about them has been proved yet and asking
+//                    somebody to vouch for a guess teaches them to click
+//                    yes.
+//   Verified         "Is this you?", showing the account Roblox proved,
+//                    once per login. Yes carries on. No takes their
+//                    access away and sends them to Roblox.
 //
-// The gate never blocks on its own failure. If the check cannot run, the
-// panel opens: locking every staff member out because a lookup timed out
-// would be a worse outcome than a session going unconfirmed for an hour.
-// The same goes for anything the server does not mark `required` -- it is
-// asked, it can be put off, and it never bars the door.
+// Nothing here decides anything. The server recomputes the same answer on
+// every protected request and refuses with a 403 if it disagrees, so this
+// component is how somebody is told what to do, not what stops them. That
+// is also why it fails closed: if the check cannot run, the panel is not
+// opened on the assumption that it would probably have been fine, because
+// the API would refuse every request behind it anyway.
 // ==================================================================
 
 const OUTCOMES = {
   ok:        { variant: "success", text: "Your Roblox account has been verified." },
   changed:   { variant: "success", text: "Verified. The Roblox account on your staff profile has been updated." },
+  partial:   { variant: "warning", text: "Verified, but your Discord nickname and roles could not be updated. Tell an administrator." },
   cancelled: { variant: "warning", text: "You cancelled the Roblox sign in, so nothing changed." },
   expired:   { variant: "warning", text: "That verification link expired. Please try again." },
-  conflict:  { variant: "error",   text: "That Roblox account is already verified to another staff member. Nothing was changed. Speak to management." },
+  conflict:  { variant: "error",   text: "That Roblox account is already linked to another staff member. Nothing was changed. Speak to management." },
   failed:    { variant: "error",   text: "Roblox could not confirm that sign in. Please try again." },
 };
-
-// Putting off an optional prompt lasts the browser session, so a reload or
-// a second tab does not ask again.
-const SNOOZE_KEY = "tsrp.identity.snoozed";
-const readSnooze = () => { try { return sessionStorage.getItem(SNOOZE_KEY) === "1"; } catch { return false; } };
-const writeSnooze = () => { try { sessionStorage.setItem(SNOOZE_KEY, "1"); } catch { /* private mode */ } };
 
 /** Reads and clears ?verify=... left by the callback redirect. */
 function useVerifyOutcome() {
@@ -69,50 +68,84 @@ function Account({ account }) {
 
 export default function IdentityGate({ children }) {
   const [state, setState] = useState(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [snoozed, setSnoozed] = useState(readSnooze);
   const outcome = useVerifyOutcome();
 
+  const load = useCallback(async () => {
+    setLoadFailed(false);
+    try {
+      setState(await apiFetch("/identity/me"));
+    } catch {
+      // Fail closed. Every protected route is behind the same check
+      // server side, so opening the panel here would only produce a panel
+      // whose every request is refused.
+      setState(null);
+      setLoadFailed(true);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load, outcome]);
+
+  // Any request refused for identity reasons re-asks the question, so a
+  // tab left open through a forced re-verification catches up rather than
+  // showing a wall of failures.
   useEffect(() => {
-    let cancelled = false;
-    apiFetch("/identity/me")
-      .then(d => { if (!cancelled) setState(d); })
-      // A failed check must not lock anybody out -- open the panel.
-      .catch(() => { if (!cancelled) setState({ action: "none" }); });
-    return () => { cancelled = true; };
-  }, [outcome]);
+    const onRequired = () => load();
+    window.addEventListener("tsrp:identity-required", onRequired);
+    return () => window.removeEventListener("tsrp:identity-required", onRequired);
+  }, [load]);
 
   async function confirm() {
     setBusy(true); setError(null);
     try {
       await apiFetch("/identity/confirm", { method: "POST" });
-      setState({ action: "none" });
+      await load();
     } catch (err) {
       setError(err.message);
+    } finally {
       setBusy(false);
     }
   }
 
-  async function startVerify() {
+  async function startVerify({ reject = false } = {}) {
     setBusy(true); setError(null);
     try {
+      // Saying no takes their access away first, so cancelling at Roblox,
+      // closing the tab or coming back tomorrow all leave them here rather
+      // than back at a prompt they can answer yes to.
+      if (reject) await apiFetch("/identity/reject", { method: "POST" });
       const { authorizeUrl } = await apiFetch("/identity/verify/start", { method: "POST" });
       window.location.href = authorizeUrl;
     } catch (err) {
       setError(err.message);
       setBusy(false);
+      if (reject) load();
     }
   }
 
-  function snooze() {
-    writeSnooze();
-    setSnoozed(true);
+  if (loadFailed) {
+    return (
+      <div className="identity-gate">
+        <div className="identity-card">
+          <h1>Couldn't check your account</h1>
+          <Banner>We couldn't reach the staff panel to check your Roblox verification.</Banner>
+          <p className="muted identity-note">
+            This is usually a connection problem. If it keeps happening, tell an administrator.
+          </p>
+          <div className="identity-actions">
+            <button className="primary" onClick={load}>Try again</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // Still checking, nothing to ask, or something optional they have
-  // already put off for this session.
-  if (!state || state.action === "none" || (snoozed && !state.required)) {
+  // Still checking.
+  if (!state) return null;
+
+  if (state.allowed) {
     return (
       <>
         {outcome && <div className="identity-toast-wrap"><Banner variant={outcome.variant}>{outcome.text}</Banner></div>}
@@ -122,9 +155,6 @@ export default function IdentityGate({ children }) {
   }
 
   const mustVerify = state.action === "verify";
-  // Only a demand from management, or a link that moved away from a proven
-  // account, holds the panel shut. Everything else is a question.
-  const optional = !state.required;
 
   return (
     <div className="identity-gate">
@@ -138,7 +168,6 @@ export default function IdentityGate({ children }) {
             <p className="muted">
               {state.reason || "Your Roblox account needs to be verified before you can continue."}
             </p>
-            <Account account={state.account} />
             <p className="muted identity-note">
               You will sign in with Roblox. We never see your password, and we cannot
               act on your account.
@@ -146,14 +175,17 @@ export default function IdentityGate({ children }) {
           </>
         ) : (
           <>
-            <p className="muted">This is the Roblox account attached to your staff profile.</p>
+            <p className="muted">This is the Roblox account on your staff profile.</p>
             <Account account={state.account} />
           </>
         )}
 
         {error && <Banner>{error}</Banner>}
-        {!state.canVerify && mustVerify && (
-          <Banner variant="warning">Roblox sign in isn't set up yet, so this can't be completed. Tell an administrator.</Banner>
+        {!state.canVerify && (
+          <Banner variant="error">
+            Roblox sign in isn't set up on this server, so this can't be completed right now.
+            Tell an administrator.
+          </Banner>
         )}
 
         <div className="identity-actions">
@@ -164,22 +196,17 @@ export default function IdentityGate({ children }) {
           )}
           <button
             className={mustVerify ? "primary" : "secondary"}
-            onClick={startVerify}
+            onClick={() => startVerify({ reject: !mustVerify })}
             disabled={busy || !state.canVerify}
           >
             {mustVerify ? "Verify with Roblox" : "No, this isn't me"}
           </button>
-          {optional && mustVerify && (
-            <button className="secondary" onClick={snooze} disabled={busy}>
-              Not now
-            </button>
-          )}
         </div>
 
         {!mustVerify && (
           <p className="muted identity-note">
-            Choosing no takes you to Roblox to sign in, and updates your staff profile
-            to the account you sign in with.
+            Choosing no signs you out of the panel until you verify with Roblox, and
+            updates your staff profile to the account you sign in with.
           </p>
         )}
       </div>

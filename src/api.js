@@ -36,6 +36,24 @@ export async function apiFetch(path, { method = "GET", body, auth = true } = {})
       localStorage.removeItem("tsrp_token");
       window.dispatchEvent(new CustomEvent("tsrp:session-invalid", { detail: { message: data.error } }));
     }
+    // A rate limit can come back from something in front of the API
+    // (nginx, Cloudflare) with no JSON body of ours, and "Request failed
+    // with status 429" tells a staff member nothing they can act on.
+    if (res.status === 429 && !data.error) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      data.error = Number.isFinite(retryAfter) && retryAfter > 0
+        ? `Too many requests. Try again in ${retryAfter} second${retryAfter === 1 ? "" : "s"}.`
+        : "Too many requests. Wait a moment and try again.";
+    }
+
+    // Refused because they have not verified their Roblox account, as
+    // opposed to refused because they lack the rank. The gate listens for
+    // this so a tab left open through a forced re-verification re-asks the
+    // question instead of showing a wall of failures.
+    if (res.status === 403 && data.identityRequired) {
+      window.dispatchEvent(new CustomEvent("tsrp:identity-required", { detail: { action: data.identityAction } }));
+    }
+
     const error = new Error(data.error || `Request failed with status ${res.status}`);
     error.status = res.status;
     Object.assign(error, data);
