@@ -6,6 +6,8 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboards from "./pages/Leaderboards";
 import Roster from "./pages/Roster";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import Economy from "./pages/Economy";
 import StockMarket from "./pages/StockMarket";
 import StockDetail from "./pages/StockDetail";
@@ -45,6 +47,8 @@ const PUBLIC_PAGES = [
   { path: "/economy/news", element: <EconomyNews /> },
   { path: "/changelog", element: <Changelog standalone /> },
   { path: "/changelog/:slug", element: <ChangelogEntry standalone /> },
+  { path: "/privacy", element: <Privacy /> },
+  { path: "/terms", element: <Terms /> },
 ];
 
 function AppShell() {

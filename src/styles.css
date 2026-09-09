@@ -3230,3 +3230,52 @@ code {
   .dc-entry-meta { width: 100%; justify-content: space-between; }
   .dc-audit-val { max-width: 160px; }
 }
+
+/* ==================================================================
+   Legal pages (Privacy Policy, Terms of Service)
+   Plain documents, so they get reading-width text and real spacing
+   between sections rather than the card grid the rest of the public
+   site uses.
+   ================================================================== */
+.legal-doc {
+  max-width: 68ch;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 8px;
+}
+
+.legal-section { display: flex; flex-direction: column; gap: 10px; }
+
+.legal-section h2 {
+  font-size: var(--text-base);
+  font-weight: 650;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.legal-section p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.legal-section ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.legal-section strong { color: var(--text-primary); font-weight: 600; }
+
+.legal-updated {
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
