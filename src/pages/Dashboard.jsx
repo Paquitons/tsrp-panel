@@ -643,9 +643,6 @@ export default function Dashboard() {
 
               <label>Type</label>
               <CustomSelect value={form.type} onChange={(v) => updateField("type", v)} options={allowedTypes} />
-              {user?.tier === "moderator" && (
-                <p className="muted" style={{ marginTop: 6, marginBottom: 0 }}>Moderators can't issue a real ban or temp ban -- Admin+ only.</p>
-              )}
 
               {form.type === "temp_ban" && (
                 <>

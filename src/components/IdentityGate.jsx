@@ -24,6 +24,7 @@ import Banner from "./primitives/Banner";
 const OUTCOMES = {
   ok:        { variant: "success", text: "Your Roblox account has been verified." },
   changed:   { variant: "success", text: "Verified. The Roblox account on your staff profile has been updated." },
+  partial:   { variant: "warning", text: "Verified, but your Discord nickname and roles could not be updated. Tell an administrator." },
   cancelled: { variant: "warning", text: "You cancelled the Roblox sign in, so nothing changed." },
   expired:   { variant: "warning", text: "That verification link expired. Please try again." },
   conflict:  { variant: "error",   text: "That Roblox account is already verified to another staff member. Nothing was changed. Speak to management." },

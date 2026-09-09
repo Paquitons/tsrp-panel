@@ -36,6 +36,16 @@ export async function apiFetch(path, { method = "GET", body, auth = true } = {})
       localStorage.removeItem("tsrp_token");
       window.dispatchEvent(new CustomEvent("tsrp:session-invalid", { detail: { message: data.error } }));
     }
+    // A rate limit can come back from something in front of the API
+    // (nginx, Cloudflare) with no JSON body of ours, and "Request failed
+    // with status 429" tells a staff member nothing they can act on.
+    if (res.status === 429 && !data.error) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      data.error = Number.isFinite(retryAfter) && retryAfter > 0
+        ? `Too many requests. Try again in ${retryAfter} second${retryAfter === 1 ? "" : "s"}.`
+        : "Too many requests. Wait a moment and try again.";
+    }
+
     const error = new Error(data.error || `Request failed with status ${res.status}`);
     error.status = res.status;
     Object.assign(error, data);
