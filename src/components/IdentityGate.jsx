@@ -17,16 +17,24 @@ import Banner from "./primitives/Banner";
 // The gate never blocks on its own failure. If the check cannot run, the
 // panel opens: locking every staff member out because a lookup timed out
 // would be a worse outcome than a session going unconfirmed for an hour.
+// The same goes for anything the server does not mark `required` -- it is
+// asked, it can be put off, and it never bars the door.
 // ==================================================================
 
 const OUTCOMES = {
-  ok:        { tone: "good", text: "Your Roblox account has been verified." },
-  changed:   { tone: "good", text: "Verified. The Roblox account on your staff profile has been updated." },
-  cancelled: { tone: "warn", text: "You cancelled the Roblox sign in, so nothing changed." },
-  expired:   { tone: "warn", text: "That verification link expired. Please try again." },
-  conflict:  { tone: "bad",  text: "That Roblox account is already verified to another staff member. Nothing was changed. Speak to management." },
-  failed:    { tone: "bad",  text: "Roblox could not confirm that sign in. Please try again." },
+  ok:        { variant: "success", text: "Your Roblox account has been verified." },
+  changed:   { variant: "success", text: "Verified. The Roblox account on your staff profile has been updated." },
+  cancelled: { variant: "warning", text: "You cancelled the Roblox sign in, so nothing changed." },
+  expired:   { variant: "warning", text: "That verification link expired. Please try again." },
+  conflict:  { variant: "error",   text: "That Roblox account is already verified to another staff member. Nothing was changed. Speak to management." },
+  failed:    { variant: "error",   text: "Roblox could not confirm that sign in. Please try again." },
 };
+
+// Putting off an optional prompt lasts the browser session, so a reload or
+// a second tab does not ask again.
+const SNOOZE_KEY = "tsrp.identity.snoozed";
+const readSnooze = () => { try { return sessionStorage.getItem(SNOOZE_KEY) === "1"; } catch { return false; } };
+const writeSnooze = () => { try { sessionStorage.setItem(SNOOZE_KEY, "1"); } catch { /* private mode */ } };
 
 /** Reads and clears ?verify=... left by the callback redirect. */
 function useVerifyOutcome() {
@@ -63,6 +71,7 @@ export default function IdentityGate({ children }) {
   const [state, setState] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [snoozed, setSnoozed] = useState(readSnooze);
   const outcome = useVerifyOutcome();
 
   useEffect(() => {
@@ -96,24 +105,33 @@ export default function IdentityGate({ children }) {
     }
   }
 
-  // Still checking, or nothing to ask.
-  if (!state || state.action === "none") {
+  function snooze() {
+    writeSnooze();
+    setSnoozed(true);
+  }
+
+  // Still checking, nothing to ask, or something optional they have
+  // already put off for this session.
+  if (!state || state.action === "none" || (snoozed && !state.required)) {
     return (
       <>
-        {outcome && <div className="identity-toast-wrap"><Banner>{outcome.text}</Banner></div>}
+        {outcome && <div className="identity-toast-wrap"><Banner variant={outcome.variant}>{outcome.text}</Banner></div>}
         {children}
       </>
     );
   }
 
   const mustVerify = state.action === "verify";
+  // Only a demand from management, or a link that moved away from a proven
+  // account, holds the panel shut. Everything else is a question.
+  const optional = !state.required;
 
   return (
     <div className="identity-gate">
       <div className="identity-card">
         <h1>{mustVerify ? "Verify your Roblox account" : "Is this you?"}</h1>
 
-        {outcome && <Banner>{outcome.text}</Banner>}
+        {outcome && <Banner variant={outcome.variant}>{outcome.text}</Banner>}
 
         {mustVerify ? (
           <>
@@ -135,7 +153,7 @@ export default function IdentityGate({ children }) {
 
         {error && <Banner>{error}</Banner>}
         {!state.canVerify && mustVerify && (
-          <Banner>Roblox sign in isn't set up yet, so this can't be completed. Tell an administrator.</Banner>
+          <Banner variant="warning">Roblox sign in isn't set up yet, so this can't be completed. Tell an administrator.</Banner>
         )}
 
         <div className="identity-actions">
@@ -151,6 +169,11 @@ export default function IdentityGate({ children }) {
           >
             {mustVerify ? "Verify with Roblox" : "No, this isn't me"}
           </button>
+          {optional && mustVerify && (
+            <button className="secondary" onClick={snooze} disabled={busy}>
+              Not now
+            </button>
+          )}
         </div>
 
         {!mustVerify && (
