@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboards from "./pages/Leaderboards";
 import Roster from "./pages/Roster";
+import IdentityGate from "./components/IdentityGate";
 import Permissions from "./pages/Permissions";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -83,7 +84,11 @@ function AppShell() {
     );
   }
 
+  // Wraps the whole authenticated panel, so "Is this you?" is answered
+  // before any staff page renders rather than being a screen somebody can
+  // click past.
   return (
+    <IdentityGate>
     <div className="layout">
       <Nav />
       <Routes>
@@ -120,6 +125,7 @@ function AppShell() {
       </Routes>
       <Strike3Prompt />
     </div>
+    </IdentityGate>
   );
 }
 
