@@ -46,6 +46,14 @@ export async function apiFetch(path, { method = "GET", body, auth = true } = {})
         : "Too many requests. Wait a moment and try again.";
     }
 
+    // Refused because they have not verified their Roblox account, as
+    // opposed to refused because they lack the rank. The gate listens for
+    // this so a tab left open through a forced re-verification re-asks the
+    // question instead of showing a wall of failures.
+    if (res.status === 403 && data.identityRequired) {
+      window.dispatchEvent(new CustomEvent("tsrp:identity-required", { detail: { action: data.identityAction } }));
+    }
+
     const error = new Error(data.error || `Request failed with status ${res.status}`);
     error.status = res.status;
     Object.assign(error, data);
