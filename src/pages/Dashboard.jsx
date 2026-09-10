@@ -70,6 +70,7 @@ export default function Dashboard() {
   const [active, setActive] = useState(null);
   const [onBreak, setOnBreak] = useState(false);
   const [shiftError, setShiftError] = useState(null);
+  const [dutyBusy, setDutyBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -136,30 +137,30 @@ export default function Dashboard() {
     }
   }
 
-  async function startShift() {
+  // Duty buttons are held shut while a change is in flight, so an
+  // impatient double-click cannot start and end a shift in quick
+  // succession. It is a guard against the extra CLICK, not a delay on
+  // anything: the in-game permission command is sent server side the
+  // moment the shift row is written, before the response that clears
+  // this even starts coming back.
+  async function changeDuty(path) {
+    if (dutyBusy) return;
+    setDutyBusy(true);
     setShiftError(null);
     try {
-      await apiFetch("/shifts/start", { method: "POST" });
+      await apiFetch(path, { method: "POST" });
       await refreshShift();
       await refreshOnDuty();
-    } catch (err) { setShiftError(err.message); }
+    } catch (err) {
+      setShiftError(err.message);
+    } finally {
+      setDutyBusy(false);
+    }
   }
-  async function toggleBreak() {
-    setShiftError(null);
-    try {
-      await apiFetch("/shifts/break", { method: "POST" });
-      await refreshShift();
-      await refreshOnDuty();
-    } catch (err) { setShiftError(err.message); }
-  }
-  async function endShift() {
-    setShiftError(null);
-    try {
-      await apiFetch("/shifts/end", { method: "POST" });
-      await refreshShift();
-      await refreshOnDuty();
-    } catch (err) { setShiftError(err.message); }
-  }
+
+  const startShift  = () => changeDuty("/shifts/start");
+  const toggleBreak = () => changeDuty("/shifts/break");
+  const endShift    = () => changeDuty("/shifts/end");
 
   const liveDurationSeconds = active && Number.isFinite(active.started_at)
     ? Math.floor((now - active.started_at) / 1000)
@@ -524,13 +525,19 @@ export default function Dashboard() {
                 <span className="timer-value">{formatDurationWithSeconds(Math.max(0, liveDurationSeconds))}</span>
                 {onBreak && <span className="badge" style={{ background: "#4a3f1a", color: "#f9a825" }}>On Break</span>}
                 <div className="button-row">
-                  <button className="btn-orange small" onClick={toggleBreak}>{onBreak ? "Resume" : "Break"}</button>
-                  <button className="btn-red small" onClick={endShift}>End Shift</button>
+                  <button className="btn-orange small" onClick={toggleBreak} disabled={dutyBusy}>
+                    {dutyBusy ? "…" : (onBreak ? "Resume" : "Break")}
+                  </button>
+                  <button className="btn-red small" onClick={endShift} disabled={dutyBusy}>
+                    {dutyBusy ? "…" : "End Shift"}
+                  </button>
                 </div>
               </>
             ) : (
               <div className="hero-shift-start">
-                <button className="btn-green small" onClick={startShift}>Start Shift</button>
+                <button className="btn-green small" onClick={startShift} disabled={dutyBusy}>
+                  {dutyBusy ? "…" : "Start Shift"}
+                </button>
               </div>
             )}
           </div>
