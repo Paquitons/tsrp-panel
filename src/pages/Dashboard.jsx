@@ -75,6 +75,7 @@ export default function Dashboard() {
   // backend refuses it regardless -- this is so the button says so rather
   // than failing when pressed.
   const [serverOnline, setServerOnline] = useState(true);
+  const [shuttingDown, setShuttingDown] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -431,6 +432,10 @@ export default function Dashboard() {
     // Older backends don't send this; treat its absence as online so a
     // version skew cannot disable the button permanently.
     setServerOnline(liveSnapshot.serverOnline !== false);
+    // The server is still up during /shutdown's countdown, but duty is
+    // already closed for it. Absent on an older backend, which reads as
+    // "no countdown" for the same reason as above.
+    setShuttingDown(liveSnapshot.shuttingDown === true);
   }, [liveSnapshot]);
 
   async function fetchLivePlayers() {
@@ -535,10 +540,14 @@ export default function Dashboard() {
                 <button
                   className="btn-green small"
                   onClick={startShift}
-                  disabled={dutyBusy || !serverOnline}
-                  title={!serverOnline ? "The server is offline, so you can't go on duty right now." : undefined}
+                  disabled={dutyBusy || !serverOnline || shuttingDown}
+                  title={
+                    !serverOnline ? "The server is offline, so you can't go on duty right now."
+                      : shuttingDown ? "The session is shutting down, so you can't go on duty right now."
+                        : undefined
+                  }
                 >
-                  {dutyBusy ? "…" : !serverOnline ? "Server Offline" : "Start Shift"}
+                  {dutyBusy ? "…" : !serverOnline ? "Server Offline" : shuttingDown ? "Shutting Down" : "Start Shift"}
                 </button>
               </div>
             )}
