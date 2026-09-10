@@ -71,6 +71,10 @@ export default function Dashboard() {
   const [onBreak, setOnBreak] = useState(false);
   const [shiftError, setShiftError] = useState(null);
   const [dutyBusy, setDutyBusy] = useState(false);
+  // Whether a session is open. Nobody can go on duty without one, and the
+  // backend refuses it regardless -- this is so the button says so rather
+  // than failing when pressed.
+  const [serverOnline, setServerOnline] = useState(true);
   const [now, setNow] = useState(Date.now());
   const [onDutyStaff, setOnDutyStaff] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -424,6 +428,9 @@ export default function Dashboard() {
     setEvents(liveSnapshot.activity.events);
     setLivePlayers(liveSnapshot.players.players);
     setQueueCount(liveSnapshot.players.queueCount);
+    // Older backends don't send this; treat its absence as online so a
+    // version skew cannot disable the button permanently.
+    setServerOnline(liveSnapshot.serverOnline !== false);
   }, [liveSnapshot]);
 
   async function fetchLivePlayers() {
@@ -525,8 +532,13 @@ export default function Dashboard() {
               </>
             ) : (
               <div className="hero-shift-start">
-                <button className="btn-green small" onClick={startShift} disabled={dutyBusy}>
-                  {dutyBusy ? "…" : "Start Shift"}
+                <button
+                  className="btn-green small"
+                  onClick={startShift}
+                  disabled={dutyBusy || !serverOnline}
+                  title={!serverOnline ? "The server is offline, so you can't go on duty right now." : undefined}
+                >
+                  {dutyBusy ? "…" : !serverOnline ? "Server Offline" : "Start Shift"}
                 </button>
               </div>
             )}
