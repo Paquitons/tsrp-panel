@@ -5,7 +5,7 @@ export const API_BASE = import.meta.env.VITE_API_BASE || "https://api.tsrp.onlin
  * session token from localStorage (if present) and parses JSON responses.
  * Throws an Error with the backend's message on any non-2xx response.
  */
-export async function apiFetch(path, { method = "GET", body, auth = true } = {}) {
+export async function apiFetch(path, { method = "GET", body, auth = true, credentials } = {}) {
   const headers = { "Content-Type": "application/json" };
 
   if (auth) {
@@ -17,6 +17,8 @@ export async function apiFetch(path, { method = "GET", body, auth = true } = {})
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    // Only the sign-in handoff sends cookies; see AuthContext.
+    ...(credentials ? { credentials } : {}),
   });
 
   const data = await res.json().catch(() => ({}));
