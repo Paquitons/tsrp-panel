@@ -24,6 +24,7 @@ const SEVERITY = {
   unknown_person: "critical",
   not_staff: "critical",
   revoke_ineffective: "critical",
+  revoke_failed: "critical",
   above_rank: "warning",
   unverified: "warning",
   off_duty: "notice",
