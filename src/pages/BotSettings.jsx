@@ -112,6 +112,16 @@ export default function BotSettings() {
                         />
                         {value ? "Enabled" : "Disabled"}
                       </label>
+                    ) : entry.type === "select" ? (
+                      <select
+                        value={value}
+                        onChange={e => setPending(p => ({ ...p, [entry.key]: e.target.value }))}
+                        style={{ width: 220 }}
+                      >
+                        {(entry.options ?? []).map(o => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
                     ) : entry.type === "text" ? (
                       <input
                         type="text"
