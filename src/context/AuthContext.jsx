@@ -71,17 +71,31 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     (async () => {
-      // If we just got redirected back from the backend's OAuth callback,
-      // the session token (or an error code) is in the URL query string.
       const params = new URLSearchParams(window.location.search);
-      const tokenFromUrl = params.get("token");
       const errorFromUrl = params.get("error");
 
+      // A session token used to arrive in the query string. It no longer
+      // does: the backend leaves it in a short-lived httpOnly cookie and
+      // the panel redeems it here, once, so the token is never written
+      // into the address bar, the frontend host's access log, or the
+      // Referer of anything this page loads.
+      //
+      // The query string is still read as a fallback for the window where
+      // a new panel is deployed against a backend that has not been
+      // updated yet. Deploy this first, the backend second, and sign in
+      // keeps working throughout.
+      const tokenFromUrl = params.get("token");
       if (tokenFromUrl) {
         localStorage.setItem("tsrp_token", tokenFromUrl);
-        // Clean the token out of the visible URL so it isn't left in
-        // browser history or accidentally shared.
         window.history.replaceState({}, "", window.location.pathname);
+      } else if (!localStorage.getItem("tsrp_token")) {
+        try {
+          const { token } = await apiFetch("/auth/handoff", { method: "POST", auth: false, credentials: "include" });
+          if (token) localStorage.setItem("tsrp_token", token);
+        } catch {
+          // Nothing to redeem: an ordinary page load rather than a
+          // return from signing in.
+        }
       }
 
       if (errorFromUrl) {
