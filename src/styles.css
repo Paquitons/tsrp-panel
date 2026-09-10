@@ -3327,6 +3327,13 @@ code {
 }
 .perm-tag-critical { color: var(--danger); border-color: var(--danger); }
 .perm-tag-warning  { color: var(--warning); border-color: var(--warning); }
+.perm-tag-ok       { color: var(--success); border-color: var(--success); }
+.perm-tag-planned  { color: var(--text-secondary); border-style: dashed; }
+
+/* An enforcement action, as opposed to a finding: the command itself is
+   the primary thing to read, so it leads and is monospaced. */
+.perm-command { font-size: var(--text-sm); font-weight: 600; word-break: break-all; }
+.perm-action .perm-what { align-items: flex-start; }
 
 @media (max-width: 720px) {
   .perm-row { grid-template-columns: 1fr; gap: 8px; }
