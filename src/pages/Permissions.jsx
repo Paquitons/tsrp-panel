@@ -23,10 +23,42 @@ const POLL_MS = 30_000;
 const SEVERITY = {
   unknown_person: "critical",
   not_staff: "critical",
+  revoke_ineffective: "critical",
   above_rank: "warning",
   unverified: "warning",
   off_duty: "notice",
 };
+
+const MODE_COPY = {
+  off: "Enforcement is off. The bot is not granting or removing anything in game.",
+  dry: "Report only. Everything below is a command the bot decided on and did not run, so you can check it agrees with reality before switching it on.",
+  on: "Enforcement is on. Everything below actually happened in game.",
+};
+
+const RESULT_LABEL = { sent: "sent", failed: "failed", dry_run: "would run" };
+
+function ActionRow({ a }) {
+  const verb = a.action === "grant"
+    ? (a.level === "admin" ? ":admin" : ":mod")
+    : (a.level === "admin" ? ":unadmin" : ":unmod");
+  return (
+    <div className={`perm-row perm-action ${a.result === "failed" ? "perm-critical" : a.action === "revoke" ? "perm-warning" : "perm-notice"}`}>
+      <div className="perm-who">
+        <code className="perm-command">{verb} {a.roblox_username ?? a.roblox_id}</code>
+        {a.discord_id && (
+          <DiscordIdentity id={a.discord_id} nickname={a.staff_nickname} username={a.staff_username} avatarHash={a.staff_avatar_hash} />
+        )}
+      </div>
+      <div className="perm-what">
+        <span className={`perm-tag perm-tag-${a.result === "failed" ? "critical" : a.result === "dry_run" ? "planned" : "ok"}`}>
+          {RESULT_LABEL[a.result] ?? a.result}
+        </span>
+        {a.result === "failed" && a.detail && <span className="perm-detail muted">{a.detail}</span>}
+      </div>
+      <div className="perm-meta"><Age since={a.created_at} /></div>
+    </div>
+  );
+}
 
 function Age({ since }) {
   const ms = Date.now() - since;
@@ -104,6 +136,10 @@ export default function Permissions() {
   const findings = data?.findings ?? [];
   const stale = data?.lastReadingAt ? Date.now() - data.lastReadingAt > 5 * 60 * 1000 : false;
 
+  const actionsQuery = useApiQuery(["permissions", "actions"], "/permissions/actions?limit=100", { refetchInterval: POLL_MS });
+  const actions = actionsQuery.data?.actions ?? [];
+  const mode = actionsQuery.data?.mode ?? "off";
+
   return (
     <PageShell title="In-Game Permissions">
       <p className="muted card-subtitle" style={{ maxWidth: "70ch" }}>
@@ -140,6 +176,26 @@ export default function Permissions() {
               {findings.map(f => <FindingRow key={f.id} f={f} onAccept={setAccepting} />)}
             </div>
           </>
+        )}
+      </AsyncBoundary>
+
+      <h2 style={{ marginTop: 32 }}>What enforcement has done</h2>
+      <p className="muted card-subtitle" style={{ maxWidth: "70ch" }}>{MODE_COPY[mode] ?? mode}</p>
+
+      <AsyncBoundary
+        isLoading={actionsQuery.isLoading}
+        isError={actionsQuery.isError}
+        error={actionsQuery.error}
+        data={actions}
+        isEmpty={a => a.length === 0}
+        emptyMessage={mode === "off"
+          ? "Nothing yet. Enforcement is off."
+          : "Nothing yet. Commands appear here as the bot decides on them."}
+      >
+        {() => (
+          <div className="perm-list">
+            {actions.map(a => <ActionRow key={a.id} a={a} />)}
+          </div>
         )}
       </AsyncBoundary>
 
