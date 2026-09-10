@@ -1,5 +1,57 @@
 [
   {
+    "version": "1.18.0",
+    "slug": "v1-18-0",
+    "title": "TSRP Update",
+    "date": "2026-09-10",
+    "summary": "In-game moderator powers are now tied to being on duty, and rank changes apply cleanly.",
+    "sections": [
+      {
+        "heading": "In-game permissions",
+        "items": [
+          "Going on duty now gives you your in-game powers automatically. Moderation ranks get mod, Administrator and above get admin.",
+          "Going off duty takes them away again straight away.",
+          "The permanent staff list has been cleared, so nobody keeps powers between sessions any more.",
+          "You need to be in the server and to have verified your Roblox account for this to work.",
+          "Co-Owners and above are not affected by any of this."
+        ]
+      },
+      {
+        "heading": "Duty",
+        "items": [
+          "Going on duty needs a session to be running. The button will say Server Offline when there isn't one.",
+          "If the server shuts down while you are on duty, your shift is ended for you and your time is saved.",
+          "The duty buttons no longer respond to being clicked repeatedly."
+        ]
+      },
+      {
+        "heading": "Ranks and terminations",
+        "items": [
+          "A promotion or demotion sometimes left the old rank role on. Every rank change now applies in one go, so nobody ends up holding two ranks.",
+          "Anyone already stuck with two rank roles is fixed automatically by their next rank change.",
+          "Terminations sometimes left staff roles behind. That is fixed too.",
+          "Someone removed from the team now disappears from the panel straight away instead of after a few minutes."
+        ]
+      },
+      {
+        "heading": "Panel",
+        "items": [
+          "You will be asked to verify your Roblox account once. This is required before the panel opens, and before you can get in-game powers.",
+          "Signing in is more secure.",
+          "Names now show next to mentions in promotion, infraction and termination logs, so old entries still make sense.",
+          "Fixed the Request failed with status 429 errors on busier pages."
+        ]
+      },
+      {
+        "heading": "Activity checks",
+        "items": [
+          "Directors can add or remove people from the strike list before approving it.",
+          "Anyone who joined the team after an activity check was posted is left off it automatically."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.17.2",
     "slug": "v1-17-2",
     "title": "TSRP Update",
