@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import Banner from "./primitives/Banner";
+import ManualVerification from "./ManualVerification";
 
 // ==================================================================
 // The identity gate.
@@ -16,6 +17,15 @@ import Banner from "./primitives/Banner";
 //   Verified         "Is this you?", showing the account Roblox proved,
 //                    once per login. Yes carries on. No takes their
 //                    access away and sends them to Roblox.
+//
+// Roblox sign in is the only option anybody is offered. Roblox will not
+// run an OAuth flow for an account under 13, so there is a second route,
+// and it appears here ONLY when the identity response carries a
+// manualVerification object -- which the API includes only for somebody a
+// Director has opened it for, and omits entirely for everyone else. There
+// is deliberately no disabled button, no "ask a Director" hint and no
+// mention of it in the markup otherwise: a fallback everybody can see is
+// a fallback everybody asks for.
 //
 // Nothing here decides anything. The server recomputes the same answer on
 // every protected request and refuses with a 403 if it disagrees, so this
@@ -208,6 +218,13 @@ export default function IdentityGate({ children }) {
             Choosing no signs you out of the panel until you verify with Roblox, and
             updates your staff profile to the account you sign in with.
           </p>
+        )}
+
+        {/* Only ever rendered for somebody a Director opened this for.
+            The server decides that; the absence of the key is the whole
+            mechanism, so there is nothing to toggle here. */}
+        {mustVerify && state.manualVerification && (
+          <ManualVerification state={state.manualVerification} onVerified={load} />
         )}
       </div>
     </div>
