@@ -39,7 +39,10 @@ const NAV_ITEMS = [
     show: user => user?.isDirectorOrAbove,
   },
   { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
-  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon, show: user => user?.isSupportStaff },
+  // Support Staff read every transcript; Internal Affairs, Management and
+  // Directors get the tab for Staff Complaints alone, which the API scopes
+  // for them. Same tab, different contents.
+  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon, show: user => user?.isSupportStaff || user?.canViewStaffComplaints },
   { to: "/changelog", label: "Changelog", icon: ScrollIcon },
 ];
 

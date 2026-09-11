@@ -124,8 +124,8 @@ function AppShell() {
             }
           />
         )}
-        {user?.isSupportStaff && <Route path="/tickets" element={<Tickets />} />}
-        {user?.isSupportStaff && <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />}
+        {(user?.isSupportStaff || user?.canViewStaffComplaints) && <Route path="/tickets" element={<Tickets />} />}
+        {(user?.isSupportStaff || user?.canViewStaffComplaints) && <Route path="/transcripts/:ticketNumber" element={<TicketTranscript />} />}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Strike3Prompt />
