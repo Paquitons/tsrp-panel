@@ -3402,3 +3402,89 @@ code {
 @media (max-width: 480px) {
   .identity-actions button { flex: 1 1 100%; }
 }
+
+/* ==================================================================
+   Alternative verification (profile code)
+
+   Only ever on screen for somebody a Director has opened it for, so it
+   is styled as a quiet secondary route inside the same card rather than
+   as an equal option next to Roblox sign in.
+   ================================================================== */
+.mv-wrap { border-top: 1px solid var(--border-subtle); padding-top: var(--space-4); }
+
+.mv-open {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.mv-open:hover { color: var(--text-primary); }
+
+.mv-panel { display: flex; flex-direction: column; gap: var(--space-3); }
+.mv-title { margin: 0; font-size: var(--text-base); font-weight: 650; }
+.mv-intro { font-size: var(--text-xs); line-height: 1.5; }
+
+.mv-form { display: flex; flex-direction: column; gap: var(--space-3); }
+.mv-field { display: flex; flex-direction: column; gap: var(--space-2); }
+.mv-field span { font-size: var(--text-xs); color: var(--text-secondary); }
+
+.mv-account { font-size: var(--text-sm); }
+
+.mv-steps {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.mv-code-row { display: flex; gap: var(--space-3); align-items: stretch; }
+
+.mv-code {
+  flex: 1;
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  /* The code is meant to be selected and copied, and it is long enough
+     to overflow a narrow card. Breaking it beats hiding half of it. */
+  word-break: break-all;
+  user-select: all;
+}
+
+.mv-expiry { font-size: var(--text-xs); }
+
+/* Director Console: manual verification grants */
+.dc-subhead { margin: var(--space-5) 0 var(--space-3); font-size: var(--text-base); font-weight: 650; }
+.mv-grant-form { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+.mv-picked { font-size: var(--text-sm); display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+
+.mv-results {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mv-result {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: var(--space-3);
+  background: var(--surface);
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+.mv-result:last-child { border-bottom: none; }
+.mv-result:hover { background: var(--surface-hover); }
+.mv-result-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
