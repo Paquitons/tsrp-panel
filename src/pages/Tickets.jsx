@@ -4,6 +4,7 @@ import DiscordIdentity from "../components/DiscordIdentity";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import { useApiQuery } from "../hooks/useApiQuery";
+import { useAuth } from "../context/AuthContext";
 
 const LIST_POLL_MS = 15_000;
 
@@ -21,6 +22,12 @@ function formatDate(ms) {
 export default function Tickets() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Internal Affairs, Management and Directors get this tab for Staff
+  // Complaints alone. Said out loud, because a list with only complaints
+  // in it otherwise reads like the rest of the transcripts failed to load.
+  const complaintsOnly = !user?.isSupportStaff && user?.canViewStaffComplaints;
 
   const query = useApiQuery(["tickets"], "/tickets?limit=100", { refetchInterval: LIST_POLL_MS });
   const data = query.data;
@@ -52,6 +59,11 @@ export default function Tickets() {
   return (
     <PageShell title="Ticket Transcripts">
       {query.isError && <Banner>{query.error.message}</Banner>}
+      {complaintsOnly && (
+        <p className="muted card-subtitle">
+          Showing Staff Complaint tickets. Other transcripts are limited to Support Staff.
+        </p>
+      )}
 
       <input
         placeholder="Search by ticket #, opener, or close reason..."
