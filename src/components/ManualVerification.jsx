@@ -32,8 +32,33 @@ function fmtRemaining(ms) {
   return `${mins} minute${mins === 1 ? "" : "s"}`;
 }
 
+/**
+ * The bot's DM links here with ?manual=1, so somebody who was told to use
+ * this route lands on it rather than on the Roblox button they already
+ * know does not work for them.
+ *
+ * Read once, at mount, and taken straight back out of the URL: it is a
+ * hint about where to start, not state, and it should not survive a
+ * refresh or get copied into a bookmark. Deliberately its own parameter
+ * and not ?verify=, which the gate already uses for OAuth outcomes and
+ * which renders anything it does not recognise as a failure banner.
+ */
+function useManualDeepLink() {
+  const [asked] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("manual") !== "1") return false;
+    params.delete("manual");
+    const rest = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
+    return true;
+  });
+  return asked;
+}
+
 export default function ManualVerification({ state, onVerified }) {
-  const [open, setOpen] = useState(!!state.challenge);
+  const deepLinked = useManualDeepLink();
+  const [open, setOpen] = useState(!!state.challenge || deepLinked);
   const [username, setUsername] = useState(state.challenge?.account?.username ?? "");
   const [challenge, setChallenge] = useState(state.challenge ?? null);
   const [busy, setBusy] = useState(false);

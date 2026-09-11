@@ -345,11 +345,17 @@ function GrantForm({ onGranted, onError, bounds }) {
     e.preventDefault();
     setBusy(true); onError(null);
     try {
-      await apiFetch("/director/manual-verification", {
+      const { dmSent } = await apiFetch("/director/manual-verification", {
         method: "POST",
         body: { discordId: picked.discordId, reason, hours: Number(hours), allowReplace },
       });
-      onGranted(`Manual verification enabled for ${picked.discordUsername || picked.discordId}.`);
+      const who = picked.discordUsername || picked.discordId;
+      // Whether the DM landed is the difference between "they have been
+      // told" and "somebody still has to tell them", so it is said out
+      // loud rather than left for the Director to assume.
+      onGranted(dmSent
+        ? `Enabled for ${who}, and they have been DMed the instructions.`
+        : `Enabled for ${who}, but their DMs are closed. You will need to explain it to them yourself.`);
       setQuery(""); setResults([]); setPicked(null); setReason(""); setAllowReplace(false);
     } catch (err) { onError(err.message); } finally { setBusy(false); }
   }
@@ -454,8 +460,12 @@ Reason (optional):`);
     <>
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
         Roblox won't run its sign in for accounts under 13. This opens a one-time
-        profile-code verification for one named staff member. Everyone else sees only
+        profile-sentence verification for one named staff member. Everyone else sees only
         Roblox sign in, and the routes behind this don't exist for them.
+      </p>
+      <p className="muted card-subtitle">
+        Enabling it DMs them the instructions and a link straight to the right page, so
+        you don't have to talk anyone through it.
       </p>
 
       <h2 className="dc-subhead">Currently enabled</h2>
