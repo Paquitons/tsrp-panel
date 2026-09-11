@@ -3451,9 +3451,9 @@ code {
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   line-height: 1.5;
-  /* A phrase of words, not a token: wrap between words rather than
-     mid-word, so somebody copying it by hand can read where each one
-     ends. It is meant to be selected in one go, hence user-select. */
+  /* A sentence, not a token: wrap between words rather than mid-word, so
+     somebody copying it by hand can read where each one ends. It is meant
+     to be selected in one go, hence user-select. */
   word-break: normal;
   overflow-wrap: break-word;
   user-select: all;
