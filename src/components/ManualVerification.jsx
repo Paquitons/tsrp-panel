@@ -6,9 +6,14 @@ import Banner from "./primitives/Banner";
 // The alternative verification route.
 //
 // Roblox will not run an OAuth flow for an account under 13, so this is
-// how those staff members prove their account: a one-time code, put in
+// how those staff members prove their account: a one-time phrase, put in
 // that account's Roblox profile description, read back from Roblox by the
 // server.
+//
+// It is a phrase of ordinary words rather than a random code because
+// Roblox's profile filter censors anything that looks like a contact
+// detail or a string of gibberish -- a random token came out the other
+// side as hashes and could never be read back.
 //
 // This component only exists on screen when the identity response carried
 // a manualVerification object, which the API includes only for somebody a
@@ -58,8 +63,8 @@ export default function ManualVerification({ state, onVerified }) {
       const result = await apiFetch("/identity/manual/check", { method: "POST" });
       setNote(
         result.discordApplied
-          ? "Verified. You can remove the code from your Roblox profile now."
-          : "Verified, but your Discord nickname and roles could not be updated. Tell a Director. You can remove the code from your Roblox profile now."
+          ? "Verified. You can remove the phrase from your Roblox profile now."
+          : "Verified, but your Discord nickname and roles could not be updated. Tell a Director. You can remove the phrase from your Roblox profile now."
       );
       // Re-reads the gate, which is what actually lets them through. The
       // panel does not decide that; it just asks again.
@@ -86,7 +91,7 @@ export default function ManualVerification({ state, onVerified }) {
   function copy() {
     navigator.clipboard?.writeText(challenge.code).then(
       () => { setCopied(true); setTimeout(() => setCopied(false), 2000); },
-      () => { /* clipboard blocked -- the code is on screen to copy by hand */ }
+      () => { /* clipboard blocked -- the phrase is on screen to copy by hand */ }
     );
   }
 
@@ -105,12 +110,18 @@ export default function ManualVerification({ state, onVerified }) {
       <h2 className="mv-title">Verify with a profile code</h2>
       <p className="muted mv-intro">
         A Director has enabled this for you because Roblox sign in isn't available on your
-        account. You'll put a one-time code in your Roblox profile, and we'll read it back
+        account. You'll put a one-time phrase in your Roblox profile, and we'll read it back
         from Roblox to prove the account is yours.
       </p>
 
       {error && <Banner variant="error">{error}</Banner>}
       {note && <Banner variant="success">{note}</Banner>}
+      {error?.includes("isn't in the profile description") && (
+        <p className="muted mv-expiry">
+          If Roblox replaced part of it with <code>###</code>, delete it and paste it again.
+          Saving from the Roblox mobile app sometimes filters text the website leaves alone.
+        </p>
+      )}
 
       {!challenge ? (
         <form className="mv-form" onSubmit={start}>
@@ -126,7 +137,7 @@ export default function ManualVerification({ state, onVerified }) {
             />
           </label>
           <button className="primary" type="submit" disabled={busy || !username.trim()}>
-            {busy ? "Checking…" : "Get my code"}
+            {busy ? "Checking…" : "Get my phrase"}
           </button>
         </form>
       ) : (
@@ -139,7 +150,7 @@ export default function ManualVerification({ state, onVerified }) {
           <ol className="mv-steps">
             <li>Open Roblox and go to your profile.</li>
             <li>Edit your About / Description.</li>
-            <li>Paste this code anywhere in it, then save:</li>
+            <li>Paste this phrase anywhere in it, then save:</li>
           </ol>
 
           <div className="mv-code-row">
@@ -150,8 +161,9 @@ export default function ManualVerification({ state, onVerified }) {
           </div>
 
           <p className="muted mv-expiry">
-            This code works for {fmtRemaining(challenge.expiresAt - Date.now())} and only for
-            this account. Don't share it.
+            Copy it exactly, every word, in this order. It works for{" "}
+            {fmtRemaining(challenge.expiresAt - Date.now())} and only for this account.
+            Don't share it.
           </p>
 
           <div className="identity-actions">
