@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
@@ -93,6 +93,11 @@ function AppShell() {
       <Nav />
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        {/* The bot's alternative-verification DM sends people to /login,
+            since that is where they need to be when signed out, which is
+            the usual case. Somebody who is already signed in should land
+            on the panel rather than on a 404. */}
+        <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
         <Route path="/changelog" element={<Changelog />} />
