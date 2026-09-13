@@ -52,6 +52,15 @@ export const HANDBOOK = [
       { type: "p", text: "Normally you verify through Roblox itself when you join the Discord, which grants you the Verified role. The first time you open the Staff Panel it asks you to confirm the linked account is yours. Confirm it once and the panel opens." },
       { type: "note", title: "If you are under 13", body: "Roblox will not run its sign-in flow for accounts under 13, so the normal route is impossible for you. A Director can open a one-time alternative for your account specifically, and the bot will DM you step-by-step instructions and a link. Open a ticket and ask; do not try to work around it with another account." },
 
+      { type: "h3", text: "If you lose your Discord account" },
+      { type: "p", text: "Hacked, or had to start a new Discord account? You do not need to abandon your Roblox account, and nobody needs to edit the database for you." },
+      { type: "list", items: [
+        "**The old account is gone from the server.** Its claim on your Roblox account is released automatically when it leaves. Join on your new account and verify the same Roblox account as normal.",
+        "**The old account is still in the server** (compromised, or you simply cannot get into it). Ask management to release the claim from the Account Verification page, then verify on the new one.",
+      ]},
+      { type: "p", text: "Verifying still means completing Roblox sign-in for that account, so releasing a claim hands nobody anything they could not already prove they own. Once your new account verifies, the old record is cleared and both sides of the handover are recorded." },
+      { type: "p", text: "Leaving the server briefly and coming back costs you nothing: rejoining puts your claim straight back and you are not asked to verify again." },
+
       { type: "h3", text: "Your nickname" },
       { type: "p", text: "Your Discord nickname is managed for you. The bot sets it to `PREFIX | Name` using your rank's prefix and re-applies it whenever your rank changes. Do not set it by hand. If it looks wrong, ask any Junior Supervisor or above to run `/fixnick` on you." },
       { type: "p", text: "Your prefix changes automatically while you are on duty, on break, or on LOA, so the state you are in is visible in the member list without anyone asking. Precedence is **LOA**, then **On Break**, then **On Duty**." },
