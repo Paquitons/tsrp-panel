@@ -3560,3 +3560,4 @@ code {
   .ann-toolbar { gap: 8px; }
   .ann-key { margin-left: 0; }
 }
+.ann-warn { color: var(--warning, #d9a441); }
