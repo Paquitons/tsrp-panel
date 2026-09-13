@@ -3490,3 +3490,73 @@ code {
 .mv-result:last-child { border-bottom: none; }
 .mv-result:hover { background: var(--surface-hover); }
 .mv-result-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+
+/* ==================================================================
+   In-Game Announcements (HR panel tab)
+   Built on the Director Console's dc-* rows -- same job, same look --
+   with only what the announcement shape actually adds: a command chip,
+   a one-line peek at the message, a copy button, and category headings
+   carrying their own Discord capacity.
+   ================================================================== */
+.ann-toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 16px;
+}
+.ann-search {
+  flex: 1 1 260px; min-width: 0;
+}
+.ann-count { font-size: var(--text-xs); white-space: nowrap; }
+
+.ann-cat { margin-top: 24px; }
+.ann-cat-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ann-cat-head h3 { margin: 0; font-size: var(--text-sm); }
+.ann-cat-sub { font-size: var(--text-xs); margin: 4px 0 0; }
+.ann-full { color: var(--danger); border-color: var(--danger); }
+
+/* The row head and the copy button share one bar, so copying never means
+   opening the editor first. */
+.ann-head { display: flex; align-items: stretch; }
+.ann-head-main { flex: 1; min-width: 0; }
+
+.ann-cmd {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-xs); color: var(--text-faint);
+  flex-shrink: 0; min-width: 28px;
+}
+.ann-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The message preview gives up its space first: the name and the Edit
+   affordance matter more than seeing the whole line at a glance, and it
+   is hidden outright on a narrow screen rather than wrapping the row
+   into three lines. */
+.ann-peek {
+  color: var(--text-faint); font-size: var(--text-xs);
+  max-width: 42ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.ann-copy {
+  flex-shrink: 0; padding: 0 14px; font-size: var(--text-xs);
+  border: none; border-left: 1px solid var(--border-subtle);
+  background: none; color: var(--text-secondary); cursor: pointer;
+}
+.ann-copy:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
+
+.ann-key { font-size: var(--text-xs); color: var(--text-faint); margin-left: auto; }
+.ann-hint { font-size: var(--text-xs); margin: 0; }
+.ann-hint code { margin: 0 1px; }
+.ann-over { color: var(--danger); }
+
+/* The whole point of the preview is that it is the line, character for
+   character, so it wraps rather than scrolls and never gets truncated. */
+.ann-line {
+  display: block; white-space: pre-wrap; word-break: break-word;
+  font-size: var(--text-sm); line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .ann-peek { display: none; }
+}
+@media (max-width: 640px) {
+  .ann-toolbar { gap: 8px; }
+  .ann-key { margin-left: 0; }
+}
