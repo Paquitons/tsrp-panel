@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard";
 import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
 import Changelog from "./pages/Changelog";
+import Handbook from "./pages/Handbook";
 import ChangelogEntry from "./pages/ChangelogEntry";
 import Verification from "./pages/Verification";
 import Tickets from "./pages/Tickets";
@@ -100,6 +101,8 @@ function AppShell() {
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/hr" element={<HrPanel />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
+        {/* Deliberately not in the sidebar: reached by link, not by a tab. */}
+        <Route path="/staff-handbook" element={<Handbook />} />
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
         {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
