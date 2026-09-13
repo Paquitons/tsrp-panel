@@ -11,6 +11,7 @@ import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Tabs from "../components/Tabs";
 import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
+import HrAnnouncements from "./HrAnnouncements";
 import Modal from "../components/primitives/Modal";
 import Banner from "../components/primitives/Banner";
 import PageShell from "../components/primitives/PageShell";
@@ -309,6 +310,7 @@ export default function HrPanel() {
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
     { value: "automod", label: "Automod Offenses" },
     { value: "quotas", label: "Quotas" },
+    { value: "announcements", label: "In-Game Announcements" },
   ];
 
   return (
@@ -567,6 +569,7 @@ export default function HrPanel() {
 
         {actionTab === "automod" && <HrAutomodOffenses />}
         {actionTab === "quotas" && <HrQuotas />}
+        {actionTab === "announcements" && <HrAnnouncements />}
       </div>
 
       {/* ---------- Reference: read-only, glance info ---------- */}
