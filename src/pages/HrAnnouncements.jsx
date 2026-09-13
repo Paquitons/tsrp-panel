@@ -94,7 +94,12 @@ function Preview({ draft }) {
 }
 
 function Fields({ draft, set, categories, showKey }) {
-  const overLimit = draft.message.length > 400;
+  const MESSAGE_MAX = 200;
+  const overLimit = draft.message.length > MESSAGE_MAX;
+  // Not an error -- the comms code legitimately carries one -- but the
+  // filter tags runs of digits freely, and a tagged announcement reaches
+  // the game as ###. Worth saying at the point somebody types one.
+  const hasDigits = /\d/.test(draft.message);
   return (
     <>
       <div className="dc-field-grid">
@@ -142,11 +147,18 @@ function Fields({ draft, set, categories, showKey }) {
         <input
           value={draft.message}
           onChange={e => set("message", e.target.value)}
-          maxLength={400}
+          maxLength={MESSAGE_MAX}
           placeholder="Three Guys is now open at [postal]!"
         />
-        <span className={`dc-count ${overLimit ? "ann-over" : ""}`}>{draft.message.length} / 400</span>
+        <span className={`dc-count ${overLimit ? "ann-over" : ""}`}>{draft.message.length} / {MESSAGE_MAX}</span>
       </label>
+
+      {hasDigits && (
+        <p className="muted ann-hint ann-warn">
+          This has a number in it. Roblox&rsquo;s chat filter tags numbers, so it may reach the game as
+          {" "}<code>###</code>. The comms code is the one place that is unavoidable.
+        </p>
+      )}
 
       <p className="muted ann-hint">
         Placeholders:{" "}
@@ -154,6 +166,7 @@ function Fields({ draft, set, categories, showKey }) {
           <span key={p}>{i > 0 && ", "}<code>[{p}]</code></span>
         ))}
         . Leave the command off the message and, on a <code>:pm</code>, leave <code>[user]</code> off too.
+        {" "}Keep it short and avoid numbers: everything here goes through Roblox&rsquo;s chat filter.
       </p>
 
       <Preview draft={draft} />
