@@ -153,6 +153,7 @@ export const HANDBOOK = [
     id: "shifts", group: "duty", title: "Shifts and breaks",
     blocks: [
       { type: "p", text: "A shift is the record of you being on duty. It is what your activity is measured against, what grants your in-game powers, and what the rest of the team sees when they check who is available." },
+      { type: "note", title: "Not for Internal Affairs", body: "This whole section is about moderation duty, and IA does none. IA members cannot start a shift from either the panel or Discord, and are exempt from the quota. See *Internal Affairs*." },
       { type: "h3", text: "Going on duty" },
       { type: "steps", items: [
         "Join the in-game server and join the staff team.",
@@ -346,6 +347,7 @@ export const HANDBOOK = [
         "Pick the log type, enter the player's Roblox username and the reason, and submit. The username field suggests players as you type.",
       ]},
       { type: "p", text: "A temp ban also requires an unban date. The type list is filtered to what your rank is allowed to issue, so if a type is missing you do not have it." },
+      { type: "note", title: "Not for Internal Affairs", body: "IA issues no log types at all and has no Create New Log form. They read this log rather than write to it. See *Internal Affairs*." },
       { type: "h3", text: "Log types" },
       { type: "table", head: ["Type", "Who can issue", "Notes"], rows: [
         ["Warning", "Everyone", "—"],
@@ -664,9 +666,12 @@ export const HANDBOOK = [
         "Issuing strikes, terminations and demotions, per the table above, including on staff who would otherwise outrank them.",
         "Requesting staff coverage.",
         "Visibility of active kick rejoin cooldowns.",
+        "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
       { type: "h3", text: "What IA does not have" },
       { type: "note", title: "No in-game power from the IA rank", body: "Internal Affairs grants no `:mod` or `:admin`, and IA members are not on the staff team, so there is no moderation rank underneath to fall back on. IA is oversight, not a stronger moderator." },
+      { type: "note", variant: "hard", title: "The punishment log is read-only for IA", body: "You can search and open every entry. You cannot **create**, **edit**, **delete**, or **complete** one, and the Create New Log form does not appear for you. A tier that writes to the moderation record puts its own entries into the evidence the next investigation has to weigh, and a tier that can edit or delete entries can reshape the record it is judging. Reading it is the whole of the access." },
+      { type: "note", variant: "hard", title: "Internal Affairs works no shifts", body: "**Start Shift** does not appear on your dashboard and `/shift start` refuses you, on the panel and in Discord alike, because both write the same shift table. A shift says who was moderating and when, and IA moderates nothing. You are **exempt from the duty quota** as a result and will not appear on it. You can still see who is on duty and read anyone's shift history, which is often what an investigation turns on." },
       { type: "h3", text: "Reporting a staff member" },
       { type: "p", text: "Open a **Staff Complaint** ticket. It is visible only to Internal Affairs, Management and Directors, and the person you are reporting cannot see it. Bring evidence: clips, screenshots, message links, timestamps." },
       { type: "p", text: "Do not report staff misconduct in a public channel, do not confront the person yourself, and do not discuss an open complaint with its subject." },
@@ -761,7 +766,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "Sign in with Discord. You are asked to confirm your linked Roblox account the first time; that confirmation is checked on every request afterwards, not just at sign-in." },
       { type: "table", head: ["Page", "Who sees it", "What it holds"], rows: [
-        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them."],
+        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls and no Create New Log; the punishment log itself is read-only for them."],
         ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change, active kick rejoin cooldowns"],
         ["**HR Panel**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements"],
         ["**Account Verification**", "Management and above", "Resolving verification problems"],
@@ -782,7 +787,7 @@ export const HANDBOOK = [
       { type: "p", text: "Discord slash commands relevant to staff work. Player-facing commands (economy, casino, business, banking, stocks, insurance, property, crime) are not listed; they are not staff duties." },
       { type: "table", head: ["Command", "Minimum rank", "What it does"], rows: [
         { tier: "Duty" },
-        ["`/shift start` `stop` `leaderboard`", "Staff Team", "Manage your own shift"],
+        ["`/shift start` `stop` `leaderboard`", "Staff Team, not IA", "Manage your own shift"],
         ["`/callstaff`", "Trial Supervisor", "Ask staff to get on duty. 10 min global cooldown"],
         ["`/startup`", "Community Management", "Start a session"],
         ["`/shutdown`", "Community Management", "End a session. 5 min personal cooldown"],

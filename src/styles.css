@@ -1816,6 +1816,14 @@ code {
   white-space: nowrap;
 }
 
+/* Shown in place of the shift controls for anybody who works no shifts
+   (Internal Affairs). A plain line rather than a disabled button: a
+   greyed-out "Start Shift" invites a click and reads as a fault. */
+.hero-shift-note {
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
 .hero-shift-start {
   display: flex;
   align-items: center;
