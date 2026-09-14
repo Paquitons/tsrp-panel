@@ -153,6 +153,7 @@ export const HANDBOOK = [
     id: "shifts", group: "duty", title: "Shifts and breaks",
     blocks: [
       { type: "p", text: "A shift is the record of you being on duty. It is what your activity is measured against, what grants your in-game powers, and what the rest of the team sees when they check who is available." },
+      { type: "note", title: "Not for Internal Affairs", body: "This whole section is about moderation duty, and IA does none. IA members cannot start a shift from either the panel or Discord, and are exempt from the quota. See *Internal Affairs*." },
       { type: "h3", text: "Going on duty" },
       { type: "steps", items: [
         "Join the in-game server and join the staff team.",
@@ -346,6 +347,7 @@ export const HANDBOOK = [
         "Pick the log type, enter the player's Roblox username and the reason, and submit. The username field suggests players as you type.",
       ]},
       { type: "p", text: "A temp ban also requires an unban date. The type list is filtered to what your rank is allowed to issue, so if a type is missing you do not have it." },
+      { type: "note", title: "Not for Internal Affairs", body: "IA issues no log types at all and has no Create New Log form. They read this log rather than write to it. See *Internal Affairs*." },
       { type: "h3", text: "Log types" },
       { type: "table", head: ["Type", "Who can issue", "Notes"], rows: [
         ["Warning", "Everyone", "—"],
@@ -473,14 +475,15 @@ export const HANDBOOK = [
       { type: "table", head: ["Type", "For", "Who can see and claim it"], rows: [
         ["**General Support**", "Questions, minor concerns, Discord conduct reports", "Support Staff, or Trial Supervisor and above"],
         ["**Community Related**", "Shop items, giveaway prizes, event invitations", "Support Staff, or Trial Supervisor and above"],
-        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Internal Affairs, Management and Directors"],
+        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Supervisory, IA Officer and above, Management and Directors"],
         ["**Staff Complaint**", "Reporting a staff member", "Internal Affairs, Management and Directors"],
         ["**Ban Appeal**", "Appealing a ban", "Admin and above who are *also* Support Staff"],
         ["**Internal Affairs Application**", "Applying to join Internal Affairs", "Management and Directors only, deliberately not IA"],
       ]},
-      { type: "note", variant: "open", title: "Known inconsistency", body: "**Fast Pass tickets** can currently be claimed by Trial Supervisor and above, but only Internal Affairs, Management and Directors can see them. A Supervisor may find they can claim a ticket that never appears for them. Leave Fast Pass tickets to IA until this is settled." },
+      { type: "note", title: "Two ticket types, granted deliberately", body: "Internal Affairs handles **Staff Complaints** and **Fast Pass**, and nothing else. IA sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would also let them into general support, community tickets and ban appeals by accident of ordering. It does not: they are excluded from those by name. Fast Pass runs the other way, and on purpose: it is a transfer application rather than a report about anybody, so Supervisory reads and claims it alongside IA. It also stops partway up IA: approving one puts somebody onto the staff team on a trial, which is a hiring decision rather than an investigation, so **Internal Affairs and Trial Internal Affairs do not handle Fast Pass at all**. IA Officer and IA Supervisor do." },
       { type: "h3", text: "Claiming" },
-      { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. On most types, claiming narrows the channel to you and the opener. Staff Complaints and Ban Appeals keep the whole qualifying team in, because those are reviewed by a team rather than owned by whoever got there first." },
+      { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. Claiming narrows the channel to you and the opener. On a Staff Complaint, Management and Directors stay in for oversight; the rest of Internal Affairs does not. Ban Appeals and IA Applications keep their whole review team, because those are decided together." },
+      { type: "note", title: "A claimed ticket is yours", body: "Once you claim one, nobody else can claim it, close it or send a close request on it, and on a Staff Complaint the rest of Internal Affairs can no longer see it either. A Director can override. Transferring one means unclaiming it and letting somebody else claim, which puts it back in front of the tier." },
       { type: "p", text: "Every action re-checks your live Discord roles. Being in the channel is not what decides whether you can act." },
       { type: "h3", text: "Closing" },
       { type: "defs", items: [
@@ -589,7 +592,7 @@ export const HANDBOOK = [
     id: "training", group: "record", title: "Training and Fast Pass",
     blocks: [
       { type: "h3", text: "Fast Pass" },
-      { type: "p", text: "Fast Pass is the transfer route for people with real moderation experience elsewhere. They apply through a Fast Pass ticket with proof of their experience, and Internal Affairs reviews it." },
+      { type: "p", text: "Fast Pass is the transfer route for people with real moderation experience elsewhere. They apply through a Fast Pass ticket with proof of their experience, and Supervisory or an IA Officer reviews it." },
       { type: "steps", items: [
         "**`/fastpass`** (Trial Supervisor and above) approves the applicant. They get the Awaiting Training role and nothing else: no staff roles, no trial clock.",
         "A Staff Trainer runs their training.",
@@ -641,17 +644,34 @@ export const HANDBOOK = [
         "Check that staff follow the rules, guidelines and expectations of the community.",
         "Report findings and recommendations to leadership.",
       ]},
+      { type: "h3", text: "What each IA rank may do" },
+      { type: "p", text: "Granted by rank, on a ladder of their own rather than by where IA sits in the staff hierarchy. They are cumulative within that ladder: each IA rank holds everything the IA rank beneath it holds. Nothing crosses in from the staff ranks either way." },
+      { type: "table", head: ["Rank", "Terminate", "Demote", "Strike", "Fast Pass"], rows: [
+        ["Internal Affairs Supervisor", "Yes", "Yes", "Yes", "Yes"],
+        ["Internal Affairs Officer", "Yes", "Yes", "Yes", "Yes"],
+        ["Internal Affairs", "No", "No", "Yes", "No"],
+        ["Trial Internal Affairs", "No", "No", "No", "No"],
+      ]},
+      { type: "p", text: "The Fast Pass column is ticket access rather than a command: whether that rank can see, claim and handle a **Fast Pass** ticket. Staff Complaints are the whole tier's at every rank." },
+      { type: "note", variant: "hard", title: "No approval step", body: "An IA member who holds a permission runs it **directly**. Nobody signs it off. The approval queue exists so somebody senior reviews a junior’s decision, and reaching a decision about the staff team without that is the point of Internal Affairs. A power you hold is a power you use, and every use is recorded against your name." },
+      { type: "p", text: "The usual rule that you cannot act on somebody at or above your own rank does not apply to these. A tier that investigates the staff team cannot be blocked from acting on the senior half of it." },
+      { type: "p", text: "**Internal Affairs never promotes.** Demotion is granted; promotion is not, at any IA rank." },
+
       { type: "h3", text: "What IA has" },
       { type: "list", items: [
         "The **Internal Affairs** page on the Staff Panel.",
-        "Sole access, with Management and Directors, to **Staff Complaint** and **Fast Pass** tickets.",
-        "Issuing strikes, including on staff who would otherwise outrank them.",
-        "Suggesting promotions and demotions.",
+        "**Staff Complaint** tickets at every IA rank, with Management and Directors.",
+        "**Fast Pass** tickets from **IA Officer** upward only, shared with Supervisory. Internal Affairs and Trial Internal Affairs do not see them.",
+        "No other type: not general support, not community tickets, not ban appeals.",
+        "Issuing strikes, terminations and demotions, per the table above, including on staff who would otherwise outrank them.",
         "Requesting staff coverage.",
         "Visibility of active kick rejoin cooldowns.",
+        "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
       { type: "h3", text: "What IA does not have" },
       { type: "note", title: "No in-game power from the IA rank", body: "Internal Affairs grants no `:mod` or `:admin`, and IA members are not on the staff team, so there is no moderation rank underneath to fall back on. IA is oversight, not a stronger moderator." },
+      { type: "note", variant: "hard", title: "The punishment log is read-only for IA", body: "You can search and open every entry. You cannot **create**, **edit**, **delete**, or **complete** one, and the Create New Log form does not appear for you. A tier that writes to the moderation record puts its own entries into the evidence the next investigation has to weigh, and a tier that can edit or delete entries can reshape the record it is judging. Reading it is the whole of the access." },
+      { type: "note", variant: "hard", title: "Internal Affairs works no shifts", body: "**Start Shift** does not appear on your dashboard and `/shift start` refuses you, on the panel and in Discord alike, because both write the same shift table. A shift says who was moderating and when, and IA moderates nothing. You are **exempt from the duty quota** as a result and will not appear on it. You can still see who is on duty and read anyone's shift history, which is often what an investigation turns on." },
       { type: "h3", text: "Reporting a staff member" },
       { type: "p", text: "Open a **Staff Complaint** ticket. It is visible only to Internal Affairs, Management and Directors, and the person you are reporting cannot see it. Bring evidence: clips, screenshots, message links, timestamps." },
       { type: "p", text: "Do not report staff misconduct in a public channel, do not confront the person yourself, and do not discuss an open complaint with its subject." },
@@ -746,7 +766,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "Sign in with Discord. You are asked to confirm your linked Roblox account the first time; that confirmation is checked on every request afterwards, not just at sign-in." },
       { type: "table", head: ["Page", "Who sees it", "What it holds"], rows: [
-        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them."],
+        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls and no Create New Log; the punishment log itself is read-only for them."],
         ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change, active kick rejoin cooldowns"],
         ["**HR Panel**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements"],
         ["**Account Verification**", "Management and above", "Resolving verification problems"],
@@ -767,7 +787,7 @@ export const HANDBOOK = [
       { type: "p", text: "Discord slash commands relevant to staff work. Player-facing commands (economy, casino, business, banking, stocks, insurance, property, crime) are not listed; they are not staff duties." },
       { type: "table", head: ["Command", "Minimum rank", "What it does"], rows: [
         { tier: "Duty" },
-        ["`/shift start` `stop` `leaderboard`", "Staff Team", "Manage your own shift"],
+        ["`/shift start` `stop` `leaderboard`", "Staff Team, not IA", "Manage your own shift"],
         ["`/callstaff`", "Trial Supervisor", "Ask staff to get on duty. 10 min global cooldown"],
         ["`/startup`", "Community Management", "Start a session"],
         ["`/shutdown`", "Community Management", "End a session. 5 min personal cooldown"],
@@ -787,7 +807,7 @@ export const HANDBOOK = [
         ["`/resign`", "Director", "Process somebody's resignation"],
         ["`/activitycheck start`", "Community Management", "Post an activity check"],
         { tier: "Training" },
-        ["`/fastpass`", "Trial Supervisor", "Approve a Fast Pass applicant"],
+        ["`/fastpass`", "Trial Supervisor, or IA Officer", "Approve a Fast Pass applicant"],
         ["`/passtraining`", "Staff Trainer", "Pass a trainee and start their trial"],
         ["`/failtraining`", "Staff Trainer", "Fail a trainee"],
         { tier: "Tickets" },
