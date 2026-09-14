@@ -480,7 +480,8 @@ export const HANDBOOK = [
       ]},
       { type: "note", title: "Two ticket types, granted deliberately", body: "Internal Affairs handles **Staff Complaints** and **Fast Pass**, and nothing else. IA sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would also let them into general support, community tickets and ban appeals by accident of ordering. It does not: they are excluded from those by name." },
       { type: "h3", text: "Claiming" },
-      { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. On most types, claiming narrows the channel to you and the opener. Staff Complaints and Ban Appeals keep the whole qualifying team in, because those are reviewed by a team rather than owned by whoever got there first." },
+      { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. On most types, claiming narrows the channel to you and the opener. Staff Complaints, Ban Appeals and IA Applications keep the whole qualifying team in, so colleagues can still read and discuss." },
+      { type: "note", title: "A claimed ticket is yours", body: "Once you claim one, nobody else can claim it, close it or send a close request on it. That holds even where the rest of your team can still see the channel: on a Staff Complaint another Internal Affairs member can read and discuss it, and cannot take it over. A Director can override, and transferring one means unclaiming it and letting somebody else claim." },
       { type: "p", text: "Every action re-checks your live Discord roles. Being in the channel is not what decides whether you can act." },
       { type: "h3", text: "Closing" },
       { type: "defs", items: [
