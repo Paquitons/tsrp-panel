@@ -473,12 +473,12 @@ export const HANDBOOK = [
       { type: "table", head: ["Type", "For", "Who can see and claim it"], rows: [
         ["**General Support**", "Questions, minor concerns, Discord conduct reports", "Support Staff, or Trial Supervisor and above"],
         ["**Community Related**", "Shop items, giveaway prizes, event invitations", "Support Staff, or Trial Supervisor and above"],
-        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Internal Affairs, Management and Directors"],
+        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Supervisory, Internal Affairs, Management and Directors"],
         ["**Staff Complaint**", "Reporting a staff member", "Internal Affairs, Management and Directors"],
         ["**Ban Appeal**", "Appealing a ban", "Admin and above who are *also* Support Staff"],
         ["**Internal Affairs Application**", "Applying to join Internal Affairs", "Management and Directors only, deliberately not IA"],
       ]},
-      { type: "note", title: "Two ticket types, granted deliberately", body: "Internal Affairs handles **Staff Complaints** and **Fast Pass**, and nothing else. IA sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would also let them into general support, community tickets and ban appeals by accident of ordering. It does not: they are excluded from those by name." },
+      { type: "note", title: "Two ticket types, granted deliberately", body: "Internal Affairs handles **Staff Complaints** and **Fast Pass**, and nothing else. IA sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would also let them into general support, community tickets and ban appeals by accident of ordering. It does not: they are excluded from those by name. Fast Pass runs the other way, and on purpose: it is a transfer application rather than a report about anybody, so Supervisory reads and claims it alongside IA." },
       { type: "h3", text: "Claiming" },
       { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. Claiming narrows the channel to you and the opener. On a Staff Complaint, Management and Directors stay in for oversight; the rest of Internal Affairs does not. Ban Appeals and IA Applications keep their whole review team, because those are decided together." },
       { type: "note", title: "A claimed ticket is yours", body: "Once you claim one, nobody else can claim it, close it or send a close request on it, and on a Staff Complaint the rest of Internal Affairs can no longer see it either. A Director can override. Transferring one means unclaiming it and letting somebody else claim, which puts it back in front of the tier." },
@@ -590,7 +590,7 @@ export const HANDBOOK = [
     id: "training", group: "record", title: "Training and Fast Pass",
     blocks: [
       { type: "h3", text: "Fast Pass" },
-      { type: "p", text: "Fast Pass is the transfer route for people with real moderation experience elsewhere. They apply through a Fast Pass ticket with proof of their experience, and Internal Affairs reviews it." },
+      { type: "p", text: "Fast Pass is the transfer route for people with real moderation experience elsewhere. They apply through a Fast Pass ticket with proof of their experience, and Supervisory or Internal Affairs reviews it." },
       { type: "steps", items: [
         "**`/fastpass`** (Trial Supervisor and above) approves the applicant. They get the Awaiting Training role and nothing else: no staff roles, no trial clock.",
         "A Staff Trainer runs their training.",
