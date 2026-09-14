@@ -473,7 +473,7 @@ export const HANDBOOK = [
       { type: "table", head: ["Type", "For", "Who can see and claim it"], rows: [
         ["**General Support**", "Questions, minor concerns, Discord conduct reports", "Support Staff, or Trial Supervisor and above"],
         ["**Community Related**", "Shop items, giveaway prizes, event invitations", "Support Staff, or Trial Supervisor and above"],
-        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Supervisory, Internal Affairs, Management and Directors"],
+        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Internal Affairs, Management and Directors"],
         ["**Staff Complaint**", "Reporting a staff member", "Internal Affairs, Management and Directors"],
         ["**Ban Appeal**", "Appealing a ban", "Admin and above who are *also* Support Staff"],
         ["**Internal Affairs Application**", "Applying to join Internal Affairs", "Management and Directors only, deliberately not IA"],
