@@ -51,6 +51,68 @@ function UnlinkModal({ discordId, onClose, onUnlinked }) {
   );
 }
 
+/**
+ * Releasing is not unlinking.
+ *
+ * Unlink throws the record away, which is right when a link was simply
+ * wrong. Release keeps it -- the record still identifies who held that
+ * Roblox account, so every audit that resolves through it still works --
+ * and only stops it blocking another Discord account from verifying onto
+ * the same Roblox account.
+ *
+ * This is the tool for somebody who lost their Discord account but is
+ * still in the server: hacked, or locked out. An account that has already
+ * LEFT is released automatically and needs nobody to come here.
+ */
+function ReleaseModal({ discordId, robloxUsername, onClose, onReleased }) {
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await apiFetch("/verification/release", { method: "POST", body: { discordId, reason } });
+      onReleased();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal onClose={onClose} labelledBy="release-modal-title">
+      <h2 id="release-modal-title">Release Roblox Claim</h2>
+      {error && <Banner>{error}</Banner>}
+      <p className="muted">
+        Frees <strong>{robloxUsername ?? "this Roblox account"}</strong> so its owner can verify it on a
+        different Discord account. Nothing is deleted and this record stays exactly as it is.
+      </p>
+      <p className="muted">
+        Verifying still means completing Roblox sign-in, so this hands nobody anything they could not
+        already prove they own. Rejoining the server does not undo a release made here.
+      </p>
+      <form onSubmit={submit}>
+        <label>Reason</label>
+        <AutoGrowTextarea
+          value={reason}
+          onChange={e => setReason(e.target.value)}
+          placeholder="Why the claim is being lifted. At least 10 characters."
+        />
+        <div className="button-row">
+          <button className="primary" type="submit" disabled={submitting || reason.trim().length < 10}>
+            {submitting ? "Releasing…" : "Release Claim"}
+          </button>
+          <button className="secondary" type="button" onClick={onClose}>Cancel</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export default function Verification() {
   const { user } = useAuth();
   const canAccess = !!user?.isManagementOrAbove;
@@ -58,6 +120,7 @@ export default function Verification() {
   const [selectedDiscordId, setSelectedDiscordId] = useState(null);
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [unlinkModalOpen, setUnlinkModalOpen] = useState(false);
+  const [releaseModalOpen, setReleaseModalOpen] = useState(false);
 
   const query = useApiQuery(["verification", selectedDiscordId], selectedDiscordId && `/verification/${selectedDiscordId}`);
   const profile = query.data;
@@ -132,10 +195,27 @@ export default function Verification() {
                 <p className="muted">This account has no linked Roblox account.</p>
               )}
 
+              {profile.claim?.released && (
+                <Banner variant="info" style={{ marginTop: 12 }}>
+                  This claim is released, so somebody else can verify this Roblox account.
+                  {profile.claim.releasedBy ? " Released by management." : " Released automatically when this account left the server."}
+                  {profile.claim.releasedReason ? ` Reason: ${profile.claim.releasedReason}` : ""}
+                </Banner>
+              )}
+
+              {profile.inServer === false && (
+                <Banner variant="warning" style={{ marginTop: 12 }}>
+                  This Discord account is no longer in the server.
+                </Banner>
+              )}
+
               <div className="button-row" style={{ marginTop: 16 }}>
                 <button className="primary" onClick={() => setLinkModalOpen(true)}>
                   {profile.link ? "Change Roblox Account" : "Link Roblox Account"}
                 </button>
+                {profile.link && !profile.claim?.released && (
+                  <button className="secondary" onClick={() => setReleaseModalOpen(true)}>Release Claim</button>
+                )}
                 {profile.link && (
                   <button className="danger" onClick={() => setUnlinkModalOpen(true)}>Unlink</button>
                 )}
@@ -183,6 +263,15 @@ export default function Verification() {
           currentlyLinked={!!profile.link}
           onClose={() => setLinkModalOpen(false)}
           onLinked={() => { setLinkModalOpen(false); query.refetch(); }}
+        />
+      )}
+
+      {releaseModalOpen && profile && (
+        <ReleaseModal
+          discordId={profile.discordId}
+          robloxUsername={profile.link?.robloxUsername}
+          onClose={() => setReleaseModalOpen(false)}
+          onReleased={() => { setReleaseModalOpen(false); query.refetch(); }}
         />
       )}
 
