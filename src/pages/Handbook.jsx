@@ -216,8 +216,9 @@ export default function Handbook() {
               the system actually does, tell management so one of the two gets fixed.
             </p>
             <p>
-              Sections marked <em>Known inconsistency</em> or <em>Pending confirmation</em> are open
-              items awaiting a decision. Direct questions about any policy here to a member of management.
+              Every policy here has been decided and matches what the system actually enforces. There
+              are no open items left in it. Direct questions about any policy here to a member of
+              management.
             </p>
           </footer>
         </main>

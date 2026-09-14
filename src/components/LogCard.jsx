@@ -45,6 +45,11 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
   // Defaults to true when the claim is missing so a session issued before
   // this shipped behaves as it did, rather than silently losing the menu.
   const canWriteLogs = user?.canWriteLogs !== false;
+  // Completing a BOLO asserts the player was caught and BANNED, so it
+  // follows in-game ban authority rather than panel tier: Administration
+  // and above. A Moderator files BOLOs precisely because they cannot ban,
+  // so they cannot be the one to say the ban happened.
+  const canReviewBolos = user?.canReviewBolos !== false;
   const canModify = canWriteLogs &&
     (log.issuer_discord_id === user?.discordId || user?.tier === "management" || user?.tier === "director");
   const editableTypes = ALL_TYPES.filter(t =>
@@ -113,11 +118,11 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           <button ref={menuTriggerRef} className="log-card-menu-trigger" onClick={() => setMenuOpen(o => !o)} disabled={busy}>⋮</button>
           <PortalDropdown anchorRef={menuTriggerRef} open={menuOpen} onClose={() => setMenuOpen(false)} align="right" className="log-card-dropdown-portal">
             {canModify && <button onClick={() => { setEditing(true); setMenuOpen(false); }}>Edit</button>}
-            {canWriteLogs && log.type === "bolo" && !log.completed_at && (
+            {canWriteLogs && canReviewBolos && log.type === "bolo" && !log.completed_at && (
               <button onClick={handleComplete} className="dropdown-item-accent">Complete (Ban User)</button>
             )}
             {canModify && <button onClick={handleDelete} className="dropdown-item-danger">Delete</button>}
-            {!canModify && (!canWriteLogs || log.type !== "bolo") && (
+            {!canModify && !(canWriteLogs && canReviewBolos && log.type === "bolo" && !log.completed_at) && (
               <span className="dropdown-empty">
                 {canWriteLogs ? "No actions available" : "View only"}
               </span>
