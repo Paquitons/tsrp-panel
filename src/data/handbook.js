@@ -473,12 +473,12 @@ export const HANDBOOK = [
       { type: "table", head: ["Type", "For", "Who can see and claim it"], rows: [
         ["**General Support**", "Questions, minor concerns, Discord conduct reports", "Support Staff, or Trial Supervisor and above"],
         ["**Community Related**", "Shop items, giveaway prizes, event invitations", "Support Staff, or Trial Supervisor and above"],
-        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Supervisory, Management and Directors"],
+        ["**Fast Pass**", "Applying to the Fast Pass / Staff Transfer Programme", "Supervisory, Internal Affairs, Management and Directors"],
         ["**Staff Complaint**", "Reporting a staff member", "Internal Affairs, Management and Directors"],
         ["**Ban Appeal**", "Appealing a ban", "Admin and above who are *also* Support Staff"],
         ["**Internal Affairs Application**", "Applying to join Internal Affairs", "Management and Directors only, deliberately not IA"],
       ]},
-      { type: "note", title: "Internal Affairs handles Staff Complaints only", body: "Every other ticket type is somebody else’s work. Internal Affairs sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would let them into Fast Pass, general support and ban appeals by accident of ordering. It does not: they are excluded from all of it by name." },
+      { type: "note", title: "Two ticket types, granted deliberately", body: "Internal Affairs handles **Staff Complaints** and **Fast Pass**, and nothing else. IA sits above Supervisory in the rank order, so a plain “Trial Supervisor and above” check would also let them into general support, community tickets and ban appeals by accident of ordering. It does not: they are excluded from those by name." },
       { type: "h3", text: "Claiming" },
       { type: "p", text: "Claim a ticket before you work it, so two people are not answering the same person. On most types, claiming narrows the channel to you and the opener. Staff Complaints and Ban Appeals keep the whole qualifying team in, because those are reviewed by a team rather than owned by whoever got there first." },
       { type: "p", text: "Every action re-checks your live Discord roles. Being in the channel is not what decides whether you can act." },
@@ -644,7 +644,7 @@ export const HANDBOOK = [
       { type: "h3", text: "What IA has" },
       { type: "list", items: [
         "The **Internal Affairs** page on the Staff Panel.",
-        "**Staff Complaint** tickets, with Management and Directors. No other ticket type: not Fast Pass, not general support, not ban appeals.",
+        "**Staff Complaint** and **Fast Pass** tickets, with Management and Directors. No other type: not general support, not community tickets, not ban appeals.",
         "Issuing strikes, including on staff who would otherwise outrank them.",
         "Suggesting promotions and demotions.",
         "Requesting staff coverage.",
