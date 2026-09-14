@@ -642,10 +642,10 @@ export const HANDBOOK = [
         "Report findings and recommendations to leadership.",
       ]},
       { type: "h3", text: "What each IA rank may do" },
-      { type: "p", text: "These are granted by rank, in a table of their own rather than by where IA sits in the hierarchy. Nothing is inherited from the ranks above or below." },
+      { type: "p", text: "Granted by rank, on a ladder of their own rather than by where IA sits in the staff hierarchy. They are cumulative within that ladder: each IA rank holds everything the IA rank beneath it holds. Nothing crosses in from the staff ranks either way." },
       { type: "table", head: ["Rank", "Terminate", "Demote", "Strike"], rows: [
         ["Internal Affairs Supervisor", "Yes", "Yes", "Yes"],
-        ["Internal Affairs Officer", "Yes", "Yes", "No"],
+        ["Internal Affairs Officer", "Yes", "Yes", "Yes"],
         ["Internal Affairs", "No", "No", "Yes"],
         ["Trial Internal Affairs", "No", "No", "No"],
       ]},
