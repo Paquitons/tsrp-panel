@@ -1,15 +1,15 @@
 // ============================================================
 //  STAFF HANDBOOK -- content, kept apart from how it is rendered
 //
-//  Structured rather than written as JSX for two reasons:
+//  Structured rather than written as JSX so that editing a policy does
+//  not mean editing a React component. Everything below is plain data,
+//  so a wording change is a one-line edit in one file, and the same
+//  content could be rendered somewhere else without being rewritten.
 //
-//    * The page filters sections as you type. Searching structured data
-//      means one precomputed text blob per section; searching rendered
-//      JSX would mean reaching into the DOM for textContent, which is
-//      the kind of thing that works until somebody adds a component.
-//    * Editing a policy should not mean editing a React component.
-//      Everything below is plain data, so a wording change is a one-line
-//      edit in one file.
+//  No inline markup beyond **bold** and *italic*. Backticks used to mark
+//  commands as code; they are gone. This is a printed handbook, not a
+//  terminal, and a command reads perfectly well as :kick Bob1 or
+//  /endloa without a box drawn round it.
 //
 //  Block types the renderer understands: h3, p, list, steps, table,
 //  defs, note, reqs. Anything else is ignored rather than crashing the
@@ -19,10 +19,9 @@
 //  Every rank threshold, duration and limit below was read off the live
 //  code, not carried over from the previous handbook. Where a policy is
 //  real but lives nowhere in code (the punishment tiers, the 20-player
-//  RP rule, the review criteria), it is carried forward as policy. Where
-//  the repositories genuinely disagree with each other, the section says
-//  so in a `note` with variant "open" rather than picking a side
-//  quietly.
+//  RP rule, the review criteria), it is carried forward as policy.
+//  Every threshold that the three repositories once disagreed about has
+//  since been decided, so there are no open items left in here.
 // ============================================================
 
 export const HANDBOOK_CODES = [
@@ -62,7 +61,7 @@ export const HANDBOOK = [
       { type: "p", text: "Leaving the server briefly and coming back costs you nothing: rejoining puts your claim straight back and you are not asked to verify again." },
 
       { type: "h3", text: "Your nickname" },
-      { type: "p", text: "Your Discord nickname is managed for you. The bot sets it to `PREFIX | Name` using your rank's prefix and re-applies it whenever your rank changes. Do not set it by hand. If it looks wrong, ask any Junior Supervisor or above to run `/fixnick` on you." },
+      { type: "p", text: "Your Discord nickname is managed for you. The bot sets it to PREFIX | Name using your rank's prefix and re-applies it whenever your rank changes. Do not set it by hand. If it looks wrong, ask any Junior Supervisor or above to run /fixnick on you." },
       { type: "p", text: "Your prefix changes automatically while you are on duty, on break, or on LOA, so the state you are in is visible in the member list without anyone asking. Precedence is **LOA**, then **On Break**, then **On Duty**." },
 
       { type: "h3", text: "Your avatar" },
@@ -106,12 +105,12 @@ export const HANDBOOK = [
         ["Junior Supervisor", "JS", ""],
         ["Trial Supervisor", "TS", ""],
         { tier: "Administration" },
-        ["Chief Administrator", "CA", "Full punishment access including bans and temp bans. Eligible for `:admin` in game."],
+        ["Chief Administrator", "CA", "Full punishment access including bans and temp bans. Eligible for :admin in game."],
         ["Senior Administrator", "SA", ""],
         ["Administrator", "A", ""],
         ["Junior Administrator", "JA", ""],
         { tier: "Moderation" },
-        ["Chief Moderator", "ChM", "Warnings, kicks, BOLOs and notes. Eligible for `:mod` in game."],
+        ["Chief Moderator", "ChM", "Warnings, kicks, BOLOs and notes. Eligible for :mod in game."],
         ["Senior Moderator", "SM", ""],
         ["Moderator", "M", ""],
         ["Junior Moderator", "JM", ""],
@@ -140,12 +139,12 @@ export const HANDBOOK = [
       { type: "h3", text: "The three thresholds that matter" },
       { type: "p", text: "Most Discord commands are gated on one of three lines rather than on a rank each. Learn these three and you can predict almost anything." },
       { type: "defs", items: [
-        ["Trial Supervisor and above", "Submit rank change requests, issue strikes, run `/say`, `/giveaway`, `/callstaff`, `/fastpass`. Also the rank floor for handling ordinary tickets."],
-        ["Management and above", "End or extend somebody's LOA (`/endloa` and the panel alike)."],
-        ["Community Management and above", "Promote and demote instantly, approve or deny rank change requests and LOAs, terminate, start and stop sessions, manage in-game permissions, run `/poll`."],
+        ["Trial Supervisor and above", "Submit rank change requests, issue strikes, run /say, /giveaway, /callstaff, /fastpass. Also the rank floor for handling ordinary tickets."],
+        ["Management and above", "End or extend somebody's LOA (/endloa and the panel alike)."],
+        ["Community Management and above", "Promote and demote instantly, approve or deny rank change requests and LOAs, terminate, start and stop sessions, manage in-game permissions, run /poll."],
         ["Director and above", "Process somebody else's resignation, delete a ticket outright, grant alternative verification."],
       ]},
-      { type: "p", text: "Reviewing a ban BOLO is the one thing not on this list, because it does not follow the rank order at all. It follows `:ban`: see *Ban BOLOs*." },
+      { type: "p", text: "Reviewing a ban BOLO is the one thing not on this list, because it does not follow the rank order at all. It follows :ban: see *Ban BOLOs*." },
     ],
   },
 
@@ -159,7 +158,7 @@ export const HANDBOOK = [
       { type: "steps", items: [
         "Join the in-game server and join the staff team.",
         "Equip your staff uniform and make sure you are on a blocky avatar.",
-        "Start your shift, either with **Start Shift** on the dashboard or with `/shift start`.",
+        "Start your shift, either with **Start Shift** on the dashboard or with /shift start.",
       ]},
       { type: "p", text: "You cannot start a shift while the server is offline or while a shutdown is running; the button says so instead of failing quietly. Starting a shift gives you the On Duty role, adds the on-duty prefix to your nickname, and grants your in-game powers within seconds." },
 
@@ -174,7 +173,7 @@ export const HANDBOOK = [
       { type: "p", text: "Take a break rather than going AFK on duty. Resume from the same button when you come back." },
 
       { type: "h3", text: "Ending a shift" },
-      { type: "p", text: "End your shift with **End Shift** or `/shift stop` when you are done. Your in-game powers are revoked immediately. If the server shuts down while you are still clocked in, your shift is ended for you and the time is saved." },
+      { type: "p", text: "End your shift with **End Shift** or /shift stop when you are done. Your in-game powers are revoked immediately. If the server shuts down while you are still clocked in, your shift is ended for you and the time is saved." },
 
       { type: "h3", text: "Flagged shifts" },
       { type: "p", text: "The bot watches every open shift and flags one that no longer looks real, then alerts management so a human can look. Two things get flagged:" },
@@ -185,7 +184,7 @@ export const HANDBOOK = [
       { type: "p", text: "A flag is not a punishment and nothing is ended automatically. Starting a break clears any existing flag, so a break is also how you answer one. If you are flagged repeatedly, expect a conversation." },
 
       { type: "h3", text: "Off-duty command alerts" },
-      { type: "p", text: "Running a moderation command in game while you are not clocked in posts an alert to management, naming you and the command. `:pm` and `:h` are excluded, since neither is a moderation action. Everything else counts." },
+      { type: "p", text: "Running a moderation command in game while you are not clocked in posts an alert to management, naming you and the command. :pm and :h are excluded, since neither is a moderation action. Everything else counts." },
       { type: "note", variant: "hard", title: "The rule", body: "If you are moderating, you are on duty. Clock in first. \"I was only doing one thing\" is the exact pattern the alert exists to catch." },
     ],
   },
@@ -194,7 +193,7 @@ export const HANDBOOK = [
   {
     id: "ingame-permissions", group: "duty", title: "In-game permissions",
     blocks: [
-      { type: "p", text: "Nobody is granted `:mod` or `:admin` permanently. The bot grants your level when you clock in and revokes it when you clock out, and it reconciles continuously so the game's staff list matches who is actually on duty." },
+      { type: "p", text: "Nobody is granted :mod or :admin permanently. The bot grants your level when you clock in and revokes it when you clock out, and it reconciles continuously so the game's staff list matches who is actually on duty." },
       { type: "h3", text: "Three things are required, all of them" },
       { type: "defs", items: [
         ["Rank", "What you are eligible for, read live from your Discord roles rather than from whatever you were when the shift started."],
@@ -204,15 +203,15 @@ export const HANDBOOK = [
       { type: "p", text: "Eligibility on its own grants nothing. A Chief Administrator sitting off duty has exactly as much in-game power as a member of the public." },
       { type: "h3", text: "What each rank is eligible for" },
       { type: "table", head: ["Level", "Ranks"], rows: [
-        ["`:admin`", "All Leadership, all Management, all four Supervisory ranks, all four Administration ranks"],
-        ["`:mod`", "All four Moderation ranks, Staff Trainer"],
+        [":admin", "All Leadership, all Management, all four Supervisory ranks, all four Administration ranks"],
+        [":mod", "All four Moderation ranks, Staff Trainer"],
         ["None", "All four Internal Affairs ranks, Department Owners, Staff Team"],
       ]},
-      { type: "note", title: "Internal Affairs holds no in-game power", body: "IA is oversight, not a stronger moderator, and it is separate from the staff team: you cannot hold an IA rank and a moderation rank at the same time, so an IA rank on its own means no `:mod` and no `:admin`. Should somebody end up holding both anyway, their in-game level comes from the moderation rank and never from the IA one. This affects `:mod` and `:admin` only; nicknames, panel access and who outranks whom are unchanged." },
+      { type: "note", title: "Internal Affairs holds no in-game power", body: "IA is oversight, not a stronger moderator, and it is separate from the staff team: you cannot hold an IA rank and a moderation rank at the same time, so an IA rank on its own means no :mod and no :admin. Should somebody end up holding both anyway, their in-game level comes from the moderation rank and never from the IA one. This affects :mod and :admin only; nicknames, panel access and who outranks whom are unchanged." },
       { type: "h3", text: "Server owners" },
       { type: "p", text: "The ER:LC server owner and co-owners sit outside this system entirely. Their power comes from owning the private server and nothing here can grant or take it away." },
       { type: "h3", text: "If your powers do not appear" },
-      { type: "p", text: "Management can run `/ingameperms check` on you, which reports exactly which gate is stopping you: not in the Discord, no rank, rank not eligible, on break, not on duty, no verified Roblox account, no confirmed reading from the game server, or the verified account not being in the server. Ask rather than guessing." },
+      { type: "p", text: "Management can run /ingameperms check on you, which reports exactly which gate is stopping you: not in the Discord, no rank, rank not eligible, on break, not on duty, no verified Roblox account, no confirmed reading from the game server, or the verified account not being in the server. Ask rather than guessing." },
     ],
   },
 
@@ -257,18 +256,18 @@ export const HANDBOOK = [
     blocks: [
       { type: "reqs", items: ["Community Management and above"] },
       { type: "h3", text: "Startup" },
-      { type: "p", text: "`/startup` announces a session and marks the server online. Until it runs, nobody can clock in. Use `/startup silent` to bring the server up without the public announcement." },
+      { type: "p", text: "/startup announces a session and marks the server online. Until it runs, nobody can clock in. Use /startup silent to bring the server up without the public announcement." },
       { type: "h3", text: "Shutdown" },
-      { type: "p", text: "`/shutdown` ends the session. The moment it is run, and before the countdown finishes:" },
+      { type: "p", text: "/shutdown ends the session. The moment it is run, and before the countdown finishes:" },
       { type: "list", items: [
         "Every open shift is ended.",
         "Nobody can start a new shift.",
-        "Every staff member's `:mod` and `:admin` is revoked in game.",
+        "Every staff member's :mod and :admin is revoked in game.",
       ]},
       { type: "p", text: "None of that waits for the countdown, because the point of a shutdown is that staff powers stop being live. There is a five minute per-person cooldown on successful shutdowns; failed attempts do not cost it." },
       { type: "h3", text: "Calling for staff" },
       { type: "reqs", items: ["Trial Supervisor and above"] },
-      { type: "p", text: "`/callstaff` pings the team to get on duty, with an optional reason. It has a **ten minute global cooldown** shared by everyone, so use it when coverage is genuinely short rather than as a nudge." },
+      { type: "p", text: "/callstaff pings the team to get on duty, with an optional reason. It has a **ten minute global cooldown** shared by everyone, so use it when coverage is genuinely short rather than as a nudge." },
       { type: "h3", text: "Population alerts" },
       { type: "p", text: "The bot watches the server population and pings management when it drops below a threshold, but only after the server has been busy enough that a drop means something. This is automatic and needs nothing from you; it is why management sometimes appears without being asked." },
     ],
@@ -305,7 +304,7 @@ export const HANDBOOK = [
         "Staff impersonation",
       ]},
       { type: "h3", text: "Kick rejoin cooldown" },
-      { type: "p", text: "Logging a kick on the Staff Panel can start a rejoin cooldown, and anyone who comes back inside their window is re-kicked automatically. The cooldown is only ever created by the panel log, never by the `:kick` command itself, which is another reason to log every kick. Active cooldowns are listed on the Internal Affairs page." },
+      { type: "p", text: "Logging a kick on the Staff Panel can start a rejoin cooldown, and anyone who comes back inside their window is re-kicked automatically. The cooldown is only ever created by the panel log, never by the :kick command itself, which is another reason to log every kick. Active cooldowns are listed on the Internal Affairs page." },
     ],
   },
 
@@ -362,13 +361,13 @@ export const HANDBOOK = [
       { type: "h3", text: "Ban BOLOs" },
       { type: "p", text: "A BOLO is how a Moderator gets a ban issued without having ban powers. Anyone who can log at all can file one: you log a BOLO with the reason and the evidence, and it goes into a review queue as pending." },
       { type: "reqs", items: ["Anyone can file", "Administration and above to review"] },
-      { type: "p", text: "Reviewing is gated on `:ban` rather than on a rank line, because accepting a BOLO **issues the ban in game, under the reviewer's name**. If you can use `:ban`, you can review; if you cannot, you cannot. In practice that is Administration, Supervisory, Management and Leadership." },
+      { type: "p", text: "Reviewing is gated on :ban rather than on a rank line, because accepting a BOLO **issues the ban in game, under the reviewer's name**. If you can use :ban, you can review; if you cannot, you cannot. In practice that is Administration, Supervisory, Management and Leadership." },
       { type: "list", items: [
-        "**Moderators and Staff Trainer cannot review.** They hold `:mod`, not `:admin`, which is the whole reason the queue exists for them to file into.",
+        "**Moderators and Staff Trainer cannot review.** They hold :mod, not :admin, which is the whole reason the queue exists for them to file into.",
         "**Internal Affairs cannot review, at any IA rank.** IA holds no in-game power, and a tier that cannot ban cannot approve a ban.",
         "Somebody who is IA *and* holds a moderation rank is judged on the moderation rank, exactly as their in-game level already is.",
       ]},
-      { type: "p", text: "Reviewers accept or decline from Discord with `/bolo`. Both sides act on the same record, so a decision appears immediately wherever else it is shown. Marking a BOLO **Complete** on the panel is the same authority as accepting one, because it asserts the player was caught and banned." },
+      { type: "p", text: "Reviewers accept or decline from Discord with /bolo. Both sides act on the same record, so a decision appears immediately wherever else it is shown. Marking a BOLO **Complete** on the panel is the same authority as accepting one, because it asserts the player was caught and banned." },
       { type: "h3", text: "Run Command" },
       { type: "reqs", items: ["Management and above"] },
       { type: "p", text: "The dashboard's **Run Command** sends a raw command straight to the ER:LC server. There is no allowlist and no confirmation step, and every use is recorded against your name in the audit log." },
@@ -382,24 +381,24 @@ export const HANDBOOK = [
     blocks: [
       { type: "h3", text: "Command standards" },
       { type: "defs", items: [
-        ["Full commands only", "Use the full four-or-more-letter form. `:kick`, not a shorthand."],
-        ["Four characters of the username, minimum", "You do not have to type the whole username, but you must give at least four characters of it. `:kick Bob1` is fine. `:kick Bob` is not, and can hit the wrong player."],
-        ["Never add a reason", "The command takes the player and nothing else. `:kick Bob1`, never `:kick Bob1 RDM`. The reason belongs in the panel log, which is where it is on the record."],
+        ["Full commands only", "Use the full four-or-more-letter form. :kick, not a shorthand."],
+        ["Four characters of the username, minimum", "You do not have to type the whole username, but you must give at least four characters of it. :kick Bob1 is fine. :kick Bob is not, and can hit the wrong player."],
+        ["Never add a reason", "The command takes the player and nothing else. :kick Bob1, never :kick Bob1 RDM. The reason belongs in the panel log, which is where it is on the record."],
       ]},
       { type: "table", head: ["Do not", "Do"], rows: [
-        ["`:kick Bob`", "`:kick Bob1`"],
-        ["`:kick Bob1 RDM`", "`:kick Bob1`"],
+        [":kick Bob", ":kick Bob1"],
+        [":kick Bob1 RDM", ":kick Bob1"],
       ]},
       { type: "p", text: "Breaking any of these is a verbal warning first, then a strike." },
       { type: "h3", text: "The three message commands" },
       { type: "table", head: ["Command", "What it does", "Use for"], rows: [
-        ["`:h`", "Hint, stays on screen", "Standing rules and situational notices that apply for a while"],
-        ["`:m`", "Server message, scrolls away", "One-off announcements: an opening, a shutdown"],
-        ["`:pm`", "Private message to one player", "Moderation messages to an individual"],
+        [":h", "Hint, stays on screen", "Standing rules and situational notices that apply for a while"],
+        [":m", "Server message, scrolls away", "One-off announcements: an opening, a shutdown"],
+        [":pm", "Private message to one player", "Moderation messages to an individual"],
       ]},
       { type: "p", text: "Do not write your own when an approved message exists." },
       { type: "h3", text: "Roblox will filter you" },
-      { type: "p", text: "Everything you send goes through Roblox's chat filter and anything it dislikes arrives as `###`. Numbers are the main trigger. Keep messages short, avoid digits, and use plain words; nothing that looks like an attempt to sneak past a filter, because that is exactly what the filter looks for." },
+      { type: "p", text: "Everything you send goes through Roblox's chat filter and anything it dislikes arrives as ###. Numbers are the main trigger. Keep messages short, avoid digits, and use plain words; nothing that looks like an attempt to sneak past a filter, because that is exactly what the filter looks for." },
     ],
   },
 
@@ -409,14 +408,14 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "The In-Game Announcements channel carries a panel with every approved reusable message, sorted into six categories. Pick a category, pick the message, and copy the line it gives you straight into the game. The line comes with the right prefix already on it." },
       { type: "table", head: ["Category", "Prefix", "Covers"], rows: [
-        ["Business & Location", "`:m`", "Openings, services, locations"],
-        ["Department & Recruitment", "`:h`", "Hiring, applications, whitelists"],
-        ["Rules & Reminders", "`:h`", "Standing rules and in-game conduct"],
-        ["Server & Community", "`:m` `:h`", "Comms, shutdowns, community notices"],
-        ["Active RP / Situations", "`:h`", "Temporary situational announcements"],
-        ["Moderation Messages", "`:pm`", "Private messages to one player"],
+        ["Business & Location", ":m", "Openings, services, locations"],
+        ["Department & Recruitment", ":h", "Hiring, applications, whitelists"],
+        ["Rules & Reminders", ":h", "Standing rules and in-game conduct"],
+        ["Server & Community", ":m :h", "Comms, shutdowns, community notices"],
+        ["Active RP / Situations", ":h", "Temporary situational announcements"],
+        ["Moderation Messages", ":pm", "Private messages to one player"],
       ]},
-      { type: "p", text: "Anything in square brackets is yours to fill in before you send it: `[user]`, `[location]`, `[postal]`, `[reason]`, `[department]`." },
+      { type: "p", text: "Anything in square brackets is yours to fill in before you send it: [user], [location], [postal], [reason], [department]." },
       { type: "p", text: "Management can edit the list from the HR Panel and changes reach the Discord panel on their own within about fifteen seconds. If a message is worded badly or missing, say so rather than improvising your own version." },
       { type: "note", title: "Do not free-hand announcements", body: "The approved wording exists so the same announcement reads the same way every time and does not get filtered. Write your own only for something genuinely one-off." },
     ],
@@ -441,7 +440,7 @@ export const HANDBOOK = [
   {
     id: "rplogs", group: "moderation", title: "RP permission logs",
     blocks: [
-      { type: "p", text: "Any roleplay that needs staff permission gets logged with `/rplog`. That is the whole system; do not type it into the channel by hand." },
+      { type: "p", text: "Any roleplay that needs staff permission gets logged with /rplog. That is the whole system; do not type it into the channel by hand." },
       { type: "p", text: "The command asks for the Roblox username of whoever asked, the RP type from a fixed list, the location, how long it runs, and any notes. The fixed list is the point: the old free-text logs produced ninety-five different spellings of about a dozen RP types, which made them unsearchable." },
       { type: "list", items: [
         "Put the **Roblox username** in the Roblox field. Not a Discord mention.",
@@ -472,7 +471,7 @@ export const HANDBOOK = [
       { type: "h3", text: "Manual Discord moderation" },
       { type: "p", text: "Ordinary Discord moderation follows the same principles as in game: evidence first, explain it, be consistent. Discord conduct reports come in through General Support tickets." },
       { type: "h3", text: "Suggestions and polls" },
-      { type: "p", text: "Anyone with the right role can post a suggestion with `/suggest`, subject to a cooldown. Discussion threads can be opened on a suggestion by the roles configured for it. `/poll create` is Community Management and above." },
+      { type: "p", text: "Anyone with the right role can post a suggestion with /suggest, subject to a cooldown. Discussion threads can be opened on a suggestion by the roles configured for it. /poll create is Community Management and above." },
     ],
   },
 
@@ -496,14 +495,14 @@ export const HANDBOOK = [
       { type: "p", text: "Every action re-checks your live Discord roles. Being in the channel is not what decides whether you can act." },
       { type: "h3", text: "Closing" },
       { type: "defs", items: [
-        ["`/tclosereq`", "Asks the opener to confirm their issue is resolved, with an optional auto-close after a set number of hours. Use this by default."],
-        ["`/tclose`", "Closes it directly, asking you for a reason and a confirmation. Use when the opener has gone quiet or the ticket is clearly finished."],
-        ["`/tdelete`", "Director and above. Deletes the ticket outright. Not the normal path."],
+        ["/tclosereq", "Asks the opener to confirm their issue is resolved, with an optional auto-close after a set number of hours. Use this by default."],
+        ["/tclose", "Closes it directly, asking you for a reason and a confirmation. Use when the opener has gone quiet or the ticket is clearly finished."],
+        ["/tdelete", "Director and above. Deletes the ticket outright. Not the normal path."],
       ]},
       { type: "p", text: "Closing archives a full transcript, including every attachment, to the Staff Panel before the channel is deleted. Transcripts survive the channel, the attachments, and the opener leaving the server, and are readable from the Ticket Transcripts page." },
       { type: "h3", text: "Managing a ticket" },
       { type: "reqs", items: ["Director and above"] },
-      { type: "p", text: "`/trename`, `/tadd`, `/tremove`, `/texclude` and `/ttranscript` handle the edge cases: renaming a ticket, pulling somebody in or out, and fetching a transcript." },
+      { type: "p", text: "/trename, /tadd, /tremove, /texclude and /ttranscript handle the edge cases: renaming a ticket, pulling somebody in or out, and fetching a transcript." },
       { type: "note", variant: "hard", title: "Staff-only information", body: "Internal notes, moderation history and anything from a Staff Complaint stay inside the staff-only channels they were written in. Do not paste them into a ticket the reported person can read, and do not discuss an open complaint with its subject." },
     ],
   },
@@ -548,7 +547,7 @@ export const HANDBOOK = [
       ]},
       { type: "p", text: "Nothing happens automatically at three strikes. A human decides." },
       { type: "h3", text: "Getting one removed" },
-      { type: "p", text: "`/unstrike` removes a strike early, at Community Management and above. If you believe a strike was issued in error, take it to management or Internal Affairs with your reasoning; do not argue it with the person who issued it in a public channel." },
+      { type: "p", text: "/unstrike removes a strike early, at Community Management and above. If you believe a strike was issued in error, take it to management or Internal Affairs with your reasoning; do not argue it with the person who issued it in a public channel." },
     ],
   },
 
@@ -558,7 +557,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "An LOA is how you stay on the team while you are away. File one *before* you go quiet, not after somebody notices." },
       { type: "h3", text: "Filing one" },
-      { type: "p", text: "Use `/loa` in Discord or **Manage LOA** on the dashboard. You give a reason, a start date and an end date. The request goes to management for a decision." },
+      { type: "p", text: "Use /loa in Discord or **Manage LOA** on the dashboard. You give a reason, a start date and an end date. The request goes to management for a decision." },
       { type: "h3", text: "Approval" },
       { type: "reqs", items: ["Community Management and above"] },
       { type: "p", text: "Approved or denied from either Discord or the panel; both act on the same request. On approval you get the LOA role and your nickname prefix changes to match. The role is removed automatically when your LOA ends." },
@@ -569,7 +568,7 @@ export const HANDBOOK = [
         "You can still clock in if you want to; an LOA excuses you, it does not lock you out.",
       ]},
       { type: "h3", text: "Ending early or extending" },
-      { type: "p", text: "Management can end an LOA early or extend it from the HR Panel, and `/endloa` does the same in Discord. Both are Management and above; there is no lower route to it. If your plans change, say so rather than letting it run." },
+      { type: "p", text: "Management can end an LOA early or extend it from the HR Panel, and /endloa does the same in Discord. Both are Management and above; there is no lower route to it. If your plans change, say so rather than letting it run." },
     ],
   },
 
@@ -603,16 +602,16 @@ export const HANDBOOK = [
       { type: "h3", text: "Fast Pass" },
       { type: "p", text: "Fast Pass is the transfer route for people with real moderation experience elsewhere. They apply through a Fast Pass ticket with proof of their experience, and Supervisory or an IA Officer reviews it." },
       { type: "steps", items: [
-        "**`/fastpass`** (Trial Supervisor and above) approves the applicant. They get the Awaiting Training role and nothing else: no staff roles, no trial clock.",
+        "**/fastpass** (Trial Supervisor and above) approves the applicant. They get the Awaiting Training role and nothing else: no staff roles, no trial clock.",
         "A Staff Trainer runs their training.",
-        "**`/passtraining`** onboards them as a Junior Moderator and starts a **7 day trial** from that moment. **`/failtraining`** ends it instead.",
+        "**/passtraining** onboards them as a Junior Moderator and starts a **7 day trial** from that moment. **/failtraining** ends it instead.",
         "When the 7 days are up, a decision card goes out: confirm them or remove them, handled like any other promotion decision.",
       ]},
       { type: "p", text: "A trial ends early on its own if the person leaves the server, is terminated, or has their rank changed." },
       { type: "h3", text: "Trainers" },
       { type: "reqs", items: ["Staff Trainer"] },
-      { type: "p", text: "Both `/passtraining` and `/failtraining` take up to three trainers, so a session run by more than one person is credited to all of them. Add notes; they are part of the record and they are what a review reads later. Internal Affairs cannot run either one." },
-      { type: "p", text: "Staff Trainer is a pinned role, kept through promotions and demotions, and it carries Admin-tier panel access and `:mod` in game so a trainer can demonstrate the tools they teach." },
+      { type: "p", text: "Both /passtraining and /failtraining take up to three trainers, so a session run by more than one person is credited to all of them. Add notes; they are part of the record and they are what a review reads later. Internal Affairs cannot run either one." },
+      { type: "p", text: "Staff Trainer is a pinned role, kept through promotions and demotions, and it carries Admin-tier panel access and :mod in game so a trainer can demonstrate the tools they teach." },
     ],
   },
 
@@ -621,10 +620,10 @@ export const HANDBOOK = [
     id: "leaving", group: "record", title: "Leaving the team",
     blocks: [
       { type: "h3", text: "Resigning" },
-      { type: "p", text: "You can resign yourself at any time from the **Resign** action on the dashboard. Processing somebody else's resignation is Director and above, in Discord with `/resign` or from the HR Panel." },
+      { type: "p", text: "You can resign yourself at any time from the **Resign** action on the dashboard. Processing somebody else's resignation is Director and above, in Discord with /resign or from the HR Panel." },
       { type: "h3", text: "Termination" },
       { type: "reqs", items: ["Community Management and above"] },
-      { type: "p", text: "`/terminate` removes somebody from the staff team with a reason. It is also the outcome of a third-strike decision, an approved activity check, and the automatic anti-abuse response." },
+      { type: "p", text: "/terminate removes somebody from the staff team with a reason. It is also the outcome of a third-strike decision, an approved activity check, and the automatic anti-abuse response." },
       { type: "h3", text: "What removal does" },
       { type: "list", items: [
         "Every staff role is stripped and the Former Staff role is applied.",
@@ -678,14 +677,14 @@ export const HANDBOOK = [
         "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
       { type: "h3", text: "What IA does not have" },
-      { type: "note", title: "No in-game power from the IA rank", body: "Internal Affairs grants no `:mod` or `:admin`, and IA members are not on the staff team, so there is no moderation rank underneath to fall back on. IA is oversight, not a stronger moderator." },
+      { type: "note", title: "No in-game power from the IA rank", body: "Internal Affairs grants no :mod or :admin, and IA members are not on the staff team, so there is no moderation rank underneath to fall back on. IA is oversight, not a stronger moderator." },
       { type: "list", items: [
         "**Reviewing ban BOLOs.** Accepting one issues the ban in game, and IA cannot ban.",
-        "**Running training.** `/passtraining` and `/failtraining` refuse IA. Training puts somebody onto the staff team, and IA oversees that team rather than staffing it.",
+        "**Running training.** /passtraining and /failtraining refuse IA. Training puts somebody onto the staff team, and IA oversees that team rather than staffing it.",
         "**Any in-game moderation command**, by way of the IA rank. If an IA member also holds a moderation rank, everything in game comes from that rank and nothing from the IA one.",
       ]},
       { type: "note", variant: "hard", title: "The punishment log is read-only for IA", body: "You can search and open every entry. You cannot **create**, **edit**, **delete**, or **complete** one, and the Create New Log form does not appear for you. A tier that writes to the moderation record puts its own entries into the evidence the next investigation has to weigh, and a tier that can edit or delete entries can reshape the record it is judging. Reading it is the whole of the access." },
-      { type: "note", variant: "hard", title: "Internal Affairs works no shifts", body: "**Start Shift** does not appear on your dashboard and `/shift start` refuses you, on the panel and in Discord alike, because both write the same shift table. A shift says who was moderating and when, and IA moderates nothing. You are **exempt from the duty quota** as a result and will not appear on it. You can still see who is on duty and read anyone's shift history, which is often what an investigation turns on." },
+      { type: "note", variant: "hard", title: "Internal Affairs works no shifts", body: "**Start Shift** does not appear on your dashboard and /shift start refuses you, on the panel and in Discord alike, because both write the same shift table. A shift says who was moderating and when, and IA moderates nothing. You are **exempt from the duty quota** as a result and will not appear on it. You can still see who is on duty and read anyone's shift history, which is often what an investigation turns on." },
       { type: "h3", text: "Reporting a staff member" },
       { type: "p", text: "Open a **Staff Complaint** ticket. It is visible only to Internal Affairs, Management and Directors, and the person you are reporting cannot see it. Bring evidence: clips, screenshots, message links, timestamps." },
       { type: "p", text: "Do not report staff misconduct in a public channel, do not confront the person yourself, and do not discuss an open complaint with its subject." },
@@ -710,7 +709,7 @@ export const HANDBOOK = [
         "**Account Verification**: resolving verification problems.",
         "**In-Game Permissions**: checking why somebody's powers are not applying, and revoking everyone's at once if needed.",
         "**Run Command** on the dashboard.",
-        "Sessions: `/startup` and `/shutdown`.",
+        "Sessions: /startup and /shutdown.",
         "Activity checks, and approving the strikes that come out of them.",
       ]},
       { type: "h3", text: "Standing responsibilities" },
@@ -732,11 +731,11 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "Two systems watch for a compromised or abusive staff account. You should know they exist, what sets them off, and that neither is something to test." },
       { type: "h3", text: "Anti-mod-abuse (in game)" },
-      { type: "p", text: "Watches for dangerous bulk-target commands: `:kick all`, `:bring others`, a long explicit player list. Once confirmed, it revokes in-game powers, game-bans, terminates on Discord, strips roles and logs everything." },
+      { type: "p", text: "Watches for dangerous bulk-target commands: :kick all, :bring others, a long explicit player list. Once confirmed, it revokes in-game powers, game-bans, terminates on Discord, strips roles and logs everything." },
       { type: "note", variant: "hard", title: "This will fire on an accident", body: "It does not know whether you meant it. It deliberately does *not* ban you from Discord, so management can reach you and review what happened, but everything else is automatic. Do not run a bulk-target command unless you are certain." },
       { type: "h3", text: "Discord moderation security" },
       { type: "p", text: "Watches Discord's own audit log for bursts of bans, kicks, timeouts, role changes, channel deletions and permission changes. A burst raises a flag at one of three severities and alerts management." },
-      { type: "p", text: "Thresholds are set so ordinary moderation never trips them: a handful of normal bans or kicks is not a burst. It never automatically kicks or bans the moderator it flagged. `/modsecurity restore` (Management Team and above) reverses an automatic response." },
+      { type: "p", text: "Thresholds are set so ordinary moderation never trips them: a handful of normal bans or kicks is not a burst. It never automatically kicks or bans the moderator it flagged. /modsecurity restore (Management Team and above) reverses an automatic response." },
       { type: "h3", text: "The audit log" },
       { type: "p", text: "Staff actions are recorded: rank changes, strikes, terminations, LOA decisions, ticket actions, commands run, permission grants and revocations, verification changes. Assume everything you do as staff is attributable to you, because it is." },
     ],
@@ -786,7 +785,7 @@ export const HANDBOOK = [
         ["**In-Game Permissions**", "Management and above", "Status, per-person checks, revoke everyone"],
         ["**Director Console**", "Directors", "Department and Civilian hub content, alternative verification grants, full audit log"],
         ["**Ticket Transcripts**", "Support Staff; IA and above see Staff Complaints", "Archived transcripts with attachments"],
-        ["**Handbook**", "Everyone", "This document, at `/staff-handbook`. Deliberately not in the sidebar; reach it by the link."],
+        ["**Handbook**", "Everyone", "This document, at /staff-handbook. Deliberately not in the sidebar; reach it by the link."],
         ["**Changelog**", "Everyone", "What changed and when"],
       ]},
       { type: "p", text: "Panel and Discord act on the same records. A strike issued in Discord appears on the panel instantly and the reverse is also true; there is no syncing and no second copy." },
@@ -800,42 +799,42 @@ export const HANDBOOK = [
       { type: "p", text: "Discord slash commands relevant to staff work. Player-facing commands (economy, casino, business, banking, stocks, insurance, property, crime) are not listed; they are not staff duties." },
       { type: "table", head: ["Command", "Minimum rank", "What it does"], rows: [
         { tier: "Duty" },
-        ["`/shift start` `stop` `leaderboard`", "Staff Team, not IA", "Manage your own shift"],
-        ["`/callstaff`", "Trial Supervisor", "Ask staff to get on duty. 10 min global cooldown"],
-        ["`/startup`", "Community Management", "Start a session"],
-        ["`/shutdown`", "Community Management", "End a session. 5 min personal cooldown"],
-        ["`/players` `/population` `/status`", "Staff Team", "Live server information"],
+        ["/shift start stop leaderboard", "Staff Team, not IA", "Manage your own shift"],
+        ["/callstaff", "Trial Supervisor", "Ask staff to get on duty. 10 min global cooldown"],
+        ["/startup", "Community Management", "Start a session"],
+        ["/shutdown", "Community Management", "End a session. 5 min personal cooldown"],
+        ["/players /population /status", "Staff Team", "Live server information"],
         { tier: "Moderation" },
-        ["`/bolo`", "Can use `:ban` (Administration and above)", "Review the ban BOLO queue"],
-        ["`/rplog`", "Staff Team", "Log an RP permission"],
-        ["`/ingameperms status` `check` `revokeall`", "Community Management", "Inspect and control in-game permissions"],
-        ["`/modsecurity restore`", "Management Team", "Reverse an automatic security response"],
+        ["/bolo", "Can use :ban (Administration and above)", "Review the ban BOLO queue"],
+        ["/rplog", "Staff Team", "Log an RP permission"],
+        ["/ingameperms status check revokeall", "Community Management", "Inspect and control in-game permissions"],
+        ["/modsecurity restore", "Management Team", "Reverse an automatic security response"],
         { tier: "Staff record" },
-        ["`/strike`", "Trial Supervisor", "Issue a strike"],
-        ["`/unstrike`", "Community Management", "Remove a strike early"],
-        ["`/loa`", "Staff Team", "File a leave of absence"],
-        ["`/endloa`", "Management", "End somebody's LOA early"],
-        ["`/promote` `/demote`", "Trial Supervisor to request, Community Management to apply", "Change somebody's rank"],
-        ["`/terminate`", "Community Management", "Remove somebody from staff"],
-        ["`/resign`", "Director", "Process somebody's resignation"],
-        ["`/activitycheck start`", "Community Management", "Post an activity check"],
+        ["/strike", "Trial Supervisor", "Issue a strike"],
+        ["/unstrike", "Community Management", "Remove a strike early"],
+        ["/loa", "Staff Team", "File a leave of absence"],
+        ["/endloa", "Management", "End somebody's LOA early"],
+        ["/promote /demote", "Trial Supervisor to request, Community Management to apply", "Change somebody's rank"],
+        ["/terminate", "Community Management", "Remove somebody from staff"],
+        ["/resign", "Director", "Process somebody's resignation"],
+        ["/activitycheck start", "Community Management", "Post an activity check"],
         { tier: "Training" },
-        ["`/fastpass`", "Trial Supervisor, or IA Officer", "Approve a Fast Pass applicant"],
-        ["`/passtraining`", "Staff Trainer, not IA", "Pass a trainee and start their trial"],
-        ["`/failtraining`", "Staff Trainer, not IA", "Fail a trainee"],
+        ["/fastpass", "Trial Supervisor, or IA Officer", "Approve a Fast Pass applicant"],
+        ["/passtraining", "Staff Trainer, not IA", "Pass a trainee and start their trial"],
+        ["/failtraining", "Staff Trainer, not IA", "Fail a trainee"],
         { tier: "Tickets" },
-        ["`/tclosereq`", "Ticket handler", "Ask the opener to confirm it is resolved"],
-        ["`/tclose`", "Ticket handler", "Close the ticket"],
-        ["`/tdelete` `/trename` `/tadd` `/tremove` `/texclude` `/ttranscript`", "Director", "Ticket management"],
+        ["/tclosereq", "Ticket handler", "Ask the opener to confirm it is resolved"],
+        ["/tclose", "Ticket handler", "Close the ticket"],
+        ["/tdelete /trename /tadd /tremove /texclude /ttranscript", "Director", "Ticket management"],
         { tier: "Utility" },
-        ["`/myid`", "Anyone", "Your Discord ID"],
-        ["`/fixnick`", "Junior Supervisor", "Re-apply somebody's nickname"],
-        ["`/feedback`", "Anyone", "Rate a staff member who helped you"],
-        ["`/suggest`", "Configured roles", "Post a suggestion"],
-        ["`/say`", "Trial Supervisor", "Send a message as the bot"],
-        ["`/poll create` `close`", "Community Management", "Run a poll"],
-        ["`/giveaway create`", "Trial Supervisor", "Run a giveaway"],
-        ["`/playtime`", "Staff Team; reset is Community Management", "Department playtime"],
+        ["/myid", "Anyone", "Your Discord ID"],
+        ["/fixnick", "Junior Supervisor", "Re-apply somebody's nickname"],
+        ["/feedback", "Anyone", "Rate a staff member who helped you"],
+        ["/suggest", "Configured roles", "Post a suggestion"],
+        ["/say", "Trial Supervisor", "Send a message as the bot"],
+        ["/poll create close", "Community Management", "Run a poll"],
+        ["/giveaway create", "Trial Supervisor", "Run a giveaway"],
+        ["/playtime", "Staff Team; reset is Community Management", "Department playtime"],
       ]},
     ],
   },
@@ -853,8 +852,8 @@ export const HANDBOOK = [
         ["Confirmation prompt timeout", "10 minutes"],
         ["Staff RP threshold", "20 players"],
         ["Staff per mod call", "2 to 3 maximum"],
-        ["`/callstaff` cooldown", "10 minutes, shared by everyone"],
-        ["`/shutdown` cooldown", "5 minutes, per person"],
+        ["/callstaff cooldown", "10 minutes, shared by everyone"],
+        ["/shutdown cooldown", "5 minutes, per person"],
         ["Panel session length", "12 hours, revoked instantly on a rank change"],
         ["Announcement edits reaching Discord", "About 15 seconds"],
       ]},
@@ -862,25 +861,3 @@ export const HANDBOOK = [
   },
 ];
 
-/**
- * One lowercase text blob per section, for the filter. Built once at
- * module load rather than per keystroke, and from the data rather than
- * from the DOM so it cannot go stale against what is rendered.
- */
-export const HANDBOOK_SEARCH_TEXT = HANDBOOK.reduce((acc, section) => {
-  const parts = [section.title];
-  for (const b of section.blocks) {
-    if (b.text) parts.push(b.text);
-    if (b.title) parts.push(b.title);
-    if (b.body) parts.push(b.body);
-    if (b.items) {
-      for (const item of b.items) parts.push(Array.isArray(item) ? item.join(" ") : item);
-    }
-    if (b.head) parts.push(b.head.join(" "));
-    if (b.rows) {
-      for (const r of b.rows) parts.push(Array.isArray(r) ? r.join(" ") : (r.tier ?? ""));
-    }
-  }
-  acc[section.id] = parts.join(" ").toLowerCase();
-  return acc;
-}, {});
