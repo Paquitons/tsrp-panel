@@ -29,6 +29,7 @@ import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
 import HrAnnouncements from "./HrAnnouncements";
 import Verification from "./Verification";
+import { canSeeManagement } from "../access";
 import {
   HubSection,
   BroadcastSection,
@@ -62,7 +63,7 @@ export default function Management() {
     setTimeout(() => setNotice(null), 4000);
   }
 
-  if (!user?.isManagementOrAbove) {
+  if (!canSeeManagement(user)) {
     return (
       <PageShell title="Management">
         <Banner>This area is limited to Management and above.</Banner>

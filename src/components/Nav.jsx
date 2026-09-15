@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DiscordAvatar from "./DiscordAvatar";
+import {
+  canSeeTickets, canSeeSupervisory, canSeeInternalAffairs,
+  canSeeManagement, canSeeSuperAdmin,
+} from "../access";
 import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon, HistoryIcon, TerminalIcon } from "./icons";
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
@@ -27,27 +31,23 @@ const NAV_GROUPS = [
       // Support Staff read every transcript; Internal Affairs, Management
       // and Directors get the tab for Staff Complaints alone, which the
       // API scopes for them. Same tab, different contents.
-      { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon,
-        show: user => user?.isSupportStaff || user?.canViewStaffComplaints },
+      { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon, show: canSeeTickets },
     ],
   },
   {
     key: "oversight",
     label: "Oversight",
     items: [
-      { to: "/supervisory", label: "Supervisory", icon: ShieldIcon,
-        show: user => user?.isSupervisoryOrAbove },
-      { to: "/internalaffairs", label: "Internal Affairs", icon: ScrollIcon,
-        show: user => user?.tier === "ia" || user?.tier === "management" || user?.tier === "director" },
+      { to: "/supervisory", label: "Supervisory", icon: ShieldIcon, show: canSeeSupervisory },
+      { to: "/internalaffairs", label: "Internal Affairs", icon: ScrollIcon, show: canSeeInternalAffairs },
     ],
   },
   {
     key: "admin",
     label: "Administration",
     items: [
-      { to: "/management", label: "Management", icon: UsersIcon,
-        show: user => user?.isManagementOrAbove },
-      { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
+      { to: "/management", label: "Management", icon: UsersIcon, show: canSeeManagement },
+      { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: canSeeSuperAdmin },
     ],
   },
 ];

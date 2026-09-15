@@ -776,12 +776,13 @@ export const HANDBOOK = [
     id: "panel", group: "reference", title: "The Staff Panel",
     blocks: [
       { type: "p", text: "Sign in with Discord. You are asked to confirm your linked Roblox account the first time; that confirmation is checked on every request afterwards, not just at sign-in." },
+      { type: "note", title: "How access works", body: "Each rank sees everything the ranks below it see. Management sees the Supervisory section, Directors see that and Management's, and so on up the ladder. **Internal Affairs is the exception**: it sits beside the ladder rather than on it. IA members see their own page, the Dashboard and Ticket Transcripts, and nothing else. Nobody outside IA sees the Internal Affairs page, including Directors, who lose nothing by it because Issue Strike and Suggest Rank Change are both in Management." },
       { type: "table", head: ["Page", "Who sees it", "What it holds"], rows: [
         ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls, no Create New Log and no Request Staff; the punishment log itself is read-only for them."],
         ["**Supervisory**", "Supervisory, Management, Directors. Not IA", "Review ban BOLOs, and lift an active kick rejoin cooldown"],
-        ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change"],
+        ["**Internal Affairs**", "Internal Affairs only", "Issue a strike, suggest a rank change"],
         ["**Management**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements, account verification. Directors also see hubs, panel broadcasts, alternative verification and the audit log"],
-        ["**Account Verification**", "Management and above", "Resolving verification problems"],
+        ["**Account Verification**", "Management and above", "Resolving verification problems. Now a tab inside Management"],
         ["**In-Game Permissions**", "Management and above", "Status, per-person checks, revoke everyone"],
         ["**Ticket Transcripts**", "Support Staff; IA and above see Staff Complaints", "Archived transcripts with attachments"],
         ["**Handbook**", "Everyone", "This document, at /staff-handbook. Deliberately not in the sidebar; reach it by the link."],

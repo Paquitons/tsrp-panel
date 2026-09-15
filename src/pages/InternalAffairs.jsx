@@ -11,10 +11,16 @@ import Card from "../components/primitives/Card";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import { useApiQuery } from "../hooks/useApiQuery";
+import { canSeeInternalAffairs } from "../access";
 
 export default function InternalAffairs() {
   const { user } = useAuth();
-  const canAccess = user?.tier === "ia" || user?.tier === "management" || user?.tier === "director";
+  // Internal Affairs only, including against Management and Directors.
+  // IA sits beside the staff ladder rather than on it, so the usual
+  // "and above" does not apply here. Leadership loses nothing: this page
+  // holds Issue Strike and Suggest Rank Change, and both are in
+  // Management. See src/access.js.
+  const canAccess = canSeeInternalAffairs(user);
 
   // ---------- Issue Strike ----------
   const strikeSearch = useStaffSearch();
