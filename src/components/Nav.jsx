@@ -100,10 +100,17 @@ export default function Nav() {
         {/* The palette's visible way in. Most people will never guess a
             keyboard shortcut exists, and one that only power users find
             is not an improvement to navigation. */}
-        <button type="button" className="sidebar-search" onClick={openCommandPalette}>
-          <SearchIcon className="sidebar-link-icon" />
-          <span>Search the panel</span>
-          <span className="sidebar-search-kbd">{shortcutHint}</span>
+        <button
+          type="button"
+          className="sidebar-search"
+          onClick={openCommandPalette}
+          aria-label={`Search the panel (${shortcutHint})`}
+        >
+          <SearchIcon />
+          <span className="sidebar-search-label">Search the panel</span>
+          {/* aria-hidden: the shortcut is already in the button's label
+              above, and read out twice it is just noise. */}
+          <span className="sidebar-search-kbd" aria-hidden="true">{shortcutHint}</span>
         </button>
 
         <nav className="sidebar-nav">

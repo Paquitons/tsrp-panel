@@ -1,11 +1,27 @@
 // Small, dependency-free stroke icon set used by the sidebar nav. Kept as
 // plain inline SVG (no icon library) to match the rest of the app, which
 // has zero UI dependencies beyond react-router.
+// An <svg> carrying a viewBox and no width or height is a replaced
+// element with no intrinsic size, so the layout is free to give it any
+// size at all. Dropped into a flex row it takes the space going: the
+// command palette rendered <SearchIcon /> with nothing sizing it and got a
+// 443px magnifying glass that filled the dialog and squeezed the input
+// down to 26px.
+//
+// So every icon carries a sensible size by default. These are
+// presentation attributes, which lose to any CSS rule, so the ~30 call
+// sites that size their icons through a class (.sidebar-link-icon,
+// .quick-action svg, and the rest) are completely unaffected. This only
+// catches the ones that would otherwise have no size at all.
+const DEFAULT_ICON_SIZE = 18;
+
 function Icon({ children, className, ...props }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
+      width={DEFAULT_ICON_SIZE}
+      height={DEFAULT_ICON_SIZE}
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
