@@ -26,11 +26,13 @@ import DiscordIdentity from "../components/DiscordIdentity";
 import Card from "../components/primitives/Card";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
+import SectionHeader from "../components/primitives/SectionHeader";
 import Tabs from "../components/Tabs";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { expiresLabel } from "../utils";
 import { canSeeSupervisory } from "../access";
+import { useOpenOnArrival } from "../hooks/useOpenOnArrival";
 
 const POLL_MS = 15_000;
 
@@ -84,7 +86,7 @@ function BoloQueue({ onError }) {
   if (!bolo) {
     return (
       <Card>
-        <h2>Ban BOLO Review</h2>
+        <SectionHeader title="Ban BOLO Review" count={0} countLabel="waiting" />
         <p className="muted" style={{ margin: 0 }}>
           {skipped.length
             ? "Nothing left that you have not skipped this session."
@@ -101,13 +103,12 @@ function BoloQueue({ onError }) {
 
   return (
     <Card>
-      <div className="modal-title-row" style={{ marginBottom: 4 }}>
-        <h2 style={{ margin: 0 }}>Ban BOLO Review</h2>
-        <span className="muted">{remaining} waiting</span>
-      </div>
-      <p className="muted card-subtitle">
-        A moderator has asked for this player to be banned. Accepting issues the ban in game under your name.
-      </p>
+      <SectionHeader
+        title="Ban BOLO Review"
+        count={remaining}
+        countLabel="waiting"
+        subtitle="A moderator has asked for this player to be banned. Accepting issues the ban in game under your name."
+      />
 
       <div className="sv-bolo">
         <div className="sv-bolo-head">
@@ -229,14 +230,11 @@ function CooldownList({ onError }) {
 
   return (
     <Card>
-      <div className="modal-title-row" style={{ marginBottom: 4 }}>
-        <h2 style={{ margin: 0 }}>Active Rejoin Cooldowns</h2>
-        <span className="muted">{cooldowns.length}</span>
-      </div>
-      <p className="muted card-subtitle">
-        Everyone currently on a rejoin cooldown from a logged kick. These start automatically when a kick is logged
-        from the Dashboard, and the bot re-kicks anyone who comes back inside their window.
-      </p>
+      <SectionHeader
+        title="Active Rejoin Cooldowns"
+        count={cooldowns.length}
+        subtitle="Everyone currently on a rejoin cooldown from a logged kick. These start automatically when a kick is logged from the Dashboard, and the bot re-kicks anyone who comes back inside their window."
+      />
 
       {query.isLoading && <p className="muted">Loading…</p>}
       {!query.isLoading && cooldowns.length === 0 && <p className="muted">Nobody is on a rejoin cooldown.</p>}
@@ -291,6 +289,11 @@ export default function Supervisory() {
   const { user } = useAuth();
   const [section, setSection] = useState("bolos");
   const [error, setError] = useState(null);
+
+  // /supervisory?do=cooldowns from the command palette.
+  useOpenOnArrival(what => {
+    if (SECTIONS.some(s => s.value === what)) setSection(what);
+  });
 
   if (!canSeeSupervisory(user)) {
     return (

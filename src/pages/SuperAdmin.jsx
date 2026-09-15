@@ -13,23 +13,66 @@ import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
 import DiscordModSecurity from "./DiscordModSecurity";
 
-const TABS = [
-  { value: "shifts", label: "Shift Editor" },
-  { value: "economy", label: "Wallets" },
-  { value: "overview", label: "Economy Overview" },
-  { value: "econconfig", label: "Economy Config" },
-  { value: "taxes", label: "Taxes" },
-  { value: "businesses", label: "Businesses" },
-  { value: "casino", label: "Casino Controls" },
-  { value: "storefronts", label: "Storefronts" },
-  { value: "govcatalog", label: "Government Catalog" },
-  { value: "lottery", label: "Lottery" },
-  { value: "stocks", label: "Stock Market" },
-  { value: "debt", label: "Debt & Loans" },
-  { value: "insurance", label: "Insurance" },
-  { value: "botsettings", label: "Bot Settings" },
-  { value: "modsecurity", label: "Discord Mod Security" },
+// Fifteen screens, in four families rather than one bar.
+//
+// They used to be a single flat row that overflowed its container at
+// every width, so reaching Insurance meant scrolling a tab strip and
+// reading fifteen labels to find it. Nothing about the screens changed;
+// only how you get to them. The families are the real ones: money that
+// people hold and spend, the market that prices it, staff records, and
+// the bot's own configuration.
+//
+// `group` is the top level, `sections` the tabs inside it, and the value
+// of a section is the same key the body below already switches on, so
+// this is a regrouping of the existing routing rather than a new one.
+const TAB_GROUPS = [
+  {
+    value: "economy",
+    label: "Economy",
+    sections: [
+      { value: "economy", label: "Wallets" },
+      { value: "overview", label: "Overview" },
+      { value: "econconfig", label: "Config" },
+      { value: "taxes", label: "Taxes" },
+      { value: "businesses", label: "Businesses" },
+    ],
+  },
+  {
+    value: "market",
+    label: "Market",
+    sections: [
+      { value: "stocks", label: "Stock Market" },
+      { value: "storefronts", label: "Storefronts" },
+      { value: "govcatalog", label: "Government Catalog" },
+      { value: "casino", label: "Casino Controls" },
+      { value: "lottery", label: "Lottery" },
+      { value: "debt", label: "Debt and Loans" },
+      { value: "insurance", label: "Insurance" },
+    ],
+  },
+  {
+    value: "staff",
+    label: "Staff",
+    sections: [
+      { value: "shifts", label: "Shift Editor" },
+    ],
+  },
+  {
+    value: "system",
+    label: "System",
+    sections: [
+      { value: "botsettings", label: "Bot Settings" },
+      { value: "modsecurity", label: "Discord Mod Security" },
+    ],
+  },
 ];
+
+// Which family a given screen belongs to, derived rather than written
+// twice, so a section moved between groups cannot end up listed in one
+// and resolved to the other.
+const GROUP_OF = Object.fromEntries(
+  TAB_GROUPS.flatMap(g => g.sections.map(s => [s.value, g.value])),
+);
 
 /**
  * Unrestricted shift editing for one hardcoded Super Admin account --
@@ -40,7 +83,19 @@ const TABS = [
  */
 export default function SuperAdmin() {
   const { user } = useAuth();
+  // `tab` stays the single source of truth for which screen is showing,
+  // exactly as before; the group is derived from it. Keeping one piece of
+  // state rather than two means the two bars cannot disagree about where
+  // you are.
   const [tab, setTab] = useState("shifts");
+  const group = GROUP_OF[tab] ?? TAB_GROUPS[0].value;
+  const sections = TAB_GROUPS.find(g => g.value === group)?.sections ?? [];
+
+  // Switching family lands on that family's first screen.
+  function pickGroup(next) {
+    const first = TAB_GROUPS.find(g => g.value === next)?.sections[0]?.value;
+    if (first) setTab(first);
+  }
   const search = useStaffSearch();
   const [shifts, setShifts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -133,7 +188,10 @@ export default function SuperAdmin() {
       {error && <Banner>{error}</Banner>}
 
       <div className="card">
-        <Tabs tabs={TABS} active={tab} onChange={setTab} />
+        <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
+        {sections.length > 1 && (
+          <Tabs tabs={sections} active={tab} onChange={setTab} variant="sub" ariaLabel="Screens in this area" />
+        )}
 
         {tab === "shifts" && (
           <>

@@ -25,6 +25,7 @@ import Supervisory from "./pages/Supervisory";
 import NotFound, { PublicNotFound } from "./pages/NotFound";
 import Strike3Prompt from "./components/Strike3Prompt";
 import NoticeCenter from "./components/NoticeCenter";
+import CommandPalette from "./components/CommandPalette";
 import { NoticesProvider } from "./context/NoticesContext";
 
 // SuperAdmin statically imports SuperAdminEconomy.jsx (2,151 lines) and
@@ -152,6 +153,9 @@ function AppShell() {
       </Routes>
       <Strike3Prompt />
       <NoticeCenter />
+      {/* Above the router so the shortcut works on every page, and inside
+          it so a command can navigate. */}
+      <CommandPalette />
     </div>
     </NoticesProvider>
     </IdentityGate>

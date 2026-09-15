@@ -4,6 +4,7 @@ import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
 import Banner from "../components/primitives/Banner";
+import SectionHeader from "../components/primitives/SectionHeader";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { expiresLabel } from "../utils";
 
@@ -92,10 +93,13 @@ export default function HrAutomodOffenses() {
 
       {data && (
         <>
-          <div className="modal-title-row" style={{ marginTop: 16 }}>
-            <h2 style={{ margin: 0 }}>Active Offenses ({data.active.length})</h2>
-            {data.active.length > 0 && <button className="btn-red small" type="button" onClick={clearAll}>Clear All</button>}
-          </div>
+          <SectionHeader
+            title="Active Offenses"
+            count={data.active.length}
+            actions={data.active.length > 0 && (
+              <button className="btn-red small" type="button" onClick={clearAll}>Clear All</button>
+            )}
+          />
 
           {data.active.length === 0 ? (
             <p className="muted">No active offenses. Clean record right now.</p>
@@ -116,7 +120,7 @@ export default function HrAutomodOffenses() {
             </div>
           )}
 
-          <h2 style={{ marginTop: 20 }}>Full History ({data.history.length})</h2>
+          <SectionHeader title="Full History" count={data.history.length} />
           {data.history.length === 0 ? (
             <p className="muted">No offenses on record.</p>
           ) : (

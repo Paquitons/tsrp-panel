@@ -2,6 +2,8 @@ import { useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Banner from "../components/primitives/Banner";
+import Modal from "../components/primitives/Modal";
+import SectionHeader from "../components/primitives/SectionHeader";
 import Tabs from "../components/Tabs";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useQueryClient } from "@tanstack/react-query";
@@ -202,9 +204,14 @@ function EntryEditor({ hub, entry, onSaved, onError }) {
   );
 }
 
-function AddEntry({ hub, onSaved, onError }) {
+/**
+ * The hub composer, in a modal opened from the section header, for the
+ * same reason as the announcement one: it used to live below the whole
+ * list, so adding an entry meant scrolling past every existing entry
+ * first.
+ */
+function AddEntryModal({ hub, onSaved, onError, onClose }) {
   const [draft, setDraft] = useState(BLANK);
-  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -213,17 +220,14 @@ function AddEntry({ hub, onSaved, onError }) {
     try {
       await apiFetch(`/director/hubs/${hub}/entries`, { method: "POST", body: draft });
       onSaved(`${draft.label} added.`);
-      setDraft(BLANK); setOpen(false);
-    } catch (err) { onError(err.message); } finally { setBusy(false); }
-  }
-
-  if (!open) {
-    return <button className="secondary dc-add" type="button" onClick={() => setOpen(true)}>Add an entry</button>;
+      onClose();
+    } catch (err) { onError(err.message); setBusy(false); }
   }
 
   return (
-    <div className="dc-entry dc-entry-new">
-      <div className="dc-entry-body">
+    <Modal onClose={onClose} className="modal-xwide" labelledBy="add-hub-entry-title">
+      <h2 id="add-hub-entry-title">New {hub === "department" ? "department" : "civilian"} hub entry</h2>
+      <div>
         <div className="dc-field-grid">
           <label className="dc-field">
             <span>ID</span>
@@ -253,10 +257,10 @@ function AddEntry({ hub, onSaved, onError }) {
           <button className="primary" type="button" disabled={busy || !draft.entryKey || !draft.label || !draft.blurb} onClick={create}>
             {busy ? "Adding…" : "Add to hub"}
           </button>
-          <button className="secondary" type="button" disabled={busy} onClick={() => { setDraft(BLANK); setOpen(false); }}>Cancel</button>
+          <button className="secondary" type="button" disabled={busy} onClick={onClose}>Cancel</button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -267,6 +271,7 @@ function HubSection({ hub, onNotice, onError }) {
   });
   const entries = query.data;
   const [reordering, setReordering] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   async function move(index, delta) {
     const order = entries.map(e => e.entry_key);
@@ -287,9 +292,17 @@ function HubSection({ hub, onNotice, onError }) {
 
   return (
     <>
-      <p className="muted card-subtitle" style={{ marginTop: 16 }}>
-        Live content for the {hub === "department" ? "Department" : "Civilian"} Hub in Discord.
-      </p>
+      <SectionHeader
+        title={hub === "department" ? "Department Hub" : "Civilian Hub"}
+        count={entries.length}
+        countLabel={entries.length === 1 ? "entry" : "entries"}
+        subtitle={`Live content for the ${hub === "department" ? "Department" : "Civilian"} Hub in Discord.`}
+        actions={
+          <button className="primary small" type="button" onClick={() => setAdding(true)}>
+            New entry
+          </button>
+        }
+      />
 
       <div className="dc-list">
         {entries.map((entry, i) => (
@@ -303,7 +316,14 @@ function HubSection({ hub, onNotice, onError }) {
         ))}
       </div>
 
-      <AddEntry hub={hub} onSaved={saved} onError={onError} />
+      {adding && (
+        <AddEntryModal
+          hub={hub}
+          onSaved={saved}
+          onError={onError}
+          onClose={() => setAdding(false)}
+        />
+      )}
     </>
   );
 }
@@ -465,15 +485,12 @@ Reason (optional):`);
 
   return (
     <>
-      <p className="muted card-subtitle" style={{ marginTop: 16 }}>
-        Roblox won't run its sign in for accounts under 13. This opens a one-time
-        profile-sentence verification for one named staff member. Everyone else sees only
-        Roblox sign in, and the routes behind this don't exist for them.
-      </p>
-      <p className="muted card-subtitle">
-        Enabling it DMs them the instructions and a link straight to the right page, so
-        you don't have to talk anyone through it.
-      </p>
+      <SectionHeader
+        title="Alternative verification"
+        count={data.active.length}
+        countLabel="enabled"
+        subtitle="Roblox will not run its sign in for accounts under 13. This opens a one-time profile-sentence verification for one named staff member, and DMs them the instructions with a link straight to the right page. Everyone else sees only Roblox sign in, and the routes behind this do not exist for them."
+      />
 
       <h2 className="dc-subhead">Currently enabled</h2>
       {data.active.length === 0
@@ -613,7 +630,10 @@ function BroadcastSection({ onNotice, onError }) {
 
   return (
     <>
-      <h2 className="dc-subhead">Send a message</h2>
+      <SectionHeader
+        title="Staff messages"
+        subtitle="Sent to staff inside the Staff Panel. The in-game messages tab holds the ones the bot posts in Discord."
+      />
 
       <form className="dc-broadcast" onSubmit={send}>
         <div className="dc-bc-row">

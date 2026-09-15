@@ -3142,11 +3142,25 @@ code {
 
 .dc-row { display: flex; align-items: flex-start; gap: 8px; }
 
-.dc-order { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; flex-shrink: 0; }
+/* Sized to sit inside the row's collapsed header rather than overhang
+   it. The header is 10px + 1em + 10px, about 40px; two 22px buttons with
+   a gap came to more than that, so the pair spilled past the bottom of
+   the row it belongs to and read as floating between two rows. Kept at
+   the top rather than centred because the entry below expands when
+   opened for editing, and centring against THAT would walk the arrows
+   down the page as soon as one was open. */
+.dc-order {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding-top: 3px;
+}
 .dc-move {
-  width: 26px; height: 22px; padding: 0; line-height: 1;
+  width: 26px; height: 17px; padding: 0; line-height: 1;
   border: 1px solid var(--border-default); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--text-secondary); cursor: pointer;
+  background: var(--card-bg-raised); color: var(--text-secondary); cursor: pointer;
   font-size: 12px;
 }
 .dc-move:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
@@ -3155,7 +3169,7 @@ code {
 .dc-entry {
   flex: 1; min-width: 0;
   border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-  background: var(--surface); overflow: hidden;
+  background: var(--card-bg-raised); overflow: hidden;
 }
 .dc-entry-inactive { opacity: .62; }
 .dc-entry-new { border-color: var(--border-default); }
@@ -3215,7 +3229,7 @@ code {
 .dc-preview-body a { color: var(--accent, #5b8def); text-decoration: none; word-break: break-all; }
 .dc-preview-body a:hover { text-decoration: underline; }
 .dc-preview-body code {
-  background: var(--surface); border: 1px solid var(--border-subtle);
+  background: var(--card-bg-raised); border: 1px solid var(--border-subtle);
   border-radius: 3px; padding: 0 4px; font-size: .92em;
 }
 
@@ -3311,7 +3325,7 @@ code {
   gap: 16px;
   align-items: start;
   padding: 12px 14px;
-  background: var(--surface);
+  background: var(--card-bg-raised);
   border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--border-default);
   border-radius: var(--radius-sm);
@@ -3372,7 +3386,7 @@ code {
 .identity-card {
   width: 100%;
   max-width: 440px;
-  background: var(--surface);
+  background: var(--card-bg-raised);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: var(--space-6);
@@ -3494,7 +3508,7 @@ code {
   align-items: baseline;
   flex-wrap: wrap;
   padding: var(--space-3);
-  background: var(--surface);
+  background: var(--card-bg-raised);
   border: none;
   border-bottom: 1px solid var(--border-subtle);
   text-align: left;
@@ -4490,4 +4504,289 @@ code {
   margin-top: var(--space-5);
   font-size: var(--text-sm);
   line-height: 1.6;
+}
+
+/* ==================================================================
+   SECTION HEADER + TAB LEVELS
+   The shared furniture that makes every list screen in the panel look
+   like the same screen: a title row with a count and the button that
+   creates a new record, and two visually distinct levels of tab bar.
+   ================================================================== */
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.section-header-main { min-width: 0; }
+
+.section-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.section-header-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.3;
+}
+
+/* The count sits beside the title rather than inside it, so the heading
+   keeps the same width and the same starting letters whatever the
+   number does. */
+.section-header-count {
+  flex: 0 0 auto;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.section-header-sub {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  max-width: 68ch;
+}
+
+.section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+/* On a phone the actions drop under the title and stretch, because a
+   button squeezed into the corner of a 360px screen is a miss target. */
+@media (max-width: 560px) {
+  .section-header { flex-direction: column; align-items: stretch; }
+  .section-header-actions { width: 100%; }
+  .section-header-actions > button { flex: 1 1 auto; }
+}
+
+/* ---------- Tab levels ---------- */
+
+/* The sub bar is an underlined row, not a tray. Two trays stacked read
+   as one bar that wrapped, and then nothing says which level a click
+   moves you within. */
+.tabs-sub {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: 0;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.tabs-sub .tab {
+  height: 34px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  box-shadow: none;
+}
+
+.tabs-sub .tab:hover { color: var(--text-primary); }
+
+.tabs-sub .tab.active {
+  background: none;
+  box-shadow: none;
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+/* A number on a tab means "this many are waiting for you", so it is
+   tinted rather than grey: it is there to pull a click. */
+.tab-count {
+  margin-left: var(--space-2);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--btn-blue-1);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+/* Two shared modal widths, so a composer moved into a dialog does not
+   need a bespoke class of its own each time. The base .modal stays 420px,
+   which is right for a confirm or a single field and too tight for a form
+   with a category, a command, a label and a message. */
+.modal.modal-wide { max-width: 620px; }
+.modal.modal-xwide { max-width: 780px; }
+
+/* ==================================================================
+   COMMAND PALETTE (Ctrl+K)
+   ================================================================== */
+
+.cmdk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(5, 6, 10, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  /* Sat high rather than centred: the list grows downwards, so a centred
+     dialog would jump every time the result count changed. */
+  padding: 12vh var(--space-4) var(--space-4);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.cmdk {
+  width: 100%;
+  max-width: 560px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: scaleIn var(--duration-slow) var(--ease-out);
+}
+
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.cmdk-input {
+  flex: 1;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+}
+
+.cmdk-input:focus { outline: none; box-shadow: none; }
+.cmdk-input::placeholder { color: var(--text-faint); }
+
+.cmdk-esc {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-family: inherit;
+}
+
+.cmdk-results {
+  overflow-y: auto;
+  padding: var(--space-2);
+  flex: 1 1 auto;
+}
+
+.cmdk-empty { padding: var(--space-5); text-align: center; margin: 0; }
+
+.cmdk-group + .cmdk-group { margin-top: var(--space-2); }
+
+.cmdk-group-label {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.cmdk-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  font-weight: 500;
+  height: auto;
+  min-height: 34px;
+}
+
+/* One highlight, driven by the keyboard cursor, which the mouse moves
+   too. A separate :hover style would mean two things look selected at
+   once whenever the pointer is resting over the list. */
+.cmdk-item.active {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.cmdk-foot {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  flex: 0 0 auto;
+}
+
+.cmdk-foot kbd {
+  display: inline-block;
+  min-width: 16px;
+  padding: 1px 4px;
+  margin-right: 2px;
+  border: 1px solid var(--border-default);
+  border-radius: 3px;
+  font-family: inherit;
+  text-align: center;
+}
+
+/* The sidebar's own way in, for anyone who does not know the shortcut
+   exists. A palette nobody can discover is a palette for one person. */
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-3);
+  height: 34px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.sidebar-search:hover {
+  border-color: var(--border-strong);
+  color: var(--text-muted);
+}
+
+.sidebar-search-kbd {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+@media (max-width: 560px) {
+  .cmdk-backdrop { padding-top: 6vh; }
+  /* No keyboard to press it with, and the row is dead weight on a phone. */
+  .cmdk-foot { display: none; }
 }

@@ -36,6 +36,7 @@ import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import Card from "../components/primitives/Card";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
+import SectionHeader from "../components/primitives/SectionHeader";
 import { canSeeInternalAffairs } from "../access";
 
 /** The staff picker, which all three actions need in the same shape. */
@@ -91,8 +92,10 @@ function StrikeCard() {
 
   return (
     <Card>
-      <h2>Issue a Strike</h2>
-      <p className="muted card-subtitle">Every strike expires on its own after 14 days. Three active at once goes to the third-strike decision.</p>
+      <SectionHeader
+        title="Issue a Strike"
+        subtitle="Every strike expires on its own after 14 days. Three active at once goes to the third-strike decision."
+      />
       {error && <Banner>{error}</Banner>}
       {done && <Banner variant="success">Strike issued.</Banner>}
       <form onSubmit={submit}>
@@ -140,8 +143,10 @@ function DemoteCard() {
 
   return (
     <Card>
-      <h2>Demote</h2>
-      <p className="muted card-subtitle">Applied immediately, without going to anybody for approval, and recorded against your name.</p>
+      <SectionHeader
+        title="Demote"
+        subtitle="Applied immediately, without going to anybody for approval, and recorded against your name."
+      />
       {error && <Banner>{error}</Banner>}
       {done && <Banner variant="success">Demotion applied.</Banner>}
       <form onSubmit={submit}>
@@ -189,8 +194,10 @@ function TerminateCard() {
 
   return (
     <Card>
-      <h2>Terminate</h2>
-      <p className="muted card-subtitle">Removes them from the staff team immediately. Applied without approval and recorded against your name.</p>
+      <SectionHeader
+        title="Terminate"
+        subtitle="Removes them from the staff team immediately. Applied without approval and recorded against your name."
+      />
       {error && <Banner>{error}</Banner>}
       {done && <Banner variant="success">Staff member terminated.</Banner>}
       <form onSubmit={submit}>
