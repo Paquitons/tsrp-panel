@@ -4370,3 +4370,18 @@ code {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* A link inside staff-authored notice text. Underlined rather than
+   colour-only: the body is already low-contrast secondary text, and
+   colour on its own is not a difference everybody can see. */
+.nc-body a,
+.nc-toast-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  /* A pasted URL can be longer than the dialog is wide. */
+  overflow-wrap: anywhere;
+}
+
+.nc-body a:hover,
+.nc-toast-body a:hover { color: var(--text-primary); }
