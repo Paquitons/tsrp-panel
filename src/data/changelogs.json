@@ -1,5 +1,93 @@
 [
   {
+    "version": "2.0.0",
+    "slug": "v2-0-0",
+    "title": "TSRP Update",
+    "date": "2026-09-15",
+    "summary": "The biggest update yet. A full Staff Handbook now lives in the Staff Panel, ban appeals are handled in this server, and Internal Affairs has become its own tier with its own permissions.",
+    "sections": [
+      {
+        "heading": "Staff Handbook",
+        "items": [
+          "There is a new Staff Handbook at tsrp.online/staff-handbook, written from the live system rather than carried over from the old document.",
+          "It covers every rank, every command, how shifts, strikes, tickets, verification and appeals work, and what is expected of you on duty.",
+          "It reads as one document from top to bottom, with a Return to Dashboard button at the end.",
+          "The Staff Handbook button in the staff info channel now opens it. The old Google Doc it used to point at is out of date and should not be used."
+        ]
+      },
+      {
+        "heading": "Ban appeals",
+        "items": [
+          "Ban appeals are now a ticket type in this server. There is no separate appeal server.",
+          "The appeal button only appears in the ban appeals channel, so it cannot be opened from the normal ticket panel by mistake.",
+          "Appeals are handled by Admin and above who are also Support Staff, and the whole review team keeps its view after one of them claims it."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "Internal Affairs is now a separate tier rather than a rung on the staff ladder. You cannot hold an IA rank and a moderation rank at the same time.",
+          "What each IA rank can do is now set by its own table. Internal Affairs can strike, IA Officer adds termination and demotion, and IA Supervisor holds all three. Trial Internal Affairs holds none of them.",
+          "Those grants build up the ladder, so every IA rank holds everything the rank below it holds.",
+          "An IA member who holds a permission now uses it directly. There is no approval step.",
+          "Internal Affairs no longer grants any in-game powers. Somebody who is IA and also holds a moderation rank gets what that moderation rank gives them and nothing extra.",
+          "IA members are given nicknames by their IA rank: IAS, IAO, IA and TIA.",
+          "Internal Affairs can read the punishment log for investigations, but cannot create, edit, delete or complete an entry.",
+          "Internal Affairs does not work shifts and is not counted against the duty quota.",
+          "There is a new Internal Affairs Application ticket for anyone who wants to join. Applications are read by Management and Directors only."
+        ]
+      },
+      {
+        "heading": "Tickets",
+        "items": [
+          "A new ticket now pings the people who can actually see it. Before this, three ticket types announced themselves to a role that could not open the channel, so the ping reached nobody.",
+          "Staff Complaints go to Internal Affairs, Management and Directors.",
+          "Fast Pass goes to Supervisory, IA Officer and above, Management and Directors.",
+          "Once you claim a ticket it stays yours. Nobody else can claim it, close it, or send a close request on it, and a Director can still override.",
+          "On a Staff Complaint, claiming it also hides it from the rest of Internal Affairs. Management and Directors keep their view for oversight."
+        ]
+      },
+      {
+        "heading": "Announcements and messages in the Staff Panel",
+        "items": [
+          "Directors can now send an announcement to the staff team, or a private message to one member of it, and it appears in the Staff Panel without anyone refreshing.",
+          "An Important message stays on your screen until you press Acknowledge, and comes back if you close the panel and open it again.",
+          "A Quick message only reaches panels that are open at the time. It does not wait for you and does not come back later.",
+          "An announcement can go to everyone or to chosen ranks.",
+          "Links inside a message are clickable."
+        ]
+      },
+      {
+        "heading": "In-game announcements",
+        "items": [
+          "There is a new In-Game Announcements panel with 55 ready-made messages across six categories, so the wording is consistent whoever sends it.",
+          "The messages are edited from the HR Panel and reach Discord within about fifteen seconds of a change.",
+          "Every message has been rewritten to get through Roblox's chat filter, and the editor warns you while typing if a message is likely to be blocked."
+        ]
+      },
+      {
+        "heading": "Verification",
+        "items": [
+          "Staff whose account Roblox will not sign in, including anyone under 13, can be given a one-time alternative route by a Director. The bot sends the instructions by DM.",
+          "The verification phrase is now a short sentence rather than a random code, because Roblox was censoring the code.",
+          "If you lose access to your Discord account, your Roblox account can be linked to a new one. When the old account leaves the server its claim is released automatically, and there is a Release Claim button for when it has not left."
+        ]
+      },
+      {
+        "heading": "Fixes",
+        "items": [
+          "Manual verification could refuse to be granted again after a window ran out, saying the person already had it. It now grants correctly.",
+          "When the server shuts down, the live player count and server data reset instead of staying frozen at the last reading.",
+          "Ending somebody's LOA is Management and above in Discord and on the panel. The two used to disagree.",
+          "Reviewing a ban BOLO now follows who can use the ban command in game, which is Administration and above, on both the panel and in Discord. The two used to disagree, and Internal Affairs could review one despite holding no in-game powers.",
+          "Training can no longer be passed or failed by Internal Affairs.",
+          "A false player-count reading can no longer be treated as the truth, which was ending shifts that were genuinely being worked.",
+          "Chief of Staff was being left out of the restricted ticket channels they are able to act on, because that rank is not part of any team role. It is now added by name."
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.18.0",
     "slug": "v1-18-0",
     "title": "TSRP Update",
