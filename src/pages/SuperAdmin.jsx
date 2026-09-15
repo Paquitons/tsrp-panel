@@ -189,9 +189,10 @@ export default function SuperAdmin() {
 
       <div className="card">
         <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
-        {sections.length > 1 && (
-          <Tabs tabs={sections} active={tab} onChange={setTab} variant="sub" ariaLabel="Screens in this area" />
-        )}
+        {/* Always rendered, including for Staff, which holds one screen.
+            Dropping the row for a family that does not need it moved
+            everything below it whenever you changed family. */}
+        <Tabs tabs={sections} active={tab} onChange={setTab} variant="sub" ariaLabel="Screens in this area" />
 
         {tab === "shifts" && (
           <>
