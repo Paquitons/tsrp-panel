@@ -4482,3 +4482,12 @@ code {
   text-transform: uppercase;
   color: var(--text-faint);
 }
+
+/* The closing note on the Internal Affairs page: these actions are
+   immediate and attributed, and promotion is not among them. */
+.ia-foot {
+  max-width: 72ch;
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}

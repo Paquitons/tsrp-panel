@@ -24,9 +24,9 @@
 //   does not see Supervisory, Management or Super Admin.
 //
 //   Nobody outside IA sees the Internal Affairs page, including
-//   Directors. They lose nothing by it: the page holds Issue Strike and
-//   Suggest Rank Change, and leadership already has both inside
-//   Management.
+//   Directors. They lose nothing by it: the page holds striking,
+//   demoting and terminating, and leadership already has all three
+//   inside Management.
 //
 // This is the one place the inherit-upward rule is deliberately broken,
 // which is why it is written down rather than left to be inferred from
