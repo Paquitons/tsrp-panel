@@ -4795,9 +4795,12 @@ code {
   /* Inset by the same 12px .sidebar-nav pads its links with, so this
      button's icon and label sit in the same column as every nav icon and
      label below it. Flush to the sidebar edge it was 11px out, and the
-     whole first column read as crooked. Top margin matches the nav's own
-     16px so the gap under the brand is the same either way. */
-  margin: var(--space-4) var(--space-3) 0;
+     whole first column read as crooked.
+     The top margin is deliberately larger than that inset: a rounded box
+     tucked right under the brand's dividing line reads as though it is
+     hanging off the line rather than sitting in its own space, and its
+     corners have nothing to breathe against. */
+  margin: var(--space-5) var(--space-3) 0;
   /* One pixel off the horizontal padding to pay for the 1px border the
      nav links do not have, so the icon inside lands on the same column
      as theirs rather than a pixel to the right of it. */
