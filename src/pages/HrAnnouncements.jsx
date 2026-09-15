@@ -31,6 +31,8 @@ import { apiFetch } from "../api";
 import { useApiQuery } from "../hooks/useApiQuery";
 import CustomSelect from "../components/CustomSelect";
 import Banner from "../components/primitives/Banner";
+import Modal from "../components/primitives/Modal";
+import SectionHeader from "../components/primitives/SectionHeader";
 
 const POLL_MS = 15_000;
 
@@ -247,46 +249,45 @@ function EntryEditor({ entry, categories, onSaved, onError }) {
   );
 }
 
-function AddEntry({ categories, defaultCategory, onSaved, onError }) {
+/**
+ * The composer, in a modal opened from the section header.
+ *
+ * It used to be a button at the very bottom of the page, underneath every
+ * category and all fifty-five messages. Adding a message therefore meant
+ * scrolling the entire list first, and the scroll got longer every time
+ * anybody added one. The form is the same; only where you reach it from
+ * has changed.
+ */
+function AddEntryModal({ categories, defaultCategory, onSaved, onError, onClose }) {
   const [draft, setDraft] = useState({ ...BLANK, category: defaultCategory ?? "" });
-  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
-  function reset() {
-    setDraft({ ...BLANK, category: defaultCategory ?? "" });
-    setOpen(false);
-  }
+  const ready = draft.entryKey && draft.label && draft.message && draft.category;
 
   async function create() {
     setBusy(true); onError(null);
     try {
       await apiFetch("/announcements/entries", { method: "POST", body: draft });
       onSaved(`${draft.label} added.`);
-      reset();
-    } catch (err) { onError(err.message); } finally { setBusy(false); }
-  }
-
-  if (!open) {
-    return <button className="secondary dc-add" type="button" onClick={() => setOpen(true)}>Add a message</button>;
+      onClose();
+    } catch (err) { onError(err.message); setBusy(false); }
   }
 
   return (
-    <div className="dc-entry dc-entry-new">
-      <div className="dc-entry-body">
-        <Fields draft={draft} set={set} categories={categories} showKey />
-        <div className="button-row">
-          <button
-            className="primary" type="button"
-            disabled={busy || !draft.entryKey || !draft.label || !draft.message || !draft.category}
-            onClick={create}
-          >
-            {busy ? "Adding…" : "Add message"}
-          </button>
-          <button className="secondary" type="button" disabled={busy} onClick={reset}>Cancel</button>
-        </div>
+    <Modal onClose={onClose} className="modal-wide" labelledBy="add-announcement-title">
+      <h2 id="add-announcement-title">New in-game message</h2>
+      <p className="muted card-subtitle">
+        Staff pick this from the In-Game Announcements panel in Discord. It appears there within about fifteen seconds.
+      </p>
+      <Fields draft={draft} set={set} categories={categories} showKey />
+      <div className="button-row">
+        <button className="primary" type="button" disabled={busy || !ready} onClick={create}>
+          {busy ? "Adding…" : "Add message"}
+        </button>
+        <button className="secondary" type="button" disabled={busy} onClick={onClose}>Cancel</button>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -296,6 +297,7 @@ export default function HrAnnouncements() {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [reordering, setReordering] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   const categories = query.data?.categories ?? [];
   const entries = query.data?.entries;
@@ -351,10 +353,16 @@ export default function HrAnnouncements() {
 
   return (
     <>
-      <p className="muted card-subtitle" style={{ marginTop: 16 }}>
-        The reusable in-game messages staff pick from the In-Game Announcements panel in Discord.
-        Changes appear there on their own within about fifteen seconds.
-      </p>
+      <SectionHeader
+        title="In-game messages"
+        count={entries.length}
+        subtitle="The reusable messages staff pick from the In-Game Announcements panel in Discord. Changes appear there on their own within about fifteen seconds."
+        actions={
+          <button className="primary small" type="button" onClick={() => setAdding(true)}>
+            New message
+          </button>
+        }
+      />
 
       {error && <Banner>{error}</Banner>}
       {notice && !error && <Banner variant="success">{notice}</Banner>}
@@ -371,7 +379,7 @@ export default function HrAnnouncements() {
         <span className="muted ann-count">
           {search.trim()
             ? `${matchCount} of ${entries.length} match`
-            : `${entries.length} messages, ${entries.filter(e => e.active === 1).length} shown in Discord`}
+            : `${entries.filter(e => e.active === 1).length} shown in Discord`}
         </span>
       </div>
 
@@ -424,12 +432,15 @@ export default function HrAnnouncements() {
         );
       })}
 
-      <AddEntry
-        categories={categories}
-        defaultCategory={categories[0]?.key}
-        onSaved={saved}
-        onError={setError}
-      />
+      {adding && (
+        <AddEntryModal
+          categories={categories}
+          defaultCategory={categories[0]?.key}
+          onSaved={saved}
+          onError={setError}
+          onClose={() => setAdding(false)}
+        />
+      )}
     </>
   );
 }

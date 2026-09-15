@@ -14,6 +14,7 @@ import HrQuotas from "./HrQuotas";
 import HrAnnouncements from "./HrAnnouncements";
 import Modal from "../components/primitives/Modal";
 import Banner from "../components/primitives/Banner";
+import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
 import { useApiQuery } from "../hooks/useApiQuery";
 
@@ -335,7 +336,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
       <div className="card-grid">
         {canReviewBigActions && (
           <div className="card">
-            <h2>Pending Rank Changes ({pendingPromotions.length})</h2>
+            <SectionHeader title="Pending Rank Changes" count={pendingPromotions.length} countLabel="waiting" />
             {pendingPromotions.length === 0 ? (
               <p className="muted">No pending requests.</p>
             ) : (
@@ -381,7 +382,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
         )}
 
         <div className="card">
-          <h2>Pending LOA Requests ({pendingLOAs.length})</h2>
+          <SectionHeader title="Pending LOA Requests" count={pendingLOAs.length} countLabel="waiting" />
           {pendingLOAs.length === 0 ? (
             <p className="muted">No pending requests.</p>
           ) : (
@@ -419,7 +420,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
       {/* ---------- Actions: tabbed forms, pick one instead of scrolling past all of them ---------- */}
       {show("actions") && (
       <div className="card">
-        <h2>Take Action</h2>
+        <SectionHeader title="Take Action" subtitle="Pick what you are doing, then fill in the one form for it." />
         <Tabs tabs={actionTabs} active={actionTab} onChange={setActionTab} />
 
         {actionTab === "strike" && (
@@ -591,7 +592,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
       <div className="multi-col-grid">
         <div className="dashboard-col">
           <div className="card">
-            <h2>Currently On Strike ({groupedStrikes.length})</h2>
+            <SectionHeader title="Currently On Strike" count={groupedStrikes.length} />
             {loading && <p className="muted">Loading…</p>}
             {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
             <div className="log-card-list">
@@ -628,7 +629,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
 
         <div className="dashboard-col">
           <div className="card">
-            <h2>Active LOAs ({activeLOAs.length})</h2>
+            <SectionHeader title="Active LOAs" count={activeLOAs.length} />
             {activeLOAs.length === 0 ? (
               <p className="muted">Nobody is currently on LOA.</p>
             ) : (
@@ -663,7 +664,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
 
         <div className="dashboard-col">
           <div className="card">
-            <h2>Fast Pass ({fastPassTrials.length})</h2>
+            <SectionHeader title="Fast Pass" count={fastPassTrials.length} />
             <p className="muted card-subtitle">
               /fastpass approves an applicant into training. Passing them with /passtraining onboards them and starts the 7-day trial from that moment.
             </p>

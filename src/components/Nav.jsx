@@ -6,7 +6,15 @@ import {
   canSeeTickets, canSeeSupervisory, canSeeInternalAffairs,
   canSeeManagement, canSeeSuperAdmin,
 } from "../access";
-import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon, HistoryIcon, TerminalIcon } from "./icons";
+import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, CloseIcon, LogoutIcon, LinkIcon, DoorExitIcon, HistoryIcon, TerminalIcon, SearchIcon } from "./icons";
+import { openCommandPalette } from "./CommandPalette";
+
+// Ctrl on Windows and Linux, Cmd on a Mac. Read once: it cannot change
+// under somebody mid-session, and it is only ever a label.
+const shortcutHint =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent ?? "")
+    ? "⌘K"
+    : "Ctrl K";
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 
@@ -88,6 +96,15 @@ export default function Nav() {
           <img src={LOGO_URL} alt="" className="sidebar-brand-mark" />
           <span className="sidebar-brand-text">TSRP Panel</span>
         </div>
+
+        {/* The palette's visible way in. Most people will never guess a
+            keyboard shortcut exists, and one that only power users find
+            is not an improvement to navigation. */}
+        <button type="button" className="sidebar-search" onClick={openCommandPalette}>
+          <SearchIcon className="sidebar-link-icon" />
+          <span>Search the panel</span>
+          <span className="sidebar-search-kbd">{shortcutHint}</span>
+        </button>
 
         <nav className="sidebar-nav">
           {groups.map(group => (

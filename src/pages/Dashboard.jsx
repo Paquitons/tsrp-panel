@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { useOpenOnArrival } from "../hooks/useOpenOnArrival";
 import { formatClockTime, formatDurationWithSeconds, TYPE_LABELS, dutyFlagLabel } from "../utils";
 import Avatar from "../components/Avatar";
 import DiscordAvatar from "../components/DiscordAvatar";
@@ -77,6 +78,10 @@ export default function Dashboard() {
   // until the token expires.
   const canWriteLogs = user?.canWriteLogs !== false;
   const canUseShifts = user?.canUseShifts !== false;
+  // Named once rather than spelled out at each of the three places that
+  // ask, so the quick action, the modal and the palette arrival cannot
+  // drift apart on who may run a command.
+  const canRunCommands = user?.tier === "management" || user?.tier === "director";
 
   // ---------- Shift state ----------
   const [active, setActive] = useState(null);
@@ -279,6 +284,30 @@ export default function Dashboard() {
 
   // ---------- Toolbox: Resign modal -- any staff member can resign themselves ----------
   const [resignModalOpen, setResignModalOpen] = useState(false);
+
+  // Arrivals from the command palette. Everything here is something the
+  // page can already do; this only decides which of them is showing when
+  // somebody lands.
+  //
+  // Create New Log is a card on the page rather than a dialog, so it gets
+  // scrolled to and its first field focused. Request Staff is absent on
+  // purpose, and so is Resign: one pings the whole team and the other
+  // ends somebody's time on it, and neither belongs one keystroke away.
+  useOpenOnArrival(what => {
+    if (what === "lookup") setLookupModalOpen(true);
+    else if (what === "loa") setLoaModalOpen(true);
+    else if (what === "leaderboard" && canUseShifts) setLeaderboardModalOpen(true);
+    else if (what === "shift-history" && canUseShifts) setHistoryModalOpen(true);
+    else if (what === "run-command" && canRunCommands) setCommandModalOpen(true);
+    else if (what === "new-log" && canWriteLogs) {
+      // After paint: the card may not be in the document yet on a cold
+      // load straight to this URL.
+      requestAnimationFrame(() => {
+        document.getElementById("create-log")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        usernameInputRef.current?.focus();
+      });
+    }
+  });
   const [resignNotes, setResignNotes] = useState("");
   const [resignError, setResignError] = useState(null);
   const [resignSubmitting, setResignSubmitting] = useState(false);
@@ -606,10 +635,10 @@ export default function Dashboard() {
               <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
             </>
           )}
-          {(user?.tier === "management" || user?.tier === "director") && (
+          {canRunCommands && (
             <button className="quick-action" onClick={() => setStaffRequestModalOpen(true)}><MegaphoneIcon />Request Staff</button>
           )}
-          {(user?.tier === "management" || user?.tier === "director") && (
+          {canRunCommands && (
             <button className="quick-action" onClick={() => setCommandModalOpen(true)}><TerminalIcon />Run Command</button>
           )}
           <button className="quick-action quick-action-danger" onClick={() => setResignModalOpen(true)}><DoorExitIcon />Resign</button>
@@ -658,7 +687,7 @@ export default function Dashboard() {
               </p>
             </div>
           ) : (
-          <div className="card">
+          <div className="card" id="create-log">
             <h2>Create New Log</h2>
             {createError && <Banner>{createError}</Banner>}
             {createSuccess && <Banner variant="success">Log created successfully.</Banner>}
