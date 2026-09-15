@@ -117,7 +117,7 @@ export const HANDBOOK = [
         { tier: "Standalone" },
         ["Staff Trainer", "ST", "Runs training and passes or fails trainees. Kept through promotions and demotions."],
         ["Department Owners", "DO", "Community role rather than a moderation rank."],
-        ["Staff Team", "—", "The base membership role everybody above also holds. No prefix."],
+        ["Staff Team", "None", "The base membership role everybody above also holds. No prefix."],
       ]},
       { type: "h3", text: "Roles that are not ranks" },
       { type: "p", text: "Three roles survive a promotion or demotion, because they describe a job rather than a level: **Support Staff**, **Staff Trainer** and **Application Reviewer**. Support Staff is what gives access to ordinary tickets regardless of rank, and it is required on top of Admin+ to handle ban appeals." },
@@ -130,11 +130,11 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "The Staff Panel sorts every rank into one of five permission tiers. Everything the panel gates is gated on the tier, not on the rank name." },
       { type: "table", head: ["Tier", "Ranks", "Can log", "Also gets"], rows: [
-        ["**Moderator**", "Junior Moderator to Chief Moderator", "Warning, kick, BOLO, note", "—"],
-        ["**Admin**", "Junior Administrator to Chief Administrator, all four Supervisory ranks, Staff Trainer", "The above plus ban, temp ban, unban", "—"],
+        ["**Moderator**", "Junior Moderator to Chief Moderator", "Warning, kick, BOLO, note", "Nothing extra"],
+        ["**Admin**", "Junior Administrator to Chief Administrator, all four Supervisory ranks, Staff Trainer", "The above plus ban, temp ban, unban", "Nothing extra"],
         ["**Internal Affairs**", "Trial Internal Affairs to IA Supervisor", "Nothing. The punishment log is read-only for IA", "Internal Affairs page, strikes that bypass hierarchy, rank change suggestions"],
-        ["**Management**", "Management Team to Chief of Staff, Department Owners", "Everything", "HR Panel, LOA review, Account Verification, In-Game Permissions"],
-        ["**Director**", "Directors Board to Founder", "Everything", "Director Console, processing resignations, deleting tickets"],
+        ["**Management**", "Management Team to Chief of Staff, Department Owners", "Everything", "The Management area, LOA review, account verification"],
+        ["**Director**", "Directors Board to Founder", "Everything", "The Director-only tabs of Management, processing resignations, deleting tickets"],
       ]},
       { type: "h3", text: "The three thresholds that matter" },
       { type: "p", text: "Most Discord commands are gated on one of three lines rather than on a rank each. Learn these three and you can predict almost anything." },
@@ -220,7 +220,7 @@ export const HANDBOOK = [
     id: "activity", group: "duty", title: "Activity and quotas",
     blocks: [
       { type: "h3", text: "The weekly quota" },
-      { type: "p", text: "Every staff member is expected to log **4 hours on duty per calendar week**. Progress is on the HR Panel's Quotas tab and resets at the start of each week. Falling short without telling anyone in advance may cost you a strike." },
+      { type: "p", text: "Every staff member is expected to log **4 hours on duty per calendar week**. Progress is on the Management area's Records tab and resets at the start of each week. Falling short without telling anyone in advance may cost you a strike." },
       { type: "p", text: "Time on break does not count. Time on an approved LOA is not held against you." },
 
       { type: "h3", text: "Activity checks" },
@@ -278,13 +278,13 @@ export const HANDBOOK = [
     id: "punishments", group: "moderation", title: "Punishment guide",
     blocks: [
       { type: "note", variant: "hard", title: "Evidence first", body: "You must have a clip or have witnessed the offence firsthand before issuing any punishment. Somebody else's word is a reason to investigate, not a reason to act." },
-      { type: "h3", text: "Minor offences — warning" },
+      { type: "h3", text: "Minor offences: warning" },
       { type: "list", items: [
         "Spamming moderator calls",
         "Minor New Life Rule violations",
         "Misuse of Booster or VIP perks",
       ]},
-      { type: "h3", text: "Moderate offences — kick" },
+      { type: "h3", text: "Moderate offences: kick" },
       { type: "list", items: [
         "Fail Roleplay (FRP)",
         "Random Deathmatch and Vehicle Deathmatch (RDM/VDM)",
@@ -293,7 +293,7 @@ export const HANDBOOK = [
         "GTA driving: unrealistic or reckless driving",
       ]},
       { type: "note", title: "RDM and VDM go straight to a kick", body: "Do not issue three warnings first. Server chaos and roleplay quality are ongoing complaints and this is the response to them." },
-      { type: "h3", text: "Severe offences — ban" },
+      { type: "h3", text: "Severe offences: ban" },
       { type: "list", items: [
         "Exploiting",
         "Cheating",
@@ -304,7 +304,7 @@ export const HANDBOOK = [
         "Staff impersonation",
       ]},
       { type: "h3", text: "Kick rejoin cooldown" },
-      { type: "p", text: "Logging a kick on the Staff Panel can start a rejoin cooldown, and anyone who comes back inside their window is re-kicked automatically. The cooldown is only ever created by the panel log, never by the :kick command itself, which is another reason to log every kick. Active cooldowns are listed on the Internal Affairs page." },
+      { type: "p", text: "Logging a kick on the Staff Panel can start a rejoin cooldown, and anyone who comes back inside their window is re-kicked automatically. The cooldown is only ever created by the panel log, never by the :kick command itself, which is another reason to log every kick. Active cooldowns are listed on the Supervisory page." },
     ],
   },
 
@@ -350,11 +350,11 @@ export const HANDBOOK = [
       { type: "note", title: "Not for Internal Affairs", body: "IA issues no log types at all and has no Create New Log form. They read this log rather than write to it. See *Internal Affairs*." },
       { type: "h3", text: "Log types" },
       { type: "table", head: ["Type", "Who can issue", "Notes"], rows: [
-        ["Warning", "Everyone", "—"],
+        ["Warning", "Everyone", "No extra conditions"],
         ["Kick", "Everyone", "May start a rejoin cooldown"],
         ["Note", "Everyone", "Record without a punishment"],
         ["BOLO", "Everyone", "A ban request for review, not a ban"],
-        ["Ban", "Admin tier and above", "—"],
+        ["Ban", "Admin tier and above", "No extra conditions"],
         ["Temp ban", "Admin tier and above", "Requires an unban date"],
         ["Unban", "Admin tier and above", "Reversing a ban is the same authority as issuing one"],
       ]},
@@ -416,7 +416,7 @@ export const HANDBOOK = [
         ["Moderation Messages", ":pm", "Private messages to one player"],
       ]},
       { type: "p", text: "Anything in square brackets is yours to fill in before you send it: [user], [location], [postal], [reason], [department]." },
-      { type: "p", text: "Management can edit the list from the HR Panel and changes reach the Discord panel on their own within about fifteen seconds. If a message is worded badly or missing, say so rather than improvising your own version." },
+      { type: "p", text: "Management can edit the list from the Management area's Announcements tab and changes reach the Discord panel on their own within about fifteen seconds. If a message is worded badly or missing, say so rather than improvising your own version." },
       { type: "note", title: "Do not free-hand announcements", body: "The approved wording exists so the same announcement reads the same way every time and does not get filtered. Write your own only for something genuinely one-off." },
     ],
   },
@@ -466,7 +466,7 @@ export const HANDBOOK = [
         "Repeated messages and message frequency",
         "New accounts joining during raid mode",
       ]},
-      { type: "p", text: "Repeat offences climb a ladder: warn, then a ten minute timeout, then an hour, then a kick, then a ban. Thresholds are deliberately lax rather than hair-trigger. Offences are visible on the HR Panel's Automod Offenses tab." },
+      { type: "p", text: "Repeat offences climb a ladder: warn, then a ten minute timeout, then an hour, then a kick, then a ban. Thresholds are deliberately lax rather than hair-trigger. Offences are visible on the Management area's Records tab." },
       { type: "p", text: "Do not manually punish something automod already handled, and do not undo an automod action without checking why it fired." },
       { type: "h3", text: "Manual Discord moderation" },
       { type: "p", text: "Ordinary Discord moderation follows the same principles as in game: evidence first, explain it, be consistent. Discord conduct reports come in through General Support tickets." },
@@ -568,7 +568,7 @@ export const HANDBOOK = [
         "You can still clock in if you want to; an LOA excuses you, it does not lock you out.",
       ]},
       { type: "h3", text: "Ending early or extending" },
-      { type: "p", text: "Management can end an LOA early or extend it from the HR Panel, and /endloa does the same in Discord. Both are Management and above; there is no lower route to it. If your plans change, say so rather than letting it run." },
+      { type: "p", text: "Management can end an LOA early or extend it from the Management area, and /endloa does the same in Discord. Both are Management and above; there is no lower route to it. If your plans change, say so rather than letting it run." },
     ],
   },
 
@@ -620,7 +620,7 @@ export const HANDBOOK = [
     id: "leaving", group: "record", title: "Leaving the team",
     blocks: [
       { type: "h3", text: "Resigning" },
-      { type: "p", text: "You can resign yourself at any time from the **Resign** action on the dashboard. Processing somebody else's resignation is Director and above, in Discord with /resign or from the HR Panel." },
+      { type: "p", text: "You can resign yourself at any time from the **Resign** action on the dashboard. Processing somebody else's resignation is Director and above, in Discord with /resign or from the Management area." },
       { type: "h3", text: "Termination" },
       { type: "reqs", items: ["Community Management and above"] },
       { type: "p", text: "/terminate removes somebody from the staff team with a reason. It is also the outcome of a third-strike decision, an approved activity check, and the automatic anti-abuse response." },
@@ -672,7 +672,6 @@ export const HANDBOOK = [
         "**Fast Pass** tickets from **IA Officer** upward only, shared with Supervisory. Internal Affairs and Trial Internal Affairs do not see them.",
         "No other type: not general support, not community tickets, not ban appeals.",
         "Issuing strikes, terminations and demotions, per the table above, including on staff who would otherwise outrank them.",
-        "Visibility of active kick rejoin cooldowns.",
         "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
       { type: "h3", text: "What IA does not have" },
@@ -705,7 +704,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "Management runs the day to day. On top of everything below their tier, Management and above hold:" },
       { type: "list", items: [
-        "**HR Panel**: strikes, LOAs, promotions and demotions, terminations, resignations, quotas, automod offences, in-game announcements.",
+        "**Management**: strikes, LOAs, promotions and demotions, terminations, resignations, quotas, automod offences, in-game announcements.",
         "**Account Verification**: resolving verification problems.",
         "**In-Game Permissions**: checking why somebody's powers are not applying, and revoking everyone's at once if needed.",
         "**Run Command** on the dashboard.",
@@ -721,7 +720,7 @@ export const HANDBOOK = [
         "Respond to anti-abuse and Discord security alerts immediately. Those are the ones that cannot wait.",
       ]},
       { type: "h3", text: "Directors" },
-      { type: "p", text: "Directors additionally hold the **Director Console** (hub content, alternative verification grants, the full audit log), process resignations, and delete tickets. Directors approve the strike list that comes out of an activity check." },
+      { type: "p", text: "Directors additionally see extra tabs inside Management (hub content, alternative verification grants, panel broadcasts, the full audit log), process resignations, and delete tickets. Directors approve the strike list that comes out of an activity check." },
     ],
   },
 
@@ -779,11 +778,11 @@ export const HANDBOOK = [
       { type: "p", text: "Sign in with Discord. You are asked to confirm your linked Roblox account the first time; that confirmation is checked on every request afterwards, not just at sign-in." },
       { type: "table", head: ["Page", "Who sees it", "What it holds"], rows: [
         ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls, no Create New Log and no Request Staff; the punishment log itself is read-only for them."],
-        ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change, active kick rejoin cooldowns"],
-        ["**HR Panel**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements"],
+        ["**Supervisory**", "Supervisory, Management, Directors. Not IA", "Review ban BOLOs, and lift an active kick rejoin cooldown"],
+        ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change"],
+        ["**Management**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements, account verification. Directors also see hubs, panel broadcasts, alternative verification and the audit log"],
         ["**Account Verification**", "Management and above", "Resolving verification problems"],
         ["**In-Game Permissions**", "Management and above", "Status, per-person checks, revoke everyone"],
-        ["**Director Console**", "Directors", "Department and Civilian hub content, alternative verification grants, full audit log"],
         ["**Ticket Transcripts**", "Support Staff; IA and above see Staff Complaints", "Archived transcripts with attachments"],
         ["**Handbook**", "Everyone", "This document, at /staff-handbook. Deliberately not in the sidebar; reach it by the link."],
         ["**Changelog**", "Everyone", "What changed and when"],

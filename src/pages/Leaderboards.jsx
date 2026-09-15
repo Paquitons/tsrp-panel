@@ -50,7 +50,7 @@ export default function Leaderboards() {
         <div className="board-grid">
           <Card variant="board" as="section">
             <h2>Richest Players</h2>
-            <p className="muted card-subtitle">By total net worth -- cash, bank, businesses, property, and investments, minus loans.</p>
+            <p className="muted card-subtitle">By total net worth: cash, bank, businesses, property and investments, minus loans.</p>
             {data.players.length === 0 && <p className="muted">No wallets yet.</p>}
             {data.players.map((p, i) => (
               <RankedRow

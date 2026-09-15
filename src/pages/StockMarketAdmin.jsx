@@ -77,7 +77,7 @@ function StockListRow({ stock, onClick }) {
     <div className="loa-card loa-card-row" style={{ cursor: "pointer" }} onClick={onClick}>
       <div>
         <div className="verification-identity-name">{stock.ticker} <span className="muted">-- {stock.name}</span></div>
-        <div className="muted">{stock.category}{stock.frozen ? " -- FROZEN" : ""}{stock.status !== "open" ? ` -- ${stock.status.toUpperCase()}` : ""}</div>
+        <div className="muted">{stock.category}{stock.frozen ? " · FROZEN" : ""}{stock.status !== "open" ? ` · ${stock.status.toUpperCase()}` : ""}</div>
       </div>
       <div style={{ marginLeft: "auto", textAlign: "right" }}>
         <div>{money(stock.current_price)}</div>
@@ -110,7 +110,7 @@ function OverviewTab() {
       <div className="loa-list">
         {data.gainers.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
-            <span>{s.ticker} -- {s.name}</span>
+            <span>{s.ticker} · {s.name}</span>
             <span className={pctClass(s.performance.daily)} style={{ marginLeft: "auto" }}>{pct(s.performance.daily)}</span>
           </div>
         ))}
@@ -121,7 +121,7 @@ function OverviewTab() {
       <div className="loa-list">
         {data.losers.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
-            <span>{s.ticker} -- {s.name}</span>
+            <span>{s.ticker} · {s.name}</span>
             <span className={pctClass(s.performance.daily)} style={{ marginLeft: "auto" }}>{pct(s.performance.daily)}</span>
           </div>
         ))}
@@ -132,8 +132,8 @@ function OverviewTab() {
       <div className="loa-list">
         {data.trending.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
-            <span>{s.ticker} -- {s.name}</span>
-            <span className="muted" style={{ marginLeft: "auto" }}>{s.trades} trade(s) -- {money(s.volume)}</span>
+            <span>{s.ticker} · {s.name}</span>
+            <span className="muted" style={{ marginLeft: "auto" }}>{s.trades} trade(s) · {money(s.volume)}</span>
           </div>
         ))}
         {data.trending.length === 0 && <p className="muted">No trading activity in the last 24h.</p>}
@@ -240,7 +240,7 @@ function CreateStockModal({ onClose, onCreated }) {
             <div><label>Category</label><input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Tech, Industrial, Retail" /></div>
             <div><label>Volatility (%)</label><input type="number" min="0.1" step="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
           </div>
-          <label>Total Shares (fixed -- only changes later via a split or issuing more shares)</label>
+          <label>Total Shares (fixed, and only changes later via a split or issuing more shares)</label>
           <input type="number" min="1" value={sharesOutstanding} onChange={e => setSharesOutstanding(e.target.value)} />
           <div className="button-row" style={{ marginTop: 16 }}>
             <button className="primary" type="submit" disabled={saving}>{saving ? "Listing…" : "List Stock"}</button>
@@ -348,7 +348,7 @@ function StockDetail({ ticker, onBack }) {
         <span className={`badge ${stock.status === "open" ? "loa-status-approved" : "loa-status-denied"}`}>{stock.status}</span>
         {!!stock.frozen && <span className="badge loa-status-pending">Frozen</span>}
       </div>
-      <p className="muted">{stock.category} -- {money(stock.current_price)}/share -- Market value {money(stock.current_price * stock.shares_outstanding)}</p>
+      <p className="muted">{stock.category} · {money(stock.current_price)}/share · Market value {money(stock.current_price * stock.shares_outstanding)}</p>
 
       <div className="card-grid">
         <div className="stat-tile"><div className="muted">24h Change</div><div className={pctClass(performance?.daily)}>{pct(performance?.daily)}</div></div>
@@ -392,7 +392,7 @@ function StockDetail({ ticker, onBack }) {
               <span className="muted">{new Date(t.created_at).toLocaleString()}</span>
             </div>
             <div className="log-card-field">
-              <NamedHolder discordId={t.discord_id} prefix="trader" row={t} /> -- {t.quantity} share(s) @ {money(t.price)} = {money(t.total)}
+              <NamedHolder discordId={t.discord_id} prefix="trader" row={t} /> · {t.quantity} share(s) @ {money(t.price)} = {money(t.total)}
             </div>
             {!t.reversed && (t.action === "buy" || t.action === "sell") && (
               <button className="btn-red small" type="button" style={{ marginTop: 8 }} onClick={() => reverse(t.id)}>Reverse</button>
@@ -415,7 +415,7 @@ function StockDetail({ ticker, onBack }) {
             <div className="log-card-field">{e.reason}</div>
           </div>
         ))}
-        {events.length === 0 && <p className="muted">No company events yet -- price has only moved from normal daily market movement.</p>}
+        {events.length === 0 && <p className="muted">No company events yet. Price has only moved from normal daily market movement.</p>}
       </div>
     </>
   );
@@ -443,7 +443,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
       <AutoGrowTextarea value={description} onChange={e => setDescription(e.target.value)} />
       <div className="form-row">
         <div><label>Category</label><input value={category} onChange={e => setCategory(e.target.value)} /></div>
-        <div><label>Volatility (%, scales daily movement -- default is 3)</label><input type="number" step="0.1" min="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
+        <div><label>Volatility (%, scales daily movement, default is 3)</label><input type="number" step="0.1" min="0.1" value={volatility} onChange={e => setVolatility(e.target.value)} /></div>
       </div>
       <div className="button-row">
         <button className="primary" type="button" onClick={() => onSaveEdit({ name, description, category, volatility: Number(volatility) / 100 })}>
@@ -452,7 +452,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
       </div>
 
       <h2 style={{ marginTop: 20 }}>Issue Shares</h2>
-      <p className="muted card-subtitle">The only way total shares changes outside a split -- a structural event with its own price impact (configurable in Economy Config's Stocks section) and a logged company event.</p>
+      <p className="muted card-subtitle">The only way total shares changes outside a split. A structural event with its own price impact (configurable in Economy Config's Stocks section) and a logged company event.</p>
       <div className="form-inline-row">
         <div className="form-inline-field"><label>Additional Shares</label><input type="number" min="1" value={additionalShares} onChange={e => setAdditionalShares(e.target.value)} /></div>
         <div className="form-inline-field-btn">
@@ -599,7 +599,7 @@ function MarketControlsTab() {
       {notice && <Banner variant="success">{notice}</Banner>}
 
       <h2 style={{ marginTop: 16 }}>Trading Status</h2>
-      <p className="muted card-subtitle">Pausing blocks buy/sell but prices keep moving. Freezing the market stops price movement too -- a harder stop.</p>
+      <p className="muted card-subtitle">Pausing blocks buy/sell but prices keep moving. Freezing the market stops price movement too, a harder stop.</p>
       <div className="button-row">
         <button className="secondary" type="button" disabled={busy} onClick={() => toggleConfig("tradingPaused")}>
           {config.tradingPaused ? "Resume Trading" : "Pause Trading"}
@@ -1168,7 +1168,7 @@ function InsightsTab() {
           <div className="loa-card loa-card-row" key={a.id}>
             <span>
               <strong>{a.ticker}</strong> {a.direction === "above" ? "rises above" : "falls below"} {money(a.target_price)}
-              {a.note && <span className="muted"> -- {a.note}</span>}
+              {a.note && <span className="muted"> · {a.note}</span>}
             </span>
             {a.triggered_at
               ? <span className="badge loa-status-approved">Triggered {new Date(a.triggered_at).toLocaleDateString()}</span>
@@ -1183,7 +1183,7 @@ function InsightsTab() {
         {log.map(entry => (
           <div className="loa-card loa-card-row" key={entry.id}>
             <span>{entry.summary}</span>
-            <span className="muted">{new Date(entry.sent_at).toLocaleString()} -- {entry.delivered ? "delivered" : "not delivered"}</span>
+            <span className="muted">{new Date(entry.sent_at).toLocaleString()} · {entry.delivered ? "delivered" : "not delivered"}</span>
           </div>
         ))}
         {log.length === 0 && <p className="muted">Nothing sent yet.</p>}
@@ -1201,12 +1201,12 @@ function AuditLogTab() {
   return (
     <>
       {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
-      <p className="muted card-subtitle" style={{ marginTop: 16 }}>Every Super Admin stock market action -- who, what, and when.</p>
+      <p className="muted card-subtitle" style={{ marginTop: 16 }}>Every Super Admin stock market action: who, what and when.</p>
       <div className="loa-list">
         {log.map(entry => (
           <div className="loa-card" key={entry.id}>
             <div className="loa-card-top loa-card-top-stack">
-              <span className="badge loa-status-pending">{entry.action}{entry.ticker ? ` -- ${entry.ticker}` : ""}</span>
+              <span className="badge loa-status-pending">{entry.action}{entry.ticker ? ` · ${entry.ticker}` : ""}</span>
               <span className="muted">{new Date(entry.created_at).toLocaleString()}</span>
             </div>
             <div className="log-card-field">

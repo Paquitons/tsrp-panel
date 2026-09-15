@@ -59,16 +59,16 @@ export default function Home() {
         <Card variant="stat">
           <span className="home-stat-label">Players</span>
           <span className="home-stat-value">
-            {status ? `${status.players}/${status.maxPlayers}` : "—"}
+            {status ? `${status.players}/${status.maxPlayers}` : "…"}
           </span>
         </Card>
         <Card variant="stat">
           <span className="home-stat-label">In Queue</span>
-          <span className="home-stat-value">{status ? status.queue : "—"}</span>
+          <span className="home-stat-value">{status ? status.queue : "…"}</span>
         </Card>
         <Card variant="stat">
           <span className="home-stat-label">Staff On Duty</span>
-          <span className="home-stat-value">{status ? status.staffOnDuty : "—"}</span>
+          <span className="home-stat-value">{status ? status.staffOnDuty : "…"}</span>
         </Card>
       </section>
 

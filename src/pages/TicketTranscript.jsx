@@ -166,7 +166,7 @@ function buildTranscriptText(ticket, messages, mentions, pending) {
     if (m.content) lines.push(mentionsToPlainText(m.content, mentions, pending));
     if (m.isEmbed && !m.content) lines.push("[embed]");
     for (const a of m.attachments) {
-      lines.push(a.status === "ok" ? `[Attachment: ${a.filename}]` : `[Attachment: ${a.filename} -- ${a.status === "too_large" ? "too large to archive" : "failed to archive"}]`);
+      lines.push(a.status === "ok" ? `[Attachment: ${a.filename}]` : `[Attachment: ${a.filename}, ${a.status === "too_large" ? "too large to archive" : "failed to archive"}]`);
     }
     lines.push("");
   }
@@ -385,7 +385,7 @@ export default function TicketTranscript() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      alert("Couldn't copy to clipboard -- your browser may be blocking it.");
+      alert("Could not copy to clipboard. Your browser may be blocking it.");
     }
   }
 

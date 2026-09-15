@@ -634,8 +634,8 @@ function BroadcastSection({ onNotice, onError }) {
               value={priority}
               onChange={setPriority}
               options={[
-                { value: "important", label: "Important — stays until acknowledged" },
-                { value: "quick", label: "Quick — only for panels open now" },
+                { value: "important", label: "Important, stays until acknowledged" },
+                { value: "quick", label: "Quick, only for panels open now" },
               ]}
             />
           </div>
@@ -750,7 +750,7 @@ function BroadcastSection({ onNotice, onError }) {
                     {/* A quick notice is never acknowledged, so a count of
                         zero against one would read as "nobody has read it"
                         rather than "there is nothing to read here". */}
-                    {n.priority === "important" ? n.ackCount : "—"}
+                    {n.priority === "important" ? n.ackCount : "n/a"}
                   </td>
                   <td>
                     {n.revokedAt ? (
@@ -831,6 +831,12 @@ function AuditSection() {
     </>
   );
 }
+
+// Exported so Management.jsx can render these inside its own tab bar.
+// The Director Console is now a section OF Management rather than a
+// separate destination, but the sections themselves did not need
+// rewriting to move, so they have not been.
+export { HubSection, BroadcastSection, ManualVerificationSection, AuditSection };
 
 export default function DirectorConsole() {
   const { user } = useAuth();

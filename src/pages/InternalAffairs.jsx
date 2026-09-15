@@ -7,38 +7,14 @@ import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import DiscordIdentity from "../components/DiscordIdentity";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
-import Avatar from "../components/Avatar";
 import Card from "../components/primitives/Card";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import { useApiQuery } from "../hooks/useApiQuery";
-import { expiresLabel } from "../utils";
 
 export default function InternalAffairs() {
   const { user } = useAuth();
   const canAccess = user?.tier === "ia" || user?.tier === "management" || user?.tier === "director";
-
-  // ---------- Kick Rejoin Cooldowns ----------
-  const [removingId, setRemovingId] = useState(null);
-
-  const cooldownsQuery = useApiQuery(["punishments", "kick-cooldowns"], canAccess && "/punishments/kick-cooldowns/active", {
-    refetchInterval: 15_000,
-    select: d => d.cooldowns,
-  });
-  const cooldowns = cooldownsQuery.data ?? [];
-
-  async function removeCooldown(id, label) {
-    if (!confirm(`Remove ${label}'s rejoin cooldown early? They'll be able to rejoin normally right away.`)) return;
-    setRemovingId(id);
-    try {
-      await apiFetch(`/punishments/kick-cooldowns/${id}`, { method: "DELETE" });
-      await cooldownsQuery.refetch();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setRemovingId(null);
-    }
-  }
 
   // ---------- Issue Strike ----------
   const strikeSearch = useStaffSearch();
@@ -130,7 +106,10 @@ export default function InternalAffairs() {
   }
 
   return (
-    <PageShell title="Internal Affairs" subtitle="Issue strikes and suggest promotions. Need backup right now? Use Request Staff from the Dashboard.">
+    <PageShell
+      title="Internal Affairs"
+      subtitle="Investigating the staff team: issue strikes and suggest rank changes. Rejoin cooldowns and ban requests moved to Supervisory, which oversees moderation rather than the people doing it."
+    >
       <div className="card-grid">
         <Card>
           <h2>Issue a Strike</h2>
@@ -217,56 +196,6 @@ export default function InternalAffairs() {
         </Card>
       </div>
 
-      <Card style={{ marginTop: 20 }}>
-        <h2>Active Kick Rejoin Cooldowns ({cooldowns.length})</h2>
-        <p className="muted card-subtitle">Everyone currently on a rejoin cooldown from a logged kick -- started automatically from the Dashboard's kick log.</p>
-        {cooldownsQuery.isLoading && <p className="muted">Loading…</p>}
-        {!cooldownsQuery.isLoading && cooldowns.length === 0 && <p className="muted">Nobody is currently on a rejoin cooldown.</p>}
-        {cooldowns.length > 0 && (
-          <div className="log-card-list">
-            {cooldowns.map(c => (
-              <div className="log-card" key={c.id}>
-                <div className="log-card-issuer-row">
-                  <span className="log-card-target" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Avatar username={c.roblox_username} robloxId={c.roblox_id} size={22} />
-                    {c.roblox_username}
-                  </span>
-                  <span className="loa-status-approved" style={{ marginLeft: "auto" }}>{expiresLabel(c.expires_at)}</span>
-                </div>
-                <div className="log-card-body">
-                  {c.reason && <div className="log-card-field"><span className="muted">Reason:</span> {c.reason}</div>}
-                  <div className="log-card-field">
-                    <span className="muted">Logged by:</span>{" "}
-                    {c.logged_by_discord_id ? (
-                      <DiscordIdentity
-                        variant="row"
-                        nickname={c.logged_by_nickname}
-                        username={c.logged_by_username}
-                        discordId={c.logged_by_discord_id}
-                        avatarHash={c.logged_by_avatar_hash}
-                        size={18}
-                        showId={false}
-                      />
-                    ) : "Unknown"}
-                  </div>
-                  {c.rekick_count > 0 && (
-                    <div className="log-card-field"><span className="muted">Automatically re-kicked:</span> {c.rekick_count} time{c.rekick_count === 1 ? "" : "s"}</div>
-                  )}
-                  <div className="button-row" style={{ marginTop: 8 }}>
-                    <button
-                      className="btn-red small"
-                      disabled={removingId === c.id}
-                      onClick={() => removeCooldown(c.id, c.roblox_username)}
-                    >
-                      {removingId === c.id ? "Removing…" : "Remove Cooldown"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
     </PageShell>
   );
 }

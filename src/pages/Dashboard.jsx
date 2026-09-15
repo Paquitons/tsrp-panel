@@ -128,7 +128,7 @@ export default function Dashboard() {
   }
 
   async function resetLeaderboard() {
-    if (!confirm("Reset the shift leaderboard? This starts a new counting period -- existing shift records and reports are not deleted.")) return;
+    if (!confirm("Reset the shift leaderboard? This starts a new counting period. Existing shift records and reports are not deleted.")) return;
     setResettingLeaderboard(true);
     try {
       await apiFetch("/shifts/leaderboard/reset", { method: "POST" });
@@ -351,13 +351,13 @@ export default function Dashboard() {
   function describeCooldown(cooldown) {
     if (!cooldown) return null;
     if (cooldown.started) {
-      return `Rejoin cooldown started -- this player will be automatically re-kicked if they rejoin within ${cooldown.cooldownMinutes} minute(s).`;
+      return `Rejoin cooldown started. This player will be automatically re-kicked if they rejoin within ${cooldown.cooldownMinutes} minute(s).`;
     }
     switch (cooldown.reason) {
       case "unresolved":
-        return "⚠️ Rejoin cooldown NOT started -- this player couldn't be verified against ERLC's player data. Re-check the username if you want the cooldown enforced.";
+        return "⚠️ Rejoin cooldown NOT started. This player could not be verified against ERLC's player data. Re-check the username if you want the cooldown enforced.";
       case "already_active":
-        return "This player already has an active rejoin cooldown from a previous kick -- no change made.";
+        return "This player already has an active rejoin cooldown from a previous kick, so nothing changed.";
       case "disabled":
         return null; // feature is off -- no need to alarm staff with a note about it
       default:
@@ -578,7 +578,7 @@ export default function Dashboard() {
                 <div
                   className="on-duty-avatar"
                   key={s.discordId}
-                  title={`${discordDisplayName(s.nickname, s.username, s.discordId)}${s.onBreak ? " (on break)" : ""}${s.flaggedReason ? ` — ${dutyFlagLabel(s.flaggedReason)}` : ""}`}
+                  title={`${discordDisplayName(s.nickname, s.username, s.discordId)}${s.onBreak ? " (on break)" : ""}${s.flaggedReason ? `, ${dutyFlagLabel(s.flaggedReason)}` : ""}`}
                   onClick={() => openUserByDiscord(s.discordId)}
                   style={{ cursor: "pointer" }}
                 >

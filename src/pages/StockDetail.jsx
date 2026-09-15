@@ -123,12 +123,12 @@ export default function StockDetail() {
 
           <Card variant="board" as="section">
             <h2>Recent Company Events</h2>
-            {events.length === 0 && <p className="muted">No company events yet -- price has only moved from normal daily market movement.</p>}
+            {events.length === 0 && <p className="muted">No company events yet. Price has only moved from normal daily market movement.</p>}
             {events.map((e, i) => (
               <div className="news-row" key={i}>
                 <span className={`news-dot ${changeClass(e.impactPercent)} ${e.severity === "major" ? "major" : ""}`} />
                 <div className="news-row-body">
-                  <p className="news-headline">{pctChange(e.impactPercent)} -- {e.reason}</p>
+                  <p className="news-headline">{pctChange(e.impactPercent)}: {e.reason}</p>
                   <p className="muted news-subtext">{new Date(e.createdAt).toLocaleString()}</p>
                 </div>
               </div>

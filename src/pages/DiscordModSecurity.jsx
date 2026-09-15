@@ -9,7 +9,7 @@ const ADMIN_POLL_MS = 15_000;
 
 const SEVERITY_LABEL = { flag: "Flagged", high_risk: "High-Risk", critical: "Critical" };
 const SEVERITY_CLASS = { flag: "positive", high_risk: "", critical: "negative" };
-const STATUS_LABEL = { open: "Open", escalated: "Escalated -- Needs Review", reviewed: "Reviewed", dismissed: "Dismissed" };
+const STATUS_LABEL = { open: "Open", escalated: "Escalated, needs review", reviewed: "Reviewed", dismissed: "Dismissed" };
 
 function NamedHolder({ discordId, prefix, row }) {
   return (

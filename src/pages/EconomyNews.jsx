@@ -59,7 +59,7 @@ function NewsItem({ item, base }) {
         <DiscordAvatar discordId={item.discordId} avatarHash={item.avatarHash} size={28} />
         <div className="news-row-body">
           <p className="news-headline">
-            <strong>{item.username ?? "A player"}</strong> won the lottery -- {fmt(item.payout)}
+            <strong>{item.username ?? "A player"}</strong> won the lottery: {fmt(item.payout)}
           </p>
         </div>
         <span className="muted news-timestamp">{formatWhen(item.timestamp)}</span>
@@ -73,7 +73,7 @@ function NewsItem({ item, base }) {
       <DiscordAvatar discordId={item.discordId} avatarHash={item.avatarHash} size={28} />
       <div className="news-row-body">
         <p className="news-headline">
-          <strong>{item.username ?? "A player"}</strong> opened a new business -- {item.name}
+          <strong>{item.username ?? "A player"}</strong> opened a new business: {item.name}
         </p>
       </div>
       <span className="muted news-timestamp">{formatWhen(item.timestamp)}</span>
