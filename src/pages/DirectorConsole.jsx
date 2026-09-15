@@ -4,6 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import Banner from "../components/primitives/Banner";
 import Tabs from "../components/Tabs";
 import { useApiQuery } from "../hooks/useApiQuery";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStaffSearch } from "../hooks/useStaffSearch";
+import CustomSelect from "../components/CustomSelect";
+import PortalDropdown from "../components/PortalDropdown";
+import DiscordAvatar from "../components/DiscordAvatar";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 
 const POLL_MS = 20_000;
 
@@ -23,6 +29,7 @@ const POLL_MS = 20_000;
 const SECTIONS = [
   { value: "department", label: "Department Hub" },
   { value: "civilian", label: "Civilian Hub" },
+  { value: "broadcast", label: "Broadcast" },
   { value: "verification", label: "Verification" },
   { value: "audit", label: "Audit Log" },
 ];
@@ -527,6 +534,262 @@ Reason (optional):`);
   );
 }
 
+// ==================================================================
+// Broadcast: announcements to staff, and private messages to one of
+// them.
+//
+// The two priorities are the only real choice on this form, and they are
+// two different promises rather than two levels of loudness:
+//
+//   IMPORTANT is a promise to the sender. It is stored, it reappears on
+//   every panel load, and it does not go away until that person presses
+//   Acknowledge. The history below shows how many have.
+//
+//   QUICK is a promise to the recipient. It reaches whoever has the
+//   panel open right now and nothing else -- no acknowledgement, no
+//   record on their screen, nothing waiting for them tomorrow.
+//
+// Targeting is enforced by the API (noticesShared.isRecipient); these
+// controls only compose the request.
+// ==================================================================
+function BroadcastSection({ onNotice, onError }) {
+  const options = useApiQuery(["director", "notice-options"], "/director/notices/options");
+  const history = useApiQuery(["director", "notices"], "/director/notices?limit=40", {
+    refetchInterval: POLL_MS,
+    select: d => d.notices,
+  });
+  const queryClient = useQueryClient();
+
+  const [channel, setChannel] = useState("announcement");
+  const [priority, setPriority] = useState("important");
+  const [audience, setAudience] = useState("everyone");
+  const [ranks, setRanks] = useState([]);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const recipient = useStaffSearch();
+
+  const maxBody = options.data?.maxBody ?? 1200;
+  const rankOptions = options.data?.ranks ?? [];
+  const isPm = channel === "pm";
+
+  function toggleRank(key) {
+    setRanks(list => (list.includes(key) ? list.filter(r => r !== key) : [...list, key]));
+  }
+
+  // A PM is addressed to one person by definition, so switching to it
+  // settles the audience rather than leaving a contradictory choice on
+  // screen for the API to reject.
+  function pickChannel(next) {
+    setChannel(next);
+    setAudience(next === "pm" ? "user" : "everyone");
+  }
+
+  async function send(e) {
+    e.preventDefault();
+    onError(null);
+    setSending(true);
+    try {
+      const payload = { channel, priority, body, audience };
+      if (audience === "ranks") payload.audienceRanks = ranks;
+      if (audience === "user") payload.recipientDiscordId = recipient.target?.discordId;
+
+      await apiFetch("/director/notices", { method: "POST", body: payload });
+
+      setBody("");
+      setRanks([]);
+      recipient.reset?.();
+      queryClient.invalidateQueries({ queryKey: ["director", "notices"] });
+      onNotice(priority === "important"
+        ? "Sent. It will stay on their screen until they acknowledge it."
+        : "Sent to everyone with the panel open right now.");
+    } catch (err) {
+      onError(err.message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const rows = history.data;
+
+  return (
+    <>
+      <h2 className="dc-subhead">Send a message</h2>
+
+      <form className="dc-broadcast" onSubmit={send}>
+        <div className="dc-bc-row">
+          <div>
+            <label>Type</label>
+            <CustomSelect
+              value={channel}
+              onChange={pickChannel}
+              options={[
+                { value: "announcement", label: "Announcement" },
+                { value: "pm", label: "Private message" },
+              ]}
+            />
+          </div>
+          <div>
+            <label>Priority</label>
+            <CustomSelect
+              value={priority}
+              onChange={setPriority}
+              options={[
+                { value: "important", label: "Important — stays until acknowledged" },
+                { value: "quick", label: "Quick — only for panels open now" },
+              ]}
+            />
+          </div>
+        </div>
+
+        <p className="muted dc-bc-hint">
+          {priority === "important"
+            ? "Shown as a dialog they have to acknowledge, on every visit until they do."
+            : "Shown as a passing toast. Anyone without the panel open right now will never see it."}
+        </p>
+
+        {isPm ? (
+          <>
+            <label>To</label>
+            <div className="autocomplete-wrap">
+              <input
+                ref={recipient.inputRef}
+                required
+                autoComplete="off"
+                value={recipient.query}
+                onChange={e => recipient.onQueryChange(e.target.value)}
+                onFocus={() => recipient.suggestions.length > 0 && recipient.setShowSuggestions(true)}
+                placeholder="Search by username or nickname"
+              />
+              <PortalDropdown
+                anchorRef={recipient.inputRef}
+                open={recipient.showSuggestions}
+                onClose={() => recipient.setShowSuggestions(false)}
+                className="autocomplete-list-portal"
+              >
+                {recipient.suggestions.map(s => (
+                  <div key={s.discordId} className="autocomplete-item" onClick={() => recipient.pick(s)}>
+                    <DiscordAvatar discordId={s.discordId} avatarHash={s.avatarHash} size={26} />
+                    <span className="autocomplete-name">{s.nickname ?? s.username}</span>
+                  </div>
+                ))}
+              </PortalDropdown>
+            </div>
+          </>
+        ) : (
+          <>
+            <label>Who sees it</label>
+            <CustomSelect
+              value={audience}
+              onChange={setAudience}
+              options={[
+                { value: "everyone", label: "Everyone" },
+                { value: "ranks", label: "Chosen ranks" },
+              ]}
+            />
+
+            {audience === "ranks" && (
+              <div className="dc-bc-ranks">
+                {rankOptions.map(r => (
+                  <label key={r.key} className={`dc-bc-rank ${ranks.includes(r.key) ? "is-on" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={ranks.includes(r.key)}
+                      onChange={() => toggleRank(r.key)}
+                    />
+                    {r.label}
+                  </label>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        <label>Message</label>
+        <AutoGrowTextarea
+          required
+          value={body}
+          maxLength={maxBody}
+          onChange={e => setBody(e.target.value)}
+          placeholder={isPm ? "What you need them to know." : "What the team needs to know."}
+        />
+        <p className="muted dc-bc-count">{body.length} / {maxBody}</p>
+
+        <button
+          className="primary"
+          type="submit"
+          disabled={sending || !body.trim() || (audience === "ranks" && ranks.length === 0) || (isPm && !recipient.target)}
+        >
+          {sending ? "Sending…" : "Send"}
+        </button>
+      </form>
+
+      <h2 className="dc-subhead">Sent</h2>
+      {history.isError && !rows && <Banner>{history.error.message}</Banner>}
+      {!rows && !history.isError && <p className="muted">Loading…</p>}
+      {rows && !rows.length && <p className="muted">Nothing sent yet.</p>}
+
+      {rows && rows.length > 0 && (
+        <div className="dc-audit-scroll">
+          <table className="dc-audit">
+            <thead>
+              <tr><th>Sent</th><th>Type</th><th>To</th><th>Message</th><th>Read</th><th /></tr>
+            </thead>
+            <tbody>
+              {rows.map(n => (
+                <tr key={n.id}>
+                  <td className="dc-audit-when">{fmt(n.createdAt)}</td>
+                  <td>
+                    {n.channel === "pm" ? "PM" : "Announcement"}
+                    <span className={`dc-bc-tag ${n.priority === "important" ? "is-important" : ""}`}>
+                      {n.priority}
+                    </span>
+                  </td>
+                  <td className="dc-audit-val">{describeAudience(n)}</td>
+                  <td className="dc-audit-val">{n.body}</td>
+                  <td>
+                    {/* A quick notice is never acknowledged, so a count of
+                        zero against one would read as "nobody has read it"
+                        rather than "there is nothing to read here". */}
+                    {n.priority === "important" ? n.ackCount : "—"}
+                  </td>
+                  <td>
+                    {n.revokedAt ? (
+                      <span className="muted">Taken down</span>
+                    ) : n.priority === "important" ? (
+                      <button
+                        className="secondary small"
+                        onClick={async () => {
+                          onError(null);
+                          try {
+                            await apiFetch(`/director/notices/${n.id}/revoke`, { method: "POST" });
+                            queryClient.invalidateQueries({ queryKey: ["director", "notices"] });
+                            onNotice("Taken down, including from panels that already had it.");
+                          } catch (err) { onError(err.message); }
+                        }}
+                      >
+                        Take down
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Who a sent notice went to, in words, for the history table. */
+function describeAudience(notice) {
+  if (notice.audience === "everyone") return "Everyone";
+  if (notice.audience === "user") return `One staff member (${notice.recipientDiscordId})`;
+  const ranks = notice.audienceRanks ?? [];
+  if (ranks.length <= 3) return ranks.join(", ");
+  return `${ranks.slice(0, 3).join(", ")} +${ranks.length - 3} more`;
+}
+
 function AuditSection() {
   const query = useApiQuery(["director", "audit"], "/director/audit-log?limit=150", {
     refetchInterval: POLL_MS,
@@ -602,6 +865,7 @@ export default function DirectorConsole() {
 
       {section === "department" && <HubSection hub="department" onNotice={flash} onError={setError} />}
       {section === "civilian" && <HubSection hub="civilian" onNotice={flash} onError={setError} />}
+      {section === "broadcast" && <BroadcastSection onNotice={flash} onError={setError} />}
       {section === "verification" && <ManualVerificationSection onNotice={flash} onError={setError} />}
       {section === "audit" && <AuditSection />}
     </div>

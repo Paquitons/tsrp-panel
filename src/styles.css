@@ -4077,3 +4077,296 @@ code {
   .hb-part-head, .hb-h2 { break-after: avoid; }
   .hb-footer-actions { display: none; }
 }
+
+/* ==================================================================
+   Notice Centre  (Director Console announcements and private messages)
+
+   Two presentations for the two priorities, and the difference between
+   them is deliberate rather than decorative: an important notice is owed
+   an answer, so it takes the screen and offers exactly one way out; a
+   quick one is not, so it sits in the corner and leaves on its own.
+   ================================================================== */
+
+/* ---------- Important: a modal with one exit ---------- */
+.nc-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;               /* over the sidebar and every page-level modal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(6, 8, 12, 0.72);
+  backdrop-filter: blur(3px);
+  /* No onClick handler anywhere on this element, on purpose. A backdrop
+     that dismisses would make "acknowledged" indistinguishable from
+     "clicked slightly off the dialog". */
+}
+
+.nc-modal {
+  width: 100%;
+  max-width: 540px;
+  background: var(--card-bg-raised);
+  border: 1px solid var(--border-default);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  max-height: calc(100vh - var(--space-10));
+  overflow-y: auto;
+}
+
+.nc-modal-pm { border-top-color: var(--info); }
+
+.nc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.nc-kind {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.nc-modal-pm .nc-kind { color: var(--info); }
+
+.nc-remaining {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.nc-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nc-body {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-md);
+  line-height: 1.65;
+  color: var(--text-secondary);
+  /* Staff-authored text: honour the line breaks they typed, and never
+     let one long unbroken string push the dialog wider than the screen. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.nc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nc-ack {
+  width: 100%;
+  min-height: var(--control-h-md);
+  margin-top: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.nc-ack:hover:not(:disabled) { background: var(--accent-hover); }
+.nc-ack:disabled { opacity: .6; cursor: default; }
+
+.nc-foot {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.nc-error {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1300;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--danger);
+  color: #1a0b0b;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+/* ---------- Quick: a toast that leaves on its own ---------- */
+.nc-toasts {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 1100;              /* under the important modal, over everything else */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(360px, calc(100vw - var(--space-8)));
+  pointer-events: none;       /* the stack is not a click target; each toast is */
+}
+
+.nc-toast {
+  pointer-events: auto;
+  background: var(--card-bg-raised);
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  animation: nc-toast-in var(--duration-base) var(--ease-out);
+}
+
+.nc-toast-pm { border-left-color: var(--info); }
+.nc-toast-pm .nc-kind { color: var(--info); }
+
+@keyframes nc-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nc-toast { animation: none; }
+}
+
+.nc-toast-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 6px;
+}
+
+.nc-toast-x {
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nc-toast-x:hover { color: var(--text-primary); }
+
+.nc-toast-body {
+  margin: 0 0 6px;
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.nc-toast-meta {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+@media (max-width: 640px) {
+  .nc-toasts {
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+    width: auto;
+  }
+}
+
+/* ---------- Director Console: Broadcast composer ---------- */
+.dc-broadcast { max-width: 720px; }
+
+.dc-bc-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.dc-bc-hint {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+}
+
+/* The rank picker. A scrolling box rather than a growing list: there are
+   29 ranks, and a form that pushes its own submit button off the screen
+   when you open one control is a form people mis-send. */
+.dc-bc-ranks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-4);
+  padding: var(--space-3);
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+
+.dc-bc-rank {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--card-bg);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.dc-bc-rank:hover { border-color: var(--border-strong); }
+
+.dc-bc-rank.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.dc-bc-rank input { margin: 0; accent-color: var(--accent); }
+
+.dc-bc-count {
+  margin: 6px 0 var(--space-4);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dc-bc-tag {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-default);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-faint);
+}
+
+.dc-bc-tag.is-important {
+  border-color: var(--accent);
+  color: var(--accent);
+}

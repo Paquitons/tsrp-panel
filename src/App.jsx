@@ -25,6 +25,8 @@ import Tickets from "./pages/Tickets";
 import TicketTranscript from "./pages/TicketTranscript";
 import NotFound, { PublicNotFound } from "./pages/NotFound";
 import Strike3Prompt from "./components/Strike3Prompt";
+import NoticeCenter from "./components/NoticeCenter";
+import { NoticesProvider } from "./context/NoticesContext";
 
 // SuperAdmin statically imports SuperAdminEconomy.jsx (2,151 lines) and
 // StockMarketAdmin.jsx (1,224 lines) -- together the single largest chunk
@@ -90,6 +92,12 @@ function AppShell() {
   // click past.
   return (
     <IdentityGate>
+    {/* Above the router, so a Director Console announcement or private
+        message reaches somebody wherever they are in the panel rather
+        than only on whichever page happened to subscribe. It also owns
+        the one shared connection to the live stream, which is what keeps
+        a quick notice tied to "the panel is open" and nothing else. */}
+    <NoticesProvider>
     <div className="layout">
       <Nav />
       <Routes>
@@ -132,7 +140,9 @@ function AppShell() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Strike3Prompt />
+      <NoticeCenter />
     </div>
+    </NoticesProvider>
     </IdentityGate>
   );
 }
