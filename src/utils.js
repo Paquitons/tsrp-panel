@@ -209,3 +209,35 @@ export const TYPE_LABELS = {
   unban: "Unban",
   note: "Note",
 };
+
+// ==================================================================
+// The panel scrolls inside .content, not on the window.
+//
+// .layout is a fixed-height flex row and .content is the child carrying
+// overflow-y: auto, so window.scrollTo does nothing here and
+// window.scrollY is always 0. Anything moving or measuring the page has
+// to go through this element.
+// ==================================================================
+
+/** The element that actually scrolls, or null on a page without one. */
+export function pageScroller() {
+  return document.querySelector(".content");
+}
+
+/**
+ * Back to the top of the page. Called when a tab changes.
+ *
+ * Sticky bars alone do not finish the job. They hold while there IS
+ * something to scroll, but a tab whose content is shorter than the screen
+ * cannot scroll at all, so the bars drop back to their resting place and
+ * appear to jump down the screen. Resetting the scroll means every tab
+ * change lands in the same position, whatever you were looking at before
+ * and however long the new tab turns out to be.
+ *
+ * Instant, not smooth: this is not a journey anybody asked to watch, and
+ * animating it on top of the tab change reads as two separate events.
+ */
+export function scrollPageToTop() {
+  const el = pageScroller();
+  if (el) el.scrollTop = 0;
+}
