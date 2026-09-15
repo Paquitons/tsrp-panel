@@ -139,7 +139,7 @@ export const HANDBOOK = [
       { type: "h3", text: "The three thresholds that matter" },
       { type: "p", text: "Most Discord commands are gated on one of three lines rather than on a rank each. Learn these three and you can predict almost anything." },
       { type: "defs", items: [
-        ["Trial Supervisor and above", "Submit rank change requests, issue strikes, run /say, /giveaway, /callstaff, /fastpass. Also the rank floor for handling ordinary tickets."],
+        ["Trial Supervisor and above", "Submit rank change requests, issue strikes, run /say, /giveaway, /callstaff, /fastpass. Also the rank floor for handling ordinary tickets. Internal Affairs is excluded from /callstaff and /fastpass."],
         ["Management and above", "End or extend somebody's LOA (/endloa and the panel alike)."],
         ["Community Management and above", "Promote and demote instantly, approve or deny rank change requests and LOAs, terminate, start and stop sessions, manage in-game permissions, run /poll."],
         ["Director and above", "Process somebody else's resignation, delete a ticket outright, grant alternative verification."],
@@ -267,7 +267,7 @@ export const HANDBOOK = [
       { type: "p", text: "None of that waits for the countdown, because the point of a shutdown is that staff powers stop being live. There is a five minute per-person cooldown on successful shutdowns; failed attempts do not cost it." },
       { type: "h3", text: "Calling for staff" },
       { type: "reqs", items: ["Trial Supervisor and above"] },
-      { type: "p", text: "/callstaff pings the team to get on duty, with an optional reason. It has a **ten minute global cooldown** shared by everyone, so use it when coverage is genuinely short rather than as a nudge." },
+      { type: "p", text: "/callstaff pings the team to get on duty, with an optional reason. It has a **ten minute global cooldown** shared by everyone, so use it when coverage is genuinely short rather than as a nudge. Internal Affairs cannot use it, and the same request from the Staff Panel is Management and above." },
       { type: "h3", text: "Population alerts" },
       { type: "p", text: "The bot watches the server population and pings management when it drops below a threshold, but only after the server has been busy enough that a drop means something. This is automatic and needs nothing from you; it is why management sometimes appears without being asked." },
     ],
@@ -672,7 +672,6 @@ export const HANDBOOK = [
         "**Fast Pass** tickets from **IA Officer** upward only, shared with Supervisory. Internal Affairs and Trial Internal Affairs do not see them.",
         "No other type: not general support, not community tickets, not ban appeals.",
         "Issuing strikes, terminations and demotions, per the table above, including on staff who would otherwise outrank them.",
-        "Requesting staff coverage.",
         "Visibility of active kick rejoin cooldowns.",
         "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
@@ -681,6 +680,7 @@ export const HANDBOOK = [
       { type: "list", items: [
         "**Reviewing ban BOLOs.** Accepting one issues the ban in game, and IA cannot ban.",
         "**Running training.** /passtraining and /failtraining refuse IA. Training puts somebody onto the staff team, and IA oversees that team rather than staffing it.",
+        "**Requesting staff coverage.** Request Staff does not appear on your dashboard and /callstaff refuses you. Calling people on duty is staffing the server, and IA runs no shifts and is not part of the duty roster it would be summoning.",
         "**Any in-game moderation command**, by way of the IA rank. If an IA member also holds a moderation rank, everything in game comes from that rank and nothing from the IA one.",
       ]},
       { type: "note", variant: "hard", title: "The punishment log is read-only for IA", body: "You can search and open every entry. You cannot **create**, **edit**, **delete**, or **complete** one, and the Create New Log form does not appear for you. A tier that writes to the moderation record puts its own entries into the evidence the next investigation has to weigh, and a tier that can edit or delete entries can reshape the record it is judging. Reading it is the whole of the access." },
@@ -778,7 +778,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "p", text: "Sign in with Discord. You are asked to confirm your linked Roblox account the first time; that confirmation is checked on every request afterwards, not just at sign-in." },
       { type: "table", head: ["Page", "Who sees it", "What it holds"], rows: [
-        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls and no Create New Log; the punishment log itself is read-only for them."],
+        ["**Dashboard**", "Everyone", "Shift controls, who is on duty, live player list, Create New Log, punishment logs, player lookup, LOA, leaderboard, shift history, resign. Run Command and Request Staff appear for those who have them. Internal Affairs sees no shift controls, no Create New Log and no Request Staff; the punishment log itself is read-only for them."],
         ["**Internal Affairs**", "IA, Management, Directors", "Issue a strike, suggest a rank change, active kick rejoin cooldowns"],
         ["**HR Panel**", "Management, Directors", "Pending rank changes and LOAs, issue strikes, promote and demote, terminate, resignations, automod offences, quotas, in-game announcements"],
         ["**Account Verification**", "Management and above", "Resolving verification problems"],
@@ -800,7 +800,7 @@ export const HANDBOOK = [
       { type: "table", head: ["Command", "Minimum rank", "What it does"], rows: [
         { tier: "Duty" },
         ["/shift start stop leaderboard", "Staff Team, not IA", "Manage your own shift"],
-        ["/callstaff", "Trial Supervisor", "Ask staff to get on duty. 10 min global cooldown"],
+        ["/callstaff", "Trial Supervisor, not IA", "Ask staff to get on duty. 10 min global cooldown"],
         ["/startup", "Community Management", "Start a session"],
         ["/shutdown", "Community Management", "End a session. 5 min personal cooldown"],
         ["/players /population /status", "Staff Team", "Live server information"],

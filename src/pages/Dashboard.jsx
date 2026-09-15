@@ -250,9 +250,13 @@ export default function Dashboard() {
     }
   }
 
-  // ---------- Toolbox: Request Staff modal (IA+) -- moved here from
-  // Internal Affairs since calling for backup is time-sensitive and
+  // ---------- Toolbox: Request Staff modal (Management+) -- moved here
+  // from Internal Affairs since calling for backup is time-sensitive and
   // shouldn't require a page navigation to reach.
+  //
+  // Internal Affairs no longer has it. Requesting staff coverage is
+  // staffing the server, and IA runs no shifts and is not part of the
+  // duty roster it would be summoning.
   const [staffRequestModalOpen, setStaffRequestModalOpen] = useState(false);
   const [staffRequestReason, setStaffRequestReason] = useState("");
   const [staffRequestStatus, setStaffRequestStatus] = useState(null);
@@ -602,7 +606,7 @@ export default function Dashboard() {
               <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
             </>
           )}
-          {(user?.tier === "ia" || user?.tier === "management" || user?.tier === "director") && (
+          {(user?.tier === "management" || user?.tier === "director") && (
             <button className="quick-action" onClick={() => setStaffRequestModalOpen(true)}><MegaphoneIcon />Request Staff</button>
           )}
           {(user?.tier === "management" || user?.tier === "director") && (
