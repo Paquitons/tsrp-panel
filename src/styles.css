@@ -4790,3 +4790,11 @@ code {
   /* No keyboard to press it with, and the row is dead weight on a phone. */
   .cmdk-foot { display: none; }
 }
+
+/* The sub bar keeps its row whether or not it has any tabs in it, so a
+   page that renders this level for every tab does not shove its content
+   up and down by the height of a bar as you move between a tab that has
+   sub-tabs and one that does not. Empty, it reads as the rule under the
+   tab bar. */
+.tabs-sub { min-height: 34px; }
+.tabs-empty { pointer-events: none; }

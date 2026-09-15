@@ -193,15 +193,20 @@ export default function Management() {
       subtitle="Running the staff team: approvals, staff actions, records and the content the bot shows in Discord."
     >
       <Tabs tabs={visible} active={current.value} onChange={pickTab} ariaLabel="Management sections" />
-      {subs.length > 1 && (
-        <Tabs
-          tabs={subs}
-          active={section}
-          onChange={pickSection}
-          variant="sub"
-          ariaLabel={`${current.label} sections`}
-        />
-      )}
+
+      {/* The second row is ALWAYS here, even for Approvals and the Audit
+          Log, which have nothing to put in it. It used to be dropped when
+          a tab had no sub-tabs, and everything below it jumped 50px up and
+          back down as you moved between tabs that had one and tabs that
+          did not. With the row always present it is a rule under the tab
+          bar when it is empty, and the page below never moves. */}
+      <Tabs
+        tabs={subs}
+        active={section}
+        onChange={pickSection}
+        variant="sub"
+        ariaLabel={`${current.label} sections`}
+      />
 
       {error && <Banner>{error}</Banner>}
       {notice && <Banner variant="success">{notice}</Banner>}
