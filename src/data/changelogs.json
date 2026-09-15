@@ -1,5 +1,61 @@
 [
   {
+    "version": "2.1.0",
+    "slug": "v2-1-0",
+    "title": "TSRP Update",
+    "date": "2026-09-15",
+    "summary": "The Staff Panel has been reorganized from top to bottom. Press Ctrl+K anywhere to jump straight to what you need, nothing important is buried at the bottom of a list any more, and Internal Affairs now sees only the actions its rank can actually use.",
+    "sections": [
+      {
+        "heading": "Search the panel",
+        "items": [
+          "Press Ctrl+K anywhere in the Staff Panel, or Cmd+K on a Mac, and type a few letters to go straight where you want.",
+          "There is a Search the panel button at the top of the sidebar if you would rather click it.",
+          "It searches by what things do as well as by name, so typing holiday finds Manage LOA and typing ban finds the BOLO queue.",
+          "It takes you to the exact section, not just the page it lives on.",
+          "You only ever see what you are able to open, so it never offers you something you would then be refused."
+        ]
+      },
+      {
+        "heading": "Management, reorganized",
+        "items": [
+          "Management is now five areas rather than seven, and each one holds a single kind of thing: Approvals, Staff, Verification, Content and the Audit Log.",
+          "Where an area genuinely holds several things, they are tabs inside it, so you pick the one you want instead of scrolling past the rest.",
+          "Approvals is on its own at the front, because it is the one part that is waiting on you, and the tab now carries the number of decisions outstanding.",
+          "Staff holds Take Action, Weekly Quotas, Automod Offenses and the Directory. These used to be stacked into one page you had to scroll through.",
+          "Content holds the in-game messages, staff messages and both Discord hubs together, since they are all things the bot publishes.",
+          "Sending a message to the staff team used to mean scrolling past all fifty-five in-game announcements to reach the form at the bottom. It is now Content, then Staff Messages, with the form at the top."
+        ]
+      },
+      {
+        "heading": "Nothing buried at the bottom",
+        "items": [
+          "Every screen that lists records now has the same header: what it is, how many there are, and the button that makes a new one.",
+          "That button is above the list on every screen, so it stays in the same place however many records build up.",
+          "Adding an in-game message or a hub entry now opens a form over the page instead of sending you to the end of the list to find it."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "The Internal Affairs page now shows only the actions your IA rank actually holds, rather than showing everything and refusing it afterwards.",
+          "Internal Affairs Supervisor and Internal Affairs Officer see Strike, Demote and Terminate. Internal Affairs sees Strike. Trial Internal Affairs sees none of them and reads the punishment log and Staff Complaint transcripts instead.",
+          "Suggest a Rank Change has been removed from Internal Affairs.",
+          "No IA rank can promote anyone, anywhere in the system. Promotion is not something Internal Affairs does."
+        ]
+      },
+      {
+        "heading": "Fixes",
+        "items": [
+          "Announcement and hub rows had no background at all, because of a colour that was never defined. They now read as proper rows.",
+          "The up and down arrows that reorder announcements and hub entries were taller than the row they belonged to and hung past the bottom of it.",
+          "The Staff Handbook no longer says Internal Affairs can suggest a rank change, which stopped being true.",
+          "The handbook now notes that In-Game Permissions and the Changelog are reached by their address rather than from the sidebar."
+        ]
+      }
+    ]
+  },
+  {
     "version": "2.0.0",
     "slug": "v2-0-0",
     "title": "TSRP Update",
