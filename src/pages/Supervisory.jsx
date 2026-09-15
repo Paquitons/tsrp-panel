@@ -30,6 +30,7 @@ import Tabs from "../components/Tabs";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { expiresLabel } from "../utils";
+import { canSeeSupervisory } from "../access";
 
 const POLL_MS = 15_000;
 
@@ -291,7 +292,7 @@ export default function Supervisory() {
   const [section, setSection] = useState("bolos");
   const [error, setError] = useState(null);
 
-  if (!user?.isSupervisoryOrAbove) {
+  if (!canSeeSupervisory(user)) {
     return (
       <PageShell title="Supervisory">
         <Banner>This area is limited to Supervisory and above.</Banner>
