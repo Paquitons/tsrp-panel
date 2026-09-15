@@ -437,7 +437,10 @@ html, body, #root {
 
 .content {
   flex: 1;
-  padding: var(--space-8) var(--space-8);
+  /* Named so anything that needs to bleed out to the page edges (the
+     sticky tab stack) can cancel exactly this much, at whatever width. */
+  --page-gutter: var(--space-8);
+  padding: var(--page-gutter);
   max-width: 980px;
   width: 100%;
   margin: 0 auto;
@@ -2222,7 +2225,8 @@ code {
 @media (max-width: 900px) {
   .content {
     height: auto;
-    padding: var(--space-5);
+    --page-gutter: var(--space-5);
+    padding: var(--page-gutter);
   }
 
   .dashboard-content {
@@ -4865,3 +4869,47 @@ code {
    tab bar. */
 .tabs-sub { min-height: 34px; }
 .tabs-empty { pointer-events: none; }
+
+/* ==================================================================
+   STICKY TAB STACK
+   The page-level tab bars stay put while the page scrolls under them.
+   Without this they scroll away with everything else, and then jump back
+   down the screen the moment you pick a shorter tab and the scroll
+   position clamps: on a phone, going from the in-game messages list to a
+   hub threw the bars 400px down the screen. Pinned, they do not move at
+   all, and they stay reachable instead of being something you scroll back
+   up to find.
+   ================================================================== */
+.tab-stack {
+  position: sticky;
+  /* Pinned a gutter HIGHER than the scrollport, because sticky measures
+     from .content's padding box: at top:0 the bar parks below the page's
+     own top padding, and rows scrolled past show through that band above
+     it. Pulled up by the gutter, the stack's matching padding-top covers
+     the band instead. */
+  top: calc(var(--page-gutter) * -1);
+  z-index: 20;
+  /* Out to the page edges and back again, so the blurred ground runs edge
+     to edge rather than leaving a gutter either side for rows to slide
+     through. */
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--page-gutter) var(--page-gutter) 0;
+  /* Translucent over a blur rather than a flat colour: the page sits on a
+     fixed radial gradient, so no single colour matches it everywhere. */
+  background: rgba(11, 13, 18, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* The bars own their spacing inside the stack; the stack owns the gap to
+   the content below it. */
+.tab-stack > .tabs { margin-bottom: 0; }
+.tab-stack > .tabs-primary { margin-bottom: var(--space-3); }
+.tab-stack { margin-bottom: var(--space-5); }
+
+/* No blur support (older Firefox, and it is disabled in some browsers):
+   fall back to an opaque ground, which is less pretty and still legible,
+   rather than letting rows scroll visibly through the bars. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tab-stack { background: var(--bg-gradient-end); }
+}

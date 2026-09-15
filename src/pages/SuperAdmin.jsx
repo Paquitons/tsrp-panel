@@ -7,7 +7,7 @@ import DiscordIdentity from "../components/DiscordIdentity";
 import AccountPicker from "../components/AccountPicker";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
-import { formatDuration, toDateTimeInputValue, parseDateTimeInput } from "../utils";
+import { formatDuration, toDateTimeInputValue, parseDateTimeInput, scrollPageToTop } from "../utils";
 import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel, TaxDashboardPanel } from "./SuperAdminEconomy";
 import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
@@ -94,7 +94,12 @@ export default function SuperAdmin() {
   // Switching family lands on that family's first screen.
   function pickGroup(next) {
     const first = TAB_GROUPS.find(g => g.value === next)?.sections[0]?.value;
-    if (first) setTab(first);
+    if (first) pickScreen(first);
+  }
+
+  function pickScreen(next) {
+    setTab(next);
+    scrollPageToTop();
   }
   const search = useStaffSearch();
   const [shifts, setShifts] = useState([]);
@@ -188,11 +193,13 @@ export default function SuperAdmin() {
       {error && <Banner>{error}</Banner>}
 
       <div className="card">
-        <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
-        {/* Always rendered, including for Staff, which holds one screen.
-            Dropping the row for a family that does not need it moved
-            everything below it whenever you changed family. */}
-        <Tabs tabs={sections} active={tab} onChange={setTab} variant="sub" ariaLabel="Screens in this area" />
+        <div className="tab-stack">
+          <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
+          {/* Always rendered, including for Staff, which holds one screen.
+              Dropping the row for a family that does not need it moved
+              everything below it whenever you changed family. */}
+          <Tabs tabs={sections} active={tab} onChange={pickScreen} variant="sub" ariaLabel="Screens in this area" />
+        </div>
 
         {tab === "shifts" && (
           <>

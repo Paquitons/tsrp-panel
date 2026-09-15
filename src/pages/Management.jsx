@@ -47,6 +47,7 @@ const BADGE_POLL_MS = 20_000;
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import Tabs from "../components/Tabs";
+import { scrollPageToTop } from "../utils";
 import HrPanel from "./HrPanel";
 import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
@@ -181,10 +182,14 @@ export default function Management() {
     }
   });
 
-  const pickTab = value => { setTab(value); setError(null); };
+  // Every tab change lands at the top. See scrollPageToTop: sticky holds
+  // the bars while there is something to scroll, and this covers the case
+  // where the new tab is too short to scroll at all.
+  const pickTab = value => { setTab(value); setError(null); scrollPageToTop(); };
   const pickSection = value => {
     setSections(prev => ({ ...prev, [current.value]: value }));
     setError(null);
+    scrollPageToTop();
   };
 
   return (
@@ -192,21 +197,26 @@ export default function Management() {
       title="Management"
       subtitle="Running the staff team: approvals, staff actions, records and the content the bot shows in Discord."
     >
-      <Tabs tabs={visible} active={current.value} onChange={pickTab} ariaLabel="Management sections" />
+      {/* Sticky, so the bars stay where they are while the page scrolls
+          under them. See .tab-stack. */}
+      <div className="tab-stack">
+        <Tabs tabs={visible} active={current.value} onChange={pickTab} ariaLabel="Management sections" />
 
-      {/* The second row is ALWAYS here, even for Approvals and the Audit
-          Log, which have nothing to put in it. It used to be dropped when
-          a tab had no sub-tabs, and everything below it jumped 50px up and
-          back down as you moved between tabs that had one and tabs that
-          did not. With the row always present it is a rule under the tab
-          bar when it is empty, and the page below never moves. */}
-      <Tabs
-        tabs={subs}
-        active={section}
-        onChange={pickSection}
-        variant="sub"
-        ariaLabel={`${current.label} sections`}
-      />
+        {/* The second row is ALWAYS here, even for Approvals and the Audit
+            Log, which have nothing to put in it. It used to be dropped
+            when a tab had no sub-tabs, and everything below it jumped 50px
+            up and back down as you moved between tabs that had one and
+            tabs that did not. With the row always present it is a rule
+            under the tab bar when it is empty, and the page below never
+            moves. */}
+        <Tabs
+          tabs={subs}
+          active={section}
+          onChange={pickSection}
+          variant="sub"
+          ariaLabel={`${current.label} sections`}
+        />
+      </div>
 
       {error && <Banner>{error}</Banner>}
       {notice && <Banner variant="success">{notice}</Banner>}

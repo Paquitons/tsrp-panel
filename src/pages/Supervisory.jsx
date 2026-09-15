@@ -30,7 +30,7 @@ import SectionHeader from "../components/primitives/SectionHeader";
 import Tabs from "../components/Tabs";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import { useApiQuery } from "../hooks/useApiQuery";
-import { expiresLabel } from "../utils";
+import { expiresLabel, scrollPageToTop } from "../utils";
 import { canSeeSupervisory } from "../access";
 import { useOpenOnArrival } from "../hooks/useOpenOnArrival";
 
@@ -308,7 +308,9 @@ export default function Supervisory() {
       title="Supervisory"
       subtitle="Oversight of moderation in the server: ban requests waiting on a decision, and who is currently locked out after a kick."
     >
-      <Tabs tabs={SECTIONS} active={section} onChange={s => { setSection(s); setError(null); }} />
+      <div className="tab-stack">
+        <Tabs tabs={SECTIONS} active={section} onChange={s => { setSection(s); setError(null); scrollPageToTop(); }} />
+      </div>
       {error && <Banner>{error}</Banner>}
       {section === "bolos" && <BoloQueue onError={setError} />}
       {section === "cooldowns" && <CooldownList onError={setError} />}
