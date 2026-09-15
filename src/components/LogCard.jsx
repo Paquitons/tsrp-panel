@@ -86,7 +86,24 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
     }
   }
 
+  /**
+   * Records that a BOLO has been dealt with. It does NOT ban anybody.
+   *
+   * The button used to say "Complete (Ban User)", which promised an
+   * action this does not perform: the request only sets completed_at.
+   * The workflow it belongs to is the manual one, where somebody with
+   * ban powers runs :ban in game themselves and then comes here to say
+   * it is done. Somebody trusting the old label would have clicked it
+   * expecting the ban to happen, and nobody would have been banned.
+   *
+   * Accepting from the Supervisory queue is the other path, and that one
+   * really does issue the ban.
+   */
   async function handleComplete() {
+    if (!confirm(
+      `Mark this BOLO as handled?\n\nOnly do this if you have ALREADY banned ${log.target_roblox_username} in game. ` +
+      `This records the outcome, it does not ban anyone.`
+    )) return;
     setMenuOpen(false);
     setBusy(true);
     try {
@@ -119,7 +136,7 @@ export default function LogCard({ log, onChanged, onUsernameClick, onIssuerClick
           <PortalDropdown anchorRef={menuTriggerRef} open={menuOpen} onClose={() => setMenuOpen(false)} align="right" className="log-card-dropdown-portal">
             {canModify && <button onClick={() => { setEditing(true); setMenuOpen(false); }}>Edit</button>}
             {canWriteLogs && canReviewBolos && log.type === "bolo" && !log.completed_at && (
-              <button onClick={handleComplete} className="dropdown-item-accent">Complete (Ban User)</button>
+              <button onClick={handleComplete} className="dropdown-item-accent">Mark as banned</button>
             )}
             {canModify && <button onClick={handleDelete} className="dropdown-item-danger">Delete</button>}
             {!canModify && !(canWriteLogs && canReviewBolos && log.type === "bolo" && !log.completed_at) && (

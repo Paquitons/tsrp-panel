@@ -367,7 +367,7 @@ export const HANDBOOK = [
         "**Internal Affairs cannot review, at any IA rank.** IA holds no in-game power, and a tier that cannot ban cannot approve a ban.",
         "Somebody who is IA *and* holds a moderation rank is judged on the moderation rank, exactly as their in-game level already is.",
       ]},
-      { type: "p", text: "Reviewers accept or decline from Discord with /bolo. Both sides act on the same record, so a decision appears immediately wherever else it is shown. Marking a BOLO **Complete** on the panel is the same authority as accepting one, because it asserts the player was caught and banned." },
+      { type: "p", text: "There are two ways to handle one, and they are not the same action. **Accept** it, from the Supervisory page or with /bolo in Discord, and the ban is issued in game for you. Or ban the player yourself with :ban and then use **Mark as banned** on the log entry, which records the outcome and bans nobody. Both take the same authority and both act on the same record, so either way the decision shows up everywhere immediately." },
       { type: "h3", text: "Run Command" },
       { type: "reqs", items: ["Management and above"] },
       { type: "p", text: "The dashboard's **Run Command** sends a raw command straight to the ER:LC server. There is no allowlist and no confirmation step, and every use is recorded against your name in the audit log." },
