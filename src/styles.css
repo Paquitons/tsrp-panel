@@ -3572,267 +3572,508 @@ code {
 
 /* ==================================================================
    Staff Handbook  (/staff-handbook)
-   A long reference document rather than a tool, so it gets the one
-   thing the rest of the panel does not need: a reading measure, a
-   sticky contents rail, and typography set for prose rather than for
-   scanning a table. Everything still draws from the design tokens.
-   ================================================================== */
-.hb { max-width: 1180px; }
 
-.hb-masthead {
-  padding-bottom: var(--space-6);
-  border-bottom: 2px solid var(--border-strong);
+   Set as a DOCUMENT, not as another panel screen. The rest of the app is
+   made of cards you operate; this is one continuous thing you read, so
+   it gets the conventions of a printed handbook instead: a single
+   measure, a serif voice for headings, numbered parts and sections, and
+   rules where a page would have them.
+
+   The serif is a system stack, not a web font. It loads instantly, is on
+   every machine that will open this, and carries the formality on its
+   own -- a handbook that waits on a font download to look official is
+   worse than one that never needed it.
+
+   Everything still draws from the design tokens, so the document reads
+   as part of the product rather than as a page pasted into it.
+   ================================================================== */
+.hb {
+  --hb-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+              "Times New Roman", Times, serif;
+  /* One measure for the whole document. Tables and the masthead are
+     allowed past it; running prose never is. */
+  --hb-measure: 68ch;
+  --hb-rule: var(--border-default);
+
+  max-width: 900px;
+  margin-inline: auto;
 }
-.hb-eyebrow {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 var(--space-3);
-}
-.hb-masthead h1 { margin: 0 0 var(--space-3); }
-.hb-standfirst {
-  max-width: 62ch;
-  margin: 0;
-  font-size: var(--text-md);
-  color: var(--text-secondary);
-}
-.hb-codes { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-5); }
-.hb-code {
-  display: flex; align-items: baseline; gap: var(--space-2);
-  padding: 6px 12px;
+
+.hb-doc {
   background: var(--card-bg);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: clamp(var(--space-6), 5vw, 64px);
 }
-.hb-code span {
+
+/* ---------- Masthead ---------- */
+.hb-masthead { margin-bottom: var(--space-10); }
+
+/* The heavy rule a title page opens with. Two weights, because one flat
+   line reads as a divider and this should read as a masthead. */
+.hb-masthead-rule {
+  height: 3px;
+  background: var(--text-primary);
+  margin-bottom: var(--space-5);
+  border-radius: 2px;
+}
+
+.hb-org {
+  margin: 0 0 var(--space-3);
   font-size: var(--text-xs);
-  letter-spacing: .08em;
+  font-weight: 700;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
-.hb-code strong {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: var(--text-base);
+
+.hb-title {
+  font-family: var(--hb-serif);
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--space-4);
   color: var(--text-primary);
 }
 
-/* ---- two-column body ---- */
-.hb-body { display: grid; grid-template-columns: 1fr; gap: var(--space-8); }
-@media (min-width: 1000px) {
-  .hb-body { grid-template-columns: 236px minmax(0, 1fr); gap: var(--space-10); align-items: start; }
-  .hb-rail {
-    position: sticky;
-    top: var(--space-4);
-    max-height: calc(100vh - var(--space-8));
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
+.hb-standfirst {
+  max-width: var(--hb-measure);
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--text-secondary);
 }
-.hb-rail { padding-top: var(--space-6); }
-.hb-main { padding-top: var(--space-6); min-width: 0; }
 
-/* ---- finder ---- */
-.hb-finder { margin-bottom: var(--space-5); }
-.hb-finder label {
-  display: block;
+/* Document metadata, the block a policy document carries under its
+   title. A grid rather than a list so the labels line up as a record. */
+.hb-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: var(--space-8) 0 0;
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--hb-rule);
+  border-bottom: 1px solid var(--hb-rule);
+}
+
+.hb-meta > div { min-width: 0; }
+
+.hb-meta dt {
+  margin: 0 0 3px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.hb-meta dd {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.hb-codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.hb-code {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--hb-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+
+.hb-code span {
   font-size: var(--text-xs);
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--text-faint);
-  margin-bottom: var(--space-2);
-}
-.hb-finder-count {
-  min-height: 1.2em;
-  margin-top: 6px;
-  font-size: var(--text-xs);
-  color: var(--text-muted);
 }
 
-/* ---- contents ---- */
-.hb-toc-group {
-  margin: var(--space-5) 0 var(--space-2);
-  padding-bottom: 5px;
+.hb-code strong {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: .01em;
+}
+
+/* ---------- Parts ---------- */
+.hb-part + .hb-part { margin-top: var(--space-10); }
+
+/* A part opening: centred numeral and title between hairlines, the way
+   a book announces a new part. */
+.hb-part-head {
+  text-align: center;
+  margin: var(--space-10) 0 var(--space-8);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--hb-rule);
+  border-bottom: 1px solid var(--hb-rule);
+}
+
+.hb-part:first-of-type .hb-part-head { margin-top: 0; }
+
+.hb-part-n {
+  display: block;
   font-size: var(--text-xs);
-  letter-spacing: .12em;
+  font-weight: 700;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  border-bottom: 1px solid var(--border-subtle);
+  color: var(--accent);
+  margin-bottom: 6px;
 }
-.hb-rail > div:first-of-type .hb-toc-group { margin-top: 0; }
-.hb-toc { list-style: none; margin: 0; padding: 0; }
-.hb-toc a {
-  display: grid;
-  grid-template-columns: 1.9em 1fr;
-  gap: 6px;
-  padding: 4px 0;
-  font-size: var(--text-base);
-  line-height: 1.4;
-  color: var(--text-muted);
-  text-decoration: none;
-}
-.hb-toc a:hover { color: var(--accent); }
-.hb-toc-n { font-size: var(--text-sm); color: var(--text-faint); font-variant-numeric: tabular-nums; }
 
-/* ---- sections ---- */
+.hb-part-title {
+  font-family: var(--hb-serif);
+  font-size: clamp(21px, 3vw, 27px);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Sections ---------- */
 .hb-section { scroll-margin-top: var(--space-4); }
 .hb-section + .hb-section { margin-top: var(--space-10); }
 
 .hb-h2 {
   display: flex;
   align-items: baseline;
-  gap: .55em;
-  margin: 0 0 var(--space-2);
+  gap: var(--space-3);
+  font-family: var(--hb-serif);
+  font-size: clamp(20px, 2.6vw, 25px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4);
   padding-bottom: var(--space-3);
-  font-size: var(--text-xl);
-  line-height: 1.2;
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 2px solid var(--hb-rule);
   text-wrap: balance;
 }
-.hb-h2-n { font-size: .78em; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
-.hb-h3 { margin: var(--space-6) 0 var(--space-2); font-size: var(--text-lg); text-wrap: balance; }
 
-/* Prose gets a reading measure; tables are allowed to run wider. */
-.hb-p, .hb-list, .hb-steps, .hb-defs, .hb-note { max-width: 72ch; }
-.hb-p { margin: 0 0 var(--space-3); color: var(--text-secondary); font-size: var(--text-md); line-height: 1.65; }
-.hb-list { margin: 0 0 var(--space-3); padding-left: 1.25em; color: var(--text-secondary); font-size: var(--text-md); line-height: 1.6; }
-.hb-list li { margin-bottom: 5px; }
-.hb-list li::marker { color: var(--text-faint); }
-.hb code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: .875em;
-  padding: .08em .38em;
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  white-space: nowrap;
+.hb-h2-n {
+  flex: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  letter-spacing: .04em;
+  /* Sits on the heading's baseline without being part of its word flow. */
+  transform: translateY(-1px);
 }
-.hb strong { color: var(--text-primary); }
+
+.hb-h3 {
+  font-family: var(--hb-serif);
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+/* ---------- Running content ---------- */
+.hb-p, .hb-list, .hb-steps, .hb-defs, .hb-note { max-width: var(--hb-measure); }
+
+.hb-p {
+  margin: 0 0 var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.7;
+}
+
+.hb-list {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.35em;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.65;
+}
+
+.hb-list li { margin-bottom: var(--space-2); }
+.hb-list li::marker { color: var(--accent); }
+
+.hb strong { color: var(--text-primary); font-weight: 600; }
 .hb em { color: var(--text-primary); font-style: italic; }
 
-/* ---- numbered steps ---- */
-.hb-steps { list-style: none; counter-reset: hbstep; margin: 0 0 var(--space-3); padding-left: 0; }
+/* Numbered procedure. The numeral is set in the margin so the steps read
+   as a sequence rather than as a list that happens to be counted. */
+.hb-steps {
+  list-style: none;
+  counter-reset: hbstep;
+  margin: 0 0 var(--space-4);
+  padding-left: 0;
+}
+
 .hb-steps > li {
   counter-increment: hbstep;
   position: relative;
-  padding-left: 32px;
+  padding-left: 2.5em;
   margin-bottom: var(--space-3);
   color: var(--text-secondary);
   font-size: var(--text-md);
-  line-height: 1.6;
-}
-.hb-steps > li::before {
-  content: counter(hbstep);
-  position: absolute;
-  left: 0; top: .1em;
-  width: 22px; height: 22px;
-  display: grid; place-items: center;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-radius: var(--radius-full);
-  font-variant-numeric: tabular-nums;
+  line-height: 1.65;
 }
 
-/* ---- definition rows ---- */
-.hb-defs { margin: 0 0 var(--space-4); }
+.hb-steps > li::before {
+  content: counter(hbstep) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.9em;
+  text-align: right;
+  font-weight: 700;
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+/* Term and definition, ruled like a schedule in a policy document. */
+.hb-defs { margin: 0 0 var(--space-5); }
+
 .hb-defs > div {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2px var(--space-5);
+  grid-template-columns: minmax(170px, 15em) 1fr;
+  gap: var(--space-5);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--border-subtle);
 }
-@media (min-width: 620px) { .hb-defs > div { grid-template-columns: 210px 1fr; } }
-.hb-defs-k { font-weight: 600; color: var(--text-primary); font-size: var(--text-base); }
-.hb-defs-v { color: var(--text-secondary); font-size: var(--text-base); line-height: 1.55; }
 
-/* ---- requirement pills ---- */
-.hb-reqs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 var(--space-4); }
+.hb-defs > div:first-child { border-top: 1px solid var(--border-subtle); }
+
+.hb-defs-k {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+.hb-defs-v {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+/* ---------- Requirement chips ---------- */
+.hb-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
 .hb-req {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid rgba(88, 101, 242, 0.32);
+  padding: 5px var(--space-3);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-}
-.hb-req::before {
-  content: "";
-  width: 5px; height: 5px;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  flex-shrink: 0;
+  background: var(--surface-sunken);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
-/* ---- callouts. Border colour is the whole signal: default is
-   informational, hard is a rule you can break, open is unresolved. ---- */
+.hb-req::before {
+  content: "Requires";
+  color: var(--text-faint);
+  font-weight: 700;
+}
+
+/* ---------- Callouts ---------- */
 .hb-note {
-  margin: 0 0 var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  background: var(--card-bg);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--accent);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-sunken);
 }
+
 .hb-note-title {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--accent);
 }
-.hb-note-body { margin: 0; color: var(--text-secondary); font-size: var(--text-base); line-height: 1.6; }
+
+.hb-note-body {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
 .hb-note-hard { border-left-color: var(--danger); }
 .hb-note-hard .hb-note-title { color: var(--danger); }
 .hb-note-open { border-left-color: var(--warning); }
 .hb-note-open .hb-note-title { color: var(--warning); }
 
-/* ---- tables ---- */
-.hb-tw { overflow-x: auto; margin: 0 0 var(--space-5); }
-.hb-table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: var(--text-base); }
+/* ---------- Tables ---------- */
+.hb-tw {
+  overflow-x: auto;
+  margin: 0 0 var(--space-5);
+  border-top: 2px solid var(--text-faint);
+  border-bottom: 1px solid var(--hb-rule);
+}
+
+.hb-table {
+  width: 100%;
+  min-width: 460px;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
 .hb-table th {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
   text-align: left;
-  padding: 0 var(--space-4) var(--space-2) 0;
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  border-bottom: 1px solid var(--border-strong);
-  white-space: nowrap;
   vertical-align: bottom;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--hb-rule);
+  white-space: nowrap;
 }
+
 .hb-table td {
-  padding: var(--space-2) var(--space-4) var(--space-2) 0;
-  border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
   vertical-align: top;
-  line-height: 1.5;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border-subtle);
 }
+
+.hb-table tbody tr:last-child td { border-bottom: 0; }
 .hb-table th:last-child, .hb-table td:last-child { padding-right: 0; }
+.hb-table td:first-child { color: var(--text-primary); }
+
+/* A band heading inside a table, not a data row. */
 .hb-tier td {
   padding-top: var(--space-5);
-  padding-bottom: 4px;
+  padding-bottom: var(--space-2);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-faint);
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--hb-rule);
 }
-.hb-table tbody tr:first-child.hb-tier td { padding-top: 4px; }
 
-/* ---- footer ---- */
-.hb-footer {
-  margin-top: var(--space-10);
-  padding-top: var(--space-5);
-  border-top: 2px solid var(--border-strong);
+.hb-table tbody tr:first-child.hb-tier td { padding-top: var(--space-2); }
+
+/* ---------- Closing block ---------- */
+.hb-footer { margin-top: var(--space-10); }
+
+.hb-footer-rule {
+  height: 3px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  margin-bottom: var(--space-5);
 }
-.hb-footer p { max-width: 72ch; color: var(--text-muted); font-size: var(--text-base); }
+
+.hb-footer-lead {
+  max-width: var(--hb-measure);
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.hb-footer-body {
+  max-width: var(--hb-measure);
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.hb-footer-actions { margin: var(--space-8) 0 var(--space-6); }
+
+.hb-return {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-h-md);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: .01em;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease);
+}
+
+.hb-return:hover { background: var(--accent-hover); }
+.hb-return:active { transform: translateY(1px); }
+
+.hb-colophon {
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 640px) {
+  .hb-doc {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    margin-inline: calc(var(--space-4) * -1);
+  }
+
+  /* Term over definition; two columns at this width leaves neither
+     enough room to read. */
+  .hb-defs > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ---------- Print ---------- */
+/* It is a handbook, so somebody will print it. On paper the app chrome
+   is noise and the ink should be black. */
+@media print {
+  .hb-doc {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    color: #000;
+  }
+
+  .hb,
+  .hb-p, .hb-list, .hb-steps, .hb-defs-k, .hb-defs-v,
+  .hb-note-body, .hb-table td, .hb-title, .hb-h2, .hb-h3, .hb-part-title {
+    color: #000;
+  }
+
+  .hb-section, .hb-note, .hb-tw { break-inside: avoid; }
+  .hb-part-head, .hb-h2 { break-after: avoid; }
+  .hb-footer-actions { display: none; }
+}
