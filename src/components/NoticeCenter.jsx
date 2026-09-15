@@ -15,6 +15,7 @@
 // ============================================================
 import { useState } from "react";
 import { useNotices } from "../context/NoticesContext";
+import Linkify from "./Linkify";
 
 function when(ts) {
   if (!ts) return "";
@@ -42,7 +43,7 @@ function ImportantNotice({ notice, remaining, onAcknowledge, busy }) {
           {notice.channel === "pm" ? "A message for you" : "Staff announcement"}
         </h2>
 
-        <p className="nc-body">{notice.body}</p>
+        <p className="nc-body"><Linkify text={notice.body} /></p>
 
         <div className="nc-meta">
           <span>From {notice.createdByName || "a director"}</span>
@@ -68,7 +69,7 @@ function QuickToast({ notice, onDismiss }) {
         <span className="nc-kind">{label(notice)}</span>
         <button className="nc-toast-x" onClick={() => onDismiss(notice.id)} aria-label="Dismiss">×</button>
       </div>
-      <p className="nc-toast-body">{notice.body}</p>
+      <p className="nc-toast-body"><Linkify text={notice.body} /></p>
       <p className="nc-toast-meta">{notice.createdByName || "A director"}</p>
     </div>
   );
