@@ -63,7 +63,7 @@ export default function HrAutomodOffenses() {
 
   return (
     <>
-      <p className="muted card-subtitle">Offenses expire on their own after a set time -- clearing here resets someone's escalation level immediately instead of waiting.</p>
+      <p className="muted card-subtitle">Offenses expire on their own after a set time. Clearing here resets someone's escalation level immediately instead of waiting.</p>
 
       <label>Find a Discord User</label>
       <div className="autocomplete-wrap">
@@ -98,7 +98,7 @@ export default function HrAutomodOffenses() {
           </div>
 
           {data.active.length === 0 ? (
-            <p className="muted">No active offenses -- clean record right now.</p>
+            <p className="muted">No active offenses. Clean record right now.</p>
           ) : (
             <div className="loa-list">
               {data.active.map(o => (

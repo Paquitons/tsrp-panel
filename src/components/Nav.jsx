@@ -6,44 +6,50 @@ import { DashboardIcon, ShieldIcon, UsersIcon, CrownIcon, ScrollIcon, MenuIcon, 
 
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 
-const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: DashboardIcon, end: true },
+// The sidebar, grouped. Three bands rather than one flat list, because
+// these are three different reasons to be here: the work everybody does,
+// oversight of other people's work, and administration of the system.
+//
+// A group whose items are all hidden for this user renders nothing at
+// all, heading included, so somebody with no oversight access does not
+// see an empty "Oversight" label.
+//
+// Two things deliberately have routes but no entry here. The Staff
+// Handbook is reached by link, and In-Game Permissions is a rarely-needed
+// screen that was taking a permanent slot; both stay reachable by URL.
+// The Changelog lives on the public site.
+const NAV_GROUPS = [
   {
-    to: "/internalaffairs",
-    label: "Internal Affairs",
-    icon: ShieldIcon,
-    show: user => user?.tier === "ia" || user?.tier === "management" || user?.tier === "director",
+    key: "daily",
+    label: null, // the first band needs no heading; it is where you land
+    items: [
+      { to: "/", label: "Dashboard", icon: DashboardIcon, end: true },
+      // Support Staff read every transcript; Internal Affairs, Management
+      // and Directors get the tab for Staff Complaints alone, which the
+      // API scopes for them. Same tab, different contents.
+      { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon,
+        show: user => user?.isSupportStaff || user?.canViewStaffComplaints },
+    ],
   },
   {
-    to: "/hr",
-    label: "HR Panel",
-    icon: UsersIcon,
-    show: user => user?.tier === "management" || user?.tier === "director",
+    key: "oversight",
+    label: "Oversight",
+    items: [
+      { to: "/supervisory", label: "Supervisory", icon: ShieldIcon,
+        show: user => user?.isSupervisoryOrAbove },
+      { to: "/internalaffairs", label: "Internal Affairs", icon: ScrollIcon,
+        show: user => user?.tier === "ia" || user?.tier === "management" || user?.tier === "director" },
+    ],
   },
   {
-    to: "/verification",
-    label: "Account Verification",
-    icon: LinkIcon,
-    show: user => user?.isManagementOrAbove,
+    key: "admin",
+    label: "Administration",
+    items: [
+      { to: "/management", label: "Management", icon: UsersIcon,
+        show: user => user?.isManagementOrAbove },
+      { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
+    ],
   },
-  {
-    to: "/permissions",
-    label: "In-Game Permissions",
-    icon: TerminalIcon,
-    show: user => user?.isManagementOrAbove,
-  },
-  {
-    to: "/director",
-    label: "Director Console",
-    icon: CrownIcon,
-    show: user => user?.isDirectorOrAbove,
-  },
-  { to: "/super-admin", label: "Super Admin", icon: CrownIcon, show: user => user?.isSuperAdmin },
-  // Support Staff read every transcript; Internal Affairs, Management and
-  // Directors get the tab for Staff Complaints alone, which the API scopes
-  // for them. Same tab, different contents.
-  { to: "/tickets", label: "Ticket Transcripts", icon: HistoryIcon, show: user => user?.isSupportStaff || user?.canViewStaffComplaints },
-  { to: "/changelog", label: "Changelog", icon: ScrollIcon },
 ];
 
 export default function Nav() {
@@ -57,7 +63,9 @@ export default function Nav() {
     setOpen(false);
   }, [location.pathname]);
 
-  const items = NAV_ITEMS.filter(item => !item.show || item.show(user));
+  const groups = NAV_GROUPS
+    .map(group => ({ ...group, items: group.items.filter(item => !item.show || item.show(user)) }))
+    .filter(group => group.items.length > 0);
 
   return (
     <>
@@ -82,11 +90,16 @@ export default function Nav() {
         </div>
 
         <nav className="sidebar-nav">
-          {items.map(({ to, label, icon: ItemIcon, end }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
-              <ItemIcon className="sidebar-link-icon" />
-              <span>{label}</span>
-            </NavLink>
+          {groups.map(group => (
+            <div className="sidebar-group" key={group.key}>
+              {group.label && <p className="sidebar-group-label">{group.label}</p>}
+              {group.items.map(({ to, label, icon: ItemIcon, end }) => (
+                <NavLink key={to} to={to} end={end} className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
+                  <ItemIcon className="sidebar-link-icon" />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 

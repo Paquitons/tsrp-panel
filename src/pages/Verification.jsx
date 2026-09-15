@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import DiscordAvatar from "../components/DiscordAvatar";
@@ -113,7 +113,8 @@ function ReleaseModal({ discordId, robloxUsername, onClose, onReleased }) {
   );
 }
 
-export default function Verification() {
+/** @param {boolean} embedded Rendered as a Management tab, so no page chrome. */
+export default function Verification({ embedded = false }) {
   const { user } = useAuth();
   const canAccess = !!user?.isManagementOrAbove;
 
@@ -130,18 +131,18 @@ export default function Verification() {
   }
 
   if (!canAccess) {
-    return (
-      <PageShell title="Account Verification">
-        <Banner>You need Management+ access to view this page.</Banner>
-      </PageShell>
-    );
+    const denied = <Banner>You need Management access or above to view this.</Banner>;
+    return embedded ? denied : <PageShell title="Account Verification">{denied}</PageShell>;
   }
 
+  const Wrapper = embedded ? Fragment : PageShell;
+  const wrapperProps = embedded ? {} : {
+    title: "Account Verification",
+    subtitle: "Manually link, change, or unlink a Discord member's Roblox account for people Bloxlink cannot verify.",
+  };
+
   return (
-    <PageShell
-      title="Account Verification"
-      subtitle="Manually link, change, or unlink a Discord member's Roblox account for people Bloxlink can't verify."
-    >
+    <Wrapper {...wrapperProps}>
       <Card>
         <h2>Find a Discord User</h2>
         <AccountPicker endpoint="/verification/members" onSelect={pickMember} />
@@ -282,6 +283,6 @@ export default function Verification() {
           onUnlinked={() => { setUnlinkModalOpen(false); query.refetch(); }}
         />
       )}
-    </PageShell>
+    </Wrapper>
   );
 }

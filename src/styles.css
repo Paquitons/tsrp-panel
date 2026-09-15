@@ -241,7 +241,9 @@ html, body, #root {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  /* Space between GROUPS; links inside a group keep their own tight 2px
+     so a band reads as one thing rather than three loose rows. */
+  gap: var(--space-5);
   flex: 1;
   padding: var(--space-4) var(--space-3);
   overflow-y: auto;
@@ -503,7 +505,12 @@ html, body, #root {
 }
 
 .tab {
-  flex: 1 1 0;
+  /* Sized to its label rather than stretched to fill. Stretching made a
+     two-tab bar into two 600px buttons while a seven-tab bar looked
+     normal, so the same control read as a different component depending
+     on how many tabs a page happened to have. Content-sized, every tab
+     bar in the panel looks like the same thing. */
+  flex: 0 0 auto;
   min-width: max-content;
   height: 32px;
   padding: 0 var(--space-3);
@@ -4385,3 +4392,93 @@ code {
 
 .nc-body a:hover,
 .nc-toast-body a:hover { color: var(--text-primary); }
+
+/* ==================================================================
+   Supervisory  (/supervisory)
+   Ban BOLO review and rejoin cooldowns. The BOLO card is a decision
+   screen rather than a list, so it gets a facts block that reads top to
+   bottom and actions that sit apart from it.
+   ================================================================== */
+.sv-bolo { margin-top: var(--space-4); }
+
+.sv-bolo-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sv-bolo-name {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sv-bolo-sub { margin: 2px 0 0; font-size: var(--text-sm); }
+
+.sv-facts { margin: var(--space-4) 0 0; }
+
+.sv-facts > div {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sv-facts dt {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.sv-facts dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  /* Staff-written reasons and evidence notes: keep their line breaks and
+     never let one long unbroken string widen the card. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sv-history { margin: 0; padding-left: 1.1em; }
+.sv-history li { margin-bottom: 3px; }
+
+.sv-bolo-actions { margin-top: var(--space-5); flex-wrap: wrap; }
+
+.sv-decline { margin-top: var(--space-5); }
+.sv-decline label { display: block; margin-bottom: 6px; }
+
+@media (max-width: 640px) {
+  /* Label over value: two columns leaves neither enough room to read. */
+  .sv-facts > div { grid-template-columns: 1fr; gap: 4px; }
+}
+
+
+/* ---------- Sidebar groups ---------- */
+/* Three bands rather than one flat list: the work everybody does,
+   oversight of other people's work, and administration of the system.
+   A group with nothing in it for this user is not rendered at all, so
+   these labels never appear over empty space. */
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-group-label {
+  margin: 0 0 6px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}

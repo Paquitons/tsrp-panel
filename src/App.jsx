@@ -15,14 +15,13 @@ import StockMarket from "./pages/StockMarket";
 import StockDetail from "./pages/StockDetail";
 import EconomyNews from "./pages/EconomyNews";
 import Dashboard from "./pages/Dashboard";
-import HrPanel from "./pages/HrPanel";
 import InternalAffairs from "./pages/InternalAffairs";
 import Changelog from "./pages/Changelog";
 import Handbook from "./pages/Handbook";
 import ChangelogEntry from "./pages/ChangelogEntry";
-import Verification from "./pages/Verification";
 import Tickets from "./pages/Tickets";
 import TicketTranscript from "./pages/TicketTranscript";
+import Supervisory from "./pages/Supervisory";
 import NotFound, { PublicNotFound } from "./pages/NotFound";
 import Strike3Prompt from "./components/Strike3Prompt";
 import NoticeCenter from "./components/NoticeCenter";
@@ -36,7 +35,13 @@ import { NoticesProvider } from "./context/NoticesContext";
 // hardcoded account can ever reach this route. React.lazy here means it's
 // its own chunk, fetched only when a super admin actually navigates here.
 const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
-const DirectorConsole = lazy(() => import("./pages/DirectorConsole"));
+
+// Management is lazy for the same reason the Director Console was before
+// it absorbed it: it pulls in the HR pages and every Director section,
+// and only Management and above can open it. Loading it eagerly would
+// have put all of that back into the bundle the public homepage
+// downloads, quietly undoing the split.
+const Management = lazy(() => import("./pages/Management"));
 
 // Every page that exists both at its normal public URL AND, for a
 // logged-in staff member who followed "Back to Website," at the same
@@ -107,24 +112,30 @@ function AppShell() {
             the usual case. Somebody who is already signed in should land
             on the panel rather than on a 404. */}
         <Route path="/login" element={<Navigate to="/" replace />} />
-        <Route path="/hr" element={<HrPanel />} />
+        <Route
+          path="/management"
+          element={
+            <Suspense fallback={<div className="content"><p className="muted">Loading…</p></div>}>
+              <Management />
+            </Suspense>
+          }
+        />
+        {/* HR Panel and the Director Console merged into Management.
+            Redirects rather than removals: these paths are in people's
+            bookmarks and in older messages. */}
+        <Route path="/hr" element={<Navigate to="/management" replace />} />
+        <Route path="/director" element={<Navigate to="/management" replace />} />
+        <Route path="/verification" element={<Navigate to="/management" replace />} />
+        <Route path="/supervisory" element={<Supervisory />} />
         <Route path="/internalaffairs" element={<InternalAffairs />} />
         {/* Deliberately not in the sidebar: reached by link, not by a tab. */}
         <Route path="/staff-handbook" element={<Handbook />} />
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/changelog/:slug" element={<ChangelogEntry />} />
-        {user?.isManagementOrAbove && <Route path="/verification" element={<Verification />} />}
+        {/* Reachable by URL, deliberately not in the sidebar: a rarely
+            needed screen was holding a permanent slot. Same arrangement
+            as the Staff Handbook. */}
         {user?.isManagementOrAbove && <Route path="/permissions" element={<Permissions />} />}
-        {user?.isDirectorOrAbove && (
-          <Route
-            path="/director"
-            element={
-              <Suspense fallback={<div className="content"><p className="muted">Loading…</p></div>}>
-                <DirectorConsole />
-              </Suspense>
-            }
-          />
-        )}
         {user?.isSuperAdmin && (
           <Route
             path="/super-admin"

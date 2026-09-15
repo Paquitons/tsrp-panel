@@ -111,7 +111,7 @@ export default function Strike3Prompt() {
   return (
     <Modal onClose={() => {}} closeOnBackdropClick={false} closeOnEscape={false} className="strike3-modal" labelledBy="strike3-modal-title">
         <div className="modal-title-row">
-          <h2 id="strike3-modal-title">🚨 3rd Strike — Action Required</h2>
+          <h2 id="strike3-modal-title">🚨 Third strike: action required</h2>
         </div>
         <p className="modal-subheading">
           {prompts.length > 1

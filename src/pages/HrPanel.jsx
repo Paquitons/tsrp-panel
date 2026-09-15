@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { timeAgo, parseLocalDateInput, toDateInputValue, todayLocalISO, expiresLabel } from "../utils";
@@ -26,7 +26,13 @@ function groupByDiscordId(strikes) {
   return [...map.entries()];
 }
 
-export default function HrPanel() {
+/**
+ * @param {boolean} embedded  Rendered inside Management's tab bar rather
+ *   than as a page of its own, so it contributes no page chrome.
+ * @param {"all"|"approvals"|"actions"|"reference"} view  Which part to
+ *   draw. Management asks for one at a time; "all" is the original page.
+ */
+export default function HrPanel({ embedded = false, view = "all" }) {
   const { user } = useAuth();
   const canAccess = user?.tier === "management" || user?.tier === "director";
   const canReviewBigActions = !!user?.canReviewBigActions;
@@ -294,11 +300,8 @@ export default function HrPanel() {
   }
 
   if (!canAccess) {
-    return (
-      <PageShell title="HR Panel">
-        <Banner>You need Management+ access to view this page.</Banner>
-      </PageShell>
-    );
+    const denied = <Banner>You need Management access or above to view this.</Banner>;
+    return embedded ? denied : <PageShell title="Management">{denied}</PageShell>;
   }
 
   const groupedStrikes = groupByDiscordId(activeStrikes);
@@ -308,20 +311,27 @@ export default function HrPanel() {
     ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
-    { value: "automod", label: "Automod Offenses" },
-    { value: "quotas", label: "Quotas" },
-    { value: "announcements", label: "In-Game Announcements" },
+    ...(embedded ? [] : [
+      { value: "automod", label: "Automod Offenses" },
+      { value: "quotas", label: "Quotas" },
+      { value: "announcements", label: "In-Game Announcements" },
+    ]),
   ];
 
-  return (
-    <PageShell
-      title="HR Panel"
-      subtitle={pendingCount > 0
-        ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
-        : "Nothing pending -- you're all caught up."}
-    >
+  const show = part => view === "all" || view === part;
+  const Wrapper = embedded ? Fragment : PageShell;
+  const wrapperProps = embedded ? {} : {
+    title: "Management",
+    subtitle: pendingCount > 0
+      ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
+      : "Nothing pending, you are all caught up.",
+  };
 
-      {/* ---------- Approvals: needs a decision now, always visible, zero clicks ---------- */}
+  return (
+    <Wrapper {...wrapperProps}>
+
+      {/* ---------- Approvals: needs a decision now ---------- */}
+      {show("approvals") && (
       <div className="card-grid">
         {canReviewBigActions && (
           <div className="card">
@@ -404,7 +414,10 @@ export default function HrPanel() {
         </div>
       </div>
 
+      )}
+
       {/* ---------- Actions: tabbed forms, pick one instead of scrolling past all of them ---------- */}
+      {show("actions") && (
       <div className="card">
         <h2>Take Action</h2>
         <Tabs tabs={actionTabs} active={actionTab} onChange={setActionTab} />
@@ -571,8 +584,10 @@ export default function HrPanel() {
         {actionTab === "quotas" && <HrQuotas />}
         {actionTab === "announcements" && <HrAnnouncements />}
       </div>
+      )}
 
       {/* ---------- Reference: read-only, glance info ---------- */}
+      {show("reference") && (
       <div className="multi-col-grid">
         <div className="dashboard-col">
           <div className="card">
@@ -733,6 +748,8 @@ export default function HrPanel() {
         </div>
       </div>
 
+      )}
+
       {extendingDiscordId && (
         <Modal onClose={() => setExtendingDiscordId(null)} labelledBy="extend-loa-modal-title">
             <h2 id="extend-loa-modal-title">Change Return Date</h2>
@@ -747,6 +764,6 @@ export default function HrPanel() {
             </form>
         </Modal>
       )}
-    </PageShell>
+    </Wrapper>
   );
 }

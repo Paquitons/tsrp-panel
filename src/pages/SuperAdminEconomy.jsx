@@ -117,8 +117,8 @@ export function EconomyOverviewPanel() {
       <h2 style={{ marginTop: 20 }}>Money Supply Cap</h2>
       <p className="muted card-subtitle">
         {data.moneySupplyCapEnabled
-          ? `Enabled -- once total supply reaches ${fmt(data.moneySupplyCap)}, /work, /daily, crime rewards, new loans, and stock dividends stop minting and draw from the Government Reserve instead. Change the cap or turn it off from Bot Settings.`
-          : "Disabled -- the economy is currently free to grow without limit. Enable it from Bot Settings."}
+          ? `Enabled. Once total supply reaches ${fmt(data.moneySupplyCap)}, /work, /daily, crime rewards, new loans, and stock dividends stop minting and draw from the Government Reserve instead. Change the cap or turn it off from Bot Settings.`
+          : "Disabled. The economy is currently free to grow without limit. Enable it from Bot Settings."}
       </p>
       {data.moneySupplyCapEnabled && (
         <div style={{ background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", height: 10, overflow: "hidden", marginBottom: 8 }}>
@@ -142,7 +142,7 @@ export function EconomyOverviewPanel() {
       </form>
 
       <h2 style={{ marginTop: 20 }}>Withdraw Money</h2>
-      <p className="muted card-subtitle">Moves money out of the Government Reserve into any account -- a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
+      <p className="muted card-subtitle">Moves money out of the Government Reserve into any account: a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
       <div className="form-inline-field" style={{ maxWidth: 340, marginBottom: 8 }}>
         <label>To Player</label>
         <AccountPicker key={withdrawPickerKey} onSelect={m => setWithdrawTarget(m.discordId)} placeholder="Search by username or nickname" />
@@ -239,7 +239,7 @@ export function EconomyConfigPanel() {
 
   return (
     <>
-      <p className="muted card-subtitle">Applies live -- no restart needed. Every player faucet and sink can be paused independently for testing or an event.</p>
+      <p className="muted card-subtitle">Applies live, no restart needed. Every player faucet and sink can be paused independently for testing or an event.</p>
       {error && <Banner>{error}</Banner>}
       {saved && <Banner variant="success">Saved.</Banner>}
 
@@ -320,7 +320,7 @@ export function EconomyConfigPanel() {
       </div>
 
       <h3 style={{ marginTop: 16 }}>Business Licensing Fee by Type</h3>
-      <p className="muted card-subtitle">A flat, recurring dollar amount per business (not a percentage of treasury) -- the cost of staying licensed to operate.</p>
+      <p className="muted card-subtitle">A flat, recurring dollar amount per business (not a percentage of treasury): the cost of staying licensed to operate.</p>
       <div className="form-row">
         <div>
           <label>Frequency (days)</label>
@@ -386,7 +386,7 @@ export function EconomyConfigPanel() {
       </div>
 
       <h3 style={{ marginTop: 16 }}>Capital Gains Tax</h3>
-      <p className="muted card-subtitle">Only on an actual profit when selling a stock -- a sale at a loss or break-even owes nothing.</p>
+      <p className="muted card-subtitle">Only on an actual profit when selling a stock. A sale at a loss or break-even owes nothing.</p>
       <div className="form-row">
         <div>
           <label>Rate (%)</label>
@@ -396,7 +396,7 @@ export function EconomyConfigPanel() {
       </div>
 
       <h3 style={{ marginTop: 16 }}>Casino Chip Purchase Tax</h3>
-      <p className="muted card-subtitle">Skimmed from a chip purchase before the rest reaches the casino's treasury -- membership fees and cashouts aren't taxed, only the initial chip purchase.</p>
+      <p className="muted card-subtitle">Skimmed from a chip purchase before the rest reaches the casino's treasury. Membership fees and cashouts are not taxed, only the initial chip purchase.</p>
       <div className="form-row">
         <div>
           <label>Rate (%)</label>
@@ -448,7 +448,7 @@ export function EconomyConfigPanel() {
       ))}
 
       <h3 style={{ marginTop: 16 }}>Company Events</h3>
-      <p className="muted card-subtitle">A separate roll from daily movement -- fictional company news (contracts, lawsuits, product launches, etc) that also moves price and shows up in a stock's event history.</p>
+      <p className="muted card-subtitle">A separate roll from daily movement: fictional company news (contracts, lawsuits, product launches, etc) that also moves price and shows up in a stock's event history.</p>
       <div className="form-row">
         <div>
           <label>Chance Any Event Fires (%)</label>
@@ -485,7 +485,7 @@ export function EconomyConfigPanel() {
       ))}
 
       <h3 style={{ marginTop: 16 }}>Share Issuance</h3>
-      <p className="muted card-subtitle">The price effect applied when a Super Admin issues additional shares for a stock (see that stock's detail page) -- negative by default, since diluting the fixed supply is a structural, bearish change.</p>
+      <p className="muted card-subtitle">The price effect applied when a Super Admin issues additional shares for a stock (see that stock's detail page). Negative by default, since diluting the fixed supply is a structural, bearish change.</p>
       <div className="form-row">
         <div>
           <label>Min Impact (%)</label>
@@ -739,7 +739,7 @@ export function BusinessesPanel() {
 
   return (
     <>
-      <p className="muted card-subtitle">Every player-owned business -- edit any setting, treasury, or ownership directly.</p>
+      <p className="muted card-subtitle">Every player-owned business. Edit any setting, treasury or ownership directly.</p>
       {error && <Banner>{error}</Banner>}
 
       <form onSubmit={search} className="form-inline-row">
@@ -888,7 +888,7 @@ function BusinessEditModal({ business, onClose, onSaved }) {
           onSelect={m => { setOwnerDiscordId(m.discordId); setNewOwnerLabel(m.nickname || m.username || "Unknown Member"); }}
         />
         {ownerDiscordId !== business.owner_discord_id && (
-          <p className="muted field-hint">New owner: {newOwnerLabel}. This will override ownership -- confirmation required on save.</p>
+          <p className="muted field-hint">New owner: {newOwnerLabel}. This will override ownership, so saving asks you to confirm.</p>
         )}
 
         <div className="button-row" style={{ marginTop: 16 }}>
@@ -919,7 +919,7 @@ export function CasinoControlsPanel() {
 
   return (
     <>
-      <p className="muted card-subtitle">Configure payout rates, win probabilities, bet limits, and profiles per game -- changes apply on the next bet, no restart.</p>
+      <p className="muted card-subtitle">Configure payout rates, win probabilities, bet limits, and profiles per game. Changes apply on the next bet, no restart.</p>
       {error && <Banner>{error}</Banner>}
       {casinos.length === 0 && !error && <p className="muted">No casinos exist yet.</p>}
 
@@ -1429,7 +1429,7 @@ function StorefrontProductsEditor({ storefront }) {
         {products.map(p => (
           <div className="loa-card loa-card-row" key={p.id}>
             <span>{p.name} <span className="muted">({STOREFRONT_CATEGORIES.find(c => c.value === p.category)?.label ?? p.category})</span></span>
-            <span className="muted">{fmt(p.price)}{p.stock !== null ? ` -- ${p.stock} in stock` : " -- unlimited"}{!p.available ? " -- SOLD OUT" : ""}</span>
+            <span className="muted">{fmt(p.price)}{p.stock !== null ? `, ${p.stock} in stock` : ", unlimited"}{!p.available ? ", SOLD OUT" : ""}</span>
             {effectSummary(p) && <span className="muted">{effectSummary(p)}</span>}
             <button className="btn-red small" type="button" style={{ marginLeft: "auto" }} onClick={() => removeProduct(p)}>Remove</button>
           </div>
@@ -1472,11 +1472,11 @@ function StorefrontProductsEditor({ storefront }) {
 // ==================================================================
 const EFFECT_TYPE_OPTIONS = [
   { value: "", label: "None (cosmetic)" },
-  { value: "requirement", label: "Requirement -- gates a crime type behind owning one" },
-  { value: "crime_success_boost", label: "Crime Success Boost -- temporary success % bump" },
-  { value: "crime_cooldown_reset", label: "Crime Cooldown Reset -- instant" },
-  { value: "work_cooldown_reset", label: "Work Cooldown Reset -- instant" },
-  { value: "jail_time_reduction", label: "Jail Time Reduction -- instant" },
+  { value: "requirement", label: "Requirement: gates a crime type behind owning one" },
+  { value: "crime_success_boost", label: "Crime Success Boost: temporary success % bump" },
+  { value: "crime_cooldown_reset", label: "Crime Cooldown Reset: instant" },
+  { value: "work_cooldown_reset", label: "Work Cooldown Reset: instant" },
+  { value: "jail_time_reduction", label: "Jail Time Reduction: instant" },
 ];
 
 function catalogEffectSummary(item) {
@@ -1626,7 +1626,7 @@ export function GovernmentCatalogPanel() {
           )}
           <div>
             <label>Enabled</label>
-            <CustomSelect value={form.enabled ? "yes" : "no"} onChange={v => setForm({ ...form, enabled: v === "yes" })} options={[{ value: "yes", label: "Yes -- stockable" }, { value: "no", label: "No -- hidden from browsing/stocking" }]} />
+            <CustomSelect value={form.enabled ? "yes" : "no"} onChange={v => setForm({ ...form, enabled: v === "yes" })} options={[{ value: "yes", label: "Yes, stockable" }, { value: "no", label: "No, hidden from browsing and stocking" }]} />
           </div>
           <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="secondary" type="submit">{editingId === "new" ? "Create" : "Save"}</button></div>
           <div className="form-inline-field-btn"><label aria-hidden="true">&nbsp;</label><button className="btn-red" type="button" onClick={cancelEdit}>Cancel</button></div>
@@ -1636,7 +1636,7 @@ export function GovernmentCatalogPanel() {
       <div className="loa-list">
         {items.map(item => (
           <div className="loa-card loa-card-row" key={item.id}>
-            <span>{item.name} <span className="muted">({item.category})</span>{!item.enabled && <span className="muted"> -- DISABLED</span>}</span>
+            <span>{item.name} <span className="muted">({item.category})</span>{!item.enabled && <span className="muted"> · DISABLED</span>}</span>
             <span className="muted">{fmt(item.wholesale_price)} wholesale</span>
             <span className="muted">{catalogEffectSummary(item)}</span>
             <button className="secondary small" type="button" style={{ marginLeft: "auto" }} onClick={() => startEdit(item)}>Edit</button>
@@ -1805,7 +1805,7 @@ export function DebtPanel() {
       )}
 
       <h2 style={{ marginTop: 20 }}>Economy-Wide Debt Event</h2>
-      <p className="muted card-subtitle">Bulk-adjusts every active or defaulted loan's remaining balance by a percentage -- e.g. -20% for broad relief, or +10% to simulate a rate hike.</p>
+      <p className="muted card-subtitle">Bulk-adjusts every active or defaulted loan's remaining balance by a percentage. For example -20% for broad relief, or +10% to simulate a rate hike.</p>
       <form onSubmit={applyEvent} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
           <label>Percent (e.g. -20 or 10)</label>
@@ -1895,7 +1895,7 @@ export function InsurancePanel() {
     const payout = input.trim() === "" ? undefined : Number(input);
     try {
       const { claim: updated } = await apiFetch(`/super-admin/insurance/claims/${claim.id}/approve`, { method: "POST", body: { payout } });
-      flash(`Claim #${claim.id} approved -- paid ${fmt(updated.approved_payout)}.`);
+      flash(`Claim #${claim.id} approved, paid ${fmt(updated.approved_payout)}.`);
       load();
     } catch (err) {
       setError(err.message);
@@ -1957,16 +1957,16 @@ export function InsurancePanel() {
             </div>
             <div className="log-card-field">
               #{c.id} -- {INSURANCE_TYPE_LABELS[c.policy_type] ?? c.policy_type} -- lost {fmt(c.amount_lost)}, requested {fmt(c.requested_payout)}
-              {c.status === "approved" && ` -- paid ${fmt(c.approved_payout)}`}
+              {c.status === "approved" && `, paid ${fmt(c.approved_payout)}`}
             </div>
             <div className="log-card-field muted">
               Coverage limit {fmt(c.coverage_limit)}, deductible {fmt(c.deductible)}
-              {c.source_table ? ` -- ${c.source_table} #${c.source_id}` : c.description ? ` -- "${c.description}"` : ""}
+              {c.source_table ? ` · ${c.source_table} #${c.source_id}` : c.description ? ` · "${c.description}"` : ""}
             </div>
             <div className="log-card-field muted">
               Submitted {new Date(c.created_at).toLocaleString()}
-              {c.decided_at ? ` -- decided ${new Date(c.decided_at).toLocaleString()}` : ""}
-              {c.status === "denied" && c.decline_reason ? ` -- ${c.decline_reason}` : ""}
+              {c.decided_at ? ` · decided ${new Date(c.decided_at).toLocaleString()}` : ""}
+              {c.status === "denied" && c.decline_reason ? ` · ${c.decline_reason}` : ""}
             </div>
             {c.status === "pending" && (
               <div className="button-row" style={{ marginTop: 8 }}>
@@ -2071,7 +2071,7 @@ export function TaxDashboardPanel() {
         <div className="stat-tile"><div className="muted">Total Spent (all time)</div><div className="verification-identity-name">{fmt(overview.totalSpent)}</div></div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Revenue -- Last 30 Days</h2>
+      <h2 style={{ marginTop: 20 }}>Revenue, last 30 days</h2>
       <TaxRevenueChart data={overview.overTime} />
 
       <h2 style={{ marginTop: 20 }}>Collected By Category</h2>
@@ -2093,7 +2093,7 @@ export function TaxDashboardPanel() {
             <span className="muted" style={{ marginLeft: "auto" }}>{fmt(row.total)}</span>
           </div>
         ))}
-        {overview.spendingByCategory.length === 0 && <p className="muted">Nothing spent yet -- see Withdraw Money on the Economy Overview tab.</p>}
+        {overview.spendingByCategory.length === 0 && <p className="muted">Nothing spent yet. See Withdraw Money on the Economy Overview tab.</p>}
       </div>
 
       <h2 style={{ marginTop: 20 }}>Recent Tax Activity</h2>
@@ -2122,7 +2122,7 @@ export function TaxDashboardPanel() {
               <span className="badge loa-status-approved">{taxCategoryLabel(entry.category)}</span>
               <span className="muted">{new Date(entry.created_at).toLocaleString()}</span>
             </div>
-            <div className="log-card-field">{entry.payer_label} ({entry.payer_type}) -- {fmt(entry.amount)}</div>
+            <div className="log-card-field">{entry.payer_label} ({entry.payer_type}) · {fmt(entry.amount)}</div>
             {entry.reason && <div className="log-card-field muted">{entry.reason}</div>}
           </div>
         ))}
@@ -2138,8 +2138,8 @@ export function TaxDashboardPanel() {
               <span className="muted">{new Date(entry.created_at).toLocaleString()}</span>
             </div>
             <div className="log-card-field">
-              {entry.recipient_label ?? "Unknown recipient"} -- {fmt(entry.amount)}
-              {entry.spent_by && <span className="muted"> -- authorized by <DiscordIdentity discordId={entry.spent_by} showAvatar={false} /></span>}
+              {entry.recipient_label ?? "Unknown recipient"} · {fmt(entry.amount)}
+              {entry.spent_by && <span className="muted"> · authorized by <DiscordIdentity discordId={entry.spent_by} showAvatar={false} /></span>}
             </div>
             {entry.reason && <div className="log-card-field muted">{entry.reason}</div>}
           </div>
