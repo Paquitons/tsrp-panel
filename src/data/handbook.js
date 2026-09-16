@@ -671,6 +671,7 @@ export const HANDBOOK = [
         "**Staff Complaint** tickets at every IA rank, with Management and Directors.",
         "**Fast Pass** tickets from **IA Officer** upward only, shared with Supervisory. Internal Affairs and Trial Internal Affairs do not see them.",
         "No other type: not general support, not community tickets, not ban appeals.",
+        "**Everything a handler does on those two types**: claiming, closing, and sending a close request with /tclosereq or the Request Close button. A close request asks the opener to confirm they are done before anything closes, and it is what you should use by default. The only ticket you cannot act on is one somebody else has claimed, which is the same rule for everybody below Director.",
         "Issuing strikes, terminations and demotions, per the table above, including on staff who would otherwise outrank them.",
         "**Read access to the whole punishment log**, including every entry issued by a staff member under investigation. Search it from the dashboard the same way anyone else does.",
       ]},
