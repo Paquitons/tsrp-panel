@@ -1,5 +1,53 @@
 [
   {
+    "version": "2.2.0",
+    "slug": "v2-2-0",
+    "title": "TSRP Update",
+    "date": "2026-09-18",
+    "summary": "Management and Directors can now see every ticket, including ones that have already been claimed. Internal Affairs can request a leave of absence. The Staff Panel's tab bars stay where you put them, and the search bar looks like a search bar again.",
+    "sections": [
+      {
+        "heading": "Tickets",
+        "items": [
+          "Management and Directors now see every ticket, of every type, whether or not somebody has claimed it. Oversight that stopped the moment a ticket was claimed was not oversight, because the handled tickets are the ones worth reading.",
+          "The larger half of that: Management could not see a general support or community ticket at all before this. Those opened to the Support Staff role and the Trial Supervisor rank role, and a Management member holds neither just by being Management.",
+          "Seeing a ticket and being able to act on one are still different things. A claimed ticket still belongs to whoever claimed it, and only a Director can override that. Management still cannot claim a ban appeal they are not on the rota for.",
+          "Nothing changed for anybody below Management, and nothing changed for Internal Affairs.",
+          "Tickets that are already open pick this up on their own the next time the bot restarts, without being reopened to the tier that lost sight of them when they were claimed."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "Internal Affairs can request a leave of absence, with /loa in Discord or from the Dashboard. Being exempt from the duty quota is not the same as being unable to take time off.",
+          "This used to depend on your history rather than your rank. The command was gated on the Staff Team role, which is kept when somebody moves into IA from a moderation rank but is never given to anybody recruited straight into IA, so two IA members of the same rank got different answers.",
+          "Internal Affairs can claim, close and send close requests on the two ticket types they handle, at every IA rank. That was already the rule; what was missing was the handbook saying so, which it now does.",
+          "The only ticket you cannot act on is one somebody else has claimed, and that is the same rule for everybody below Director."
+        ]
+      },
+      {
+        "heading": "Staff Panel",
+        "items": [
+          "The tab bars stay where they are while the page scrolls underneath them, so you do not have to scroll back up to change tab.",
+          "Changing tabs no longer moves the page around. Picking a tab could scroll the whole page up or down, and the second row of tabs disappeared entirely on tabs that had none, which shoved everything below it up and back down again.",
+          "The tab bars now only ever move sideways, and only when there are more tabs than fit.",
+          "Every tab change now lands in the same place, whatever you were looking at before and however long the new tab turns out to be."
+        ]
+      },
+      {
+        "heading": "Fixes",
+        "items": [
+          "The search bar had a magnifying glass roughly four hundred pixels across, which filled most of the dialog and squeezed the search field down to almost nothing. It is the right size now, and no icon in the panel can do that again.",
+          "The search bar's typing field was quietly losing its own styling to a panel-wide rule, which is why it sat too tall.",
+          "The Search the panel button in the sidebar was flush to both edges and sat a little high under the header. It now lines up with the links below it.",
+          "Announcement and hub rows had no background at all, because of a colour that was never defined anywhere.",
+          "The up and down arrows that reorder announcements and hub entries were taller than the row they belonged to and hung past the bottom of it.",
+          "The Staff Handbook now says that Management keeps reading a ticket after it is claimed, that Internal Affairs can take a leave of absence, and that Internal Affairs can send close requests."
+        ]
+      }
+    ]
+  },
+  {
     "version": "2.1.0",
     "slug": "v2-1-0",
     "title": "TSRP Update",
