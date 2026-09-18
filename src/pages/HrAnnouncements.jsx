@@ -31,6 +31,7 @@ import { apiFetch } from "../api";
 import { useApiQuery } from "../hooks/useApiQuery";
 import CustomSelect from "../components/CustomSelect";
 import Banner from "../components/primitives/Banner";
+import Skeleton from "../components/primitives/Skeleton";
 import Modal from "../components/primitives/Modal";
 import SectionHeader from "../components/primitives/SectionHeader";
 
@@ -349,7 +350,7 @@ export default function HrAnnouncements() {
   }
 
   if (query.isError && !entries) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (!entries) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!entries) return <Skeleton variant="rows" />;
 
   return (
     <>

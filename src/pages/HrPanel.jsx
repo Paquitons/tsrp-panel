@@ -13,6 +13,7 @@ import HrAutomodOffenses from "./HrAutomodOffenses";
 import HrQuotas from "./HrQuotas";
 import HrAnnouncements from "./HrAnnouncements";
 import Modal from "../components/primitives/Modal";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
@@ -325,7 +326,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
     title: "Management",
     subtitle: pendingCount > 0
       ? `${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting on a decision.`
-      : "Nothing pending, you are all caught up.",
+      : "Nothing waiting on a decision.",
   };
 
   return (
@@ -593,7 +594,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
         <div className="dashboard-col">
           <div className="card">
             <SectionHeader title="Currently On Strike" count={groupedStrikes.length} />
-            {loading && <p className="muted">Loading…</p>}
+            {loading && <Skeleton variant="rows" />}
             {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
             <div className="log-card-list">
               {groupedStrikes.map(([discordId, strikes]) => (

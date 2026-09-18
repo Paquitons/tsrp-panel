@@ -2,6 +2,7 @@ import { useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Banner from "../components/primitives/Banner";
+import Skeleton from "../components/primitives/Skeleton";
 import Modal from "../components/primitives/Modal";
 import SectionHeader from "../components/primitives/SectionHeader";
 import Tabs from "../components/Tabs";
@@ -286,7 +287,7 @@ function HubSection({ hub, onNotice, onError }) {
   }
 
   if (query.isError && !entries) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (!entries) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!entries) return <Skeleton variant="rows" />;
 
   const saved = msg => { onNotice(msg); query.refetch(); };
 
@@ -479,7 +480,7 @@ Reason (optional):`);
   }
 
   if (query.isError && !data) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!data) return <Skeleton variant="rows" />;
 
   const granted = msg => { onNotice(msg); query.refetch(); };
 
@@ -745,7 +746,7 @@ function BroadcastSection({ onNotice, onError }) {
 
       <h2 className="dc-subhead">Sent</h2>
       {history.isError && !rows && <Banner>{history.error.message}</Banner>}
-      {!rows && !history.isError && <p className="muted">Loading…</p>}
+      {!rows && !history.isError && <Skeleton variant="rows" />}
       {rows && !rows.length && <p className="muted">Nothing sent yet.</p>}
 
       {rows && rows.length > 0 && (
@@ -817,7 +818,7 @@ function AuditSection() {
   });
   const rows = query.data;
   if (query.isError && !rows) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (!rows) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!rows) return <Skeleton variant="rows" />;
   if (!rows.length) return <p className="muted" style={{ marginTop: 16 }}>No changes recorded yet.</p>;
 
   return (

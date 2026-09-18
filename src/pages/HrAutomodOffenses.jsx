@@ -4,6 +4,7 @@ import { useStaffSearch } from "../hooks/useStaffSearch";
 import DiscordAvatar from "../components/DiscordAvatar";
 import PortalDropdown from "../components/PortalDropdown";
 import Banner from "../components/primitives/Banner";
+import Skeleton from "../components/primitives/Skeleton";
 import SectionHeader from "../components/primitives/SectionHeader";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { expiresLabel } from "../utils";
@@ -87,7 +88,7 @@ export default function HrAutomodOffenses() {
         </PortalDropdown>
       </div>
 
-      {query.isLoading && <p className="muted">Loading…</p>}
+      {query.isLoading && <Skeleton variant="rows" />}
       {(query.isError || actionError) && <Banner>{actionError ?? query.error?.message}</Banner>}
       {notice && <Banner variant="success">{notice}</Banner>}
 
