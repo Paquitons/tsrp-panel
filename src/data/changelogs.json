@@ -1,5 +1,45 @@
 [
   {
+    "version": "2.3.0",
+    "slug": "v2-3-0",
+    "title": "TSRP Update",
+    "date": "2026-09-19",
+    "summary": "Fast Pass entries no longer show as \"Unknown Member\", and a Fast Pass for somebody who has left the server now comes off the list on its own. The Staff Panel has been cleaned up throughout: quieter colours, more on screen at once, and a layout that stays where you put it.",
+    "sections": [
+      {
+        "heading": "Fast Pass",
+        "items": [
+          "Fast Pass entries no longer show as \"Unknown Member\".",
+          "Everybody showing that way was waiting on training. Names were being matched against the staff team, and an applicant does not join the staff team until a trainer passes them with /passtraining, so nobody in the waiting stage could be named. It looked like they had left the server. They had not.",
+          "Names are now looked up from Discord directly, so anybody in the server can be named, staff or not.",
+          "A Fast Pass for somebody who really has left the server is now closed out and drops off the list.",
+          "Closed out is not deleted. The entry keeps who approved it, when, and how far it got, and still shows up in that person's history.",
+          "If a name cannot be loaded, the entry stays on the list and says so on the row, instead of sitting there nameless."
+        ]
+      },
+      {
+        "heading": "The Staff Panel",
+        "items": [
+          "The colours are quieter. Colour marks a state now rather than decorating buttons and panels.",
+          "Grey text is darker and easier to read on every background it lands on.",
+          "Spacing is tighter, so roughly two more rows fit on screen in every list.",
+          "Log and LOA entries were boxes stacked inside a box. They are plain rows now, separated by a thin line, and the row lights up as you move down the list.",
+          "Pages no longer slide up the screen every time you open one. Menus still animate, and the on duty dot still pulses.",
+          "Screens that used to just say \"Loading\" now show placeholder rows the same size as what is coming, so nothing jumps around when it arrives."
+        ]
+      },
+      {
+        "heading": "Layout",
+        "items": [
+          "Headings and the counts beside them line up now. The count in Ban BOLO Review looked low, but it was the heading sitting high, and it was doing that on every screen.",
+          "The tab bars cannot be nudged up and down any more.",
+          "When there are more tabs than fit across, they wrap onto a second row instead of scrolling sideways, so every tab stays visible and in the same place. On a phone, a section with sub tabs starts one row lower than a section without them.",
+          "The blinking circle on the server status is gone. It is a block with the state written beside it, so it reads at a glance and does not lean on colour alone."
+        ]
+      }
+    ]
+  },
+  {
     "version": "2.2.0",
     "slug": "v2-2-0",
     "title": "TSRP Update",
