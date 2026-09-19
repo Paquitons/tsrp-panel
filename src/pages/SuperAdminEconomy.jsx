@@ -5,6 +5,7 @@ import AccountPicker from "../components/AccountPicker";
 import CustomSelect from "../components/CustomSelect";
 import { usePolling } from "../hooks/usePolling";
 import Modal from "../components/primitives/Modal";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 
 const CURRENCY = "$";
@@ -95,7 +96,7 @@ export function EconomyOverviewPanel() {
   }
 
   if (error && !data) return <Banner>{error}</Banner>;
-  if (!data) return <p className="muted">Loading…</p>;
+  if (!data) return <Skeleton variant="rows" />;
 
   const capPercent = data.moneySupplyCap ? Math.min(100, (data.totalMoneySupply / data.moneySupplyCap) * 100) : 0;
 
@@ -114,7 +115,7 @@ export function EconomyOverviewPanel() {
         <div className="stat-tile"><div className="muted">In Lottery Pots</div><div className="verification-identity-name">{fmt(data.lotteryPotTotal)}</div></div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Money Supply Cap</h2>
+      <h2>Money Supply Cap</h2>
       <p className="muted card-subtitle">
         {data.moneySupplyCapEnabled
           ? `Enabled. Once total supply reaches ${fmt(data.moneySupplyCap)}, /work, /daily, crime rewards, new loans, and stock dividends stop minting and draw from the Government Reserve instead. Change the cap or turn it off from Bot Settings.`
@@ -127,7 +128,7 @@ export function EconomyOverviewPanel() {
       )}
       <p className="muted">{fmt(data.totalMoneySupply)} / {fmt(data.moneySupplyCap)} ({capPercent.toFixed(1)}%)</p>
 
-      <h2 style={{ marginTop: 20 }}>Print Money</h2>
+      <h2>Print Money</h2>
       <p className="muted card-subtitle">Intentionally grows the money supply by minting directly into the Government Reserve. The only other way new money enters the economy is through /work, /daily, crime rewards, new loans, and stock dividends (and only up to the cap above).</p>
       <form onSubmit={printMoney} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
@@ -141,7 +142,7 @@ export function EconomyOverviewPanel() {
         <button className="primary" type="submit" disabled={printing}>{printing ? "Printing…" : "Print Money"}</button>
       </form>
 
-      <h2 style={{ marginTop: 20 }}>Withdraw Money</h2>
+      <h2>Withdraw Money</h2>
       <p className="muted card-subtitle">Moves money out of the Government Reserve into any account: a real transfer, not a burn. Capped at whatever's currently in the reserve.</p>
       <div className="form-inline-field" style={{ maxWidth: 340, marginBottom: 8 }}>
         <label>To Player</label>
@@ -172,7 +173,7 @@ export function EconomyOverviewPanel() {
       </form>
       <p className="muted" style={{ marginTop: 4 }}>Shown on the Taxes tab's spending breakdown, so it's clear this money went back into the economy and where.</p>
 
-      <h2 style={{ marginTop: 20 }}>Top 10 Wallets</h2>
+      <h2>Top 10 Wallets</h2>
       <div className="loa-list">
         {data.topWallets.map(w => (
           <div className="loa-card loa-card-row" key={w.discord_id}>
@@ -215,7 +216,7 @@ export function EconomyConfigPanel() {
   }
 
   if (error && !config) return <Banner>{error}</Banner>;
-  if (!config) return <p className="muted">Loading…</p>;
+  if (!config) return <Skeleton variant="rows" />;
 
   const SYSTEM_LABELS = {
     daily: "Daily Bonus",
@@ -270,7 +271,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Net Worth Tax</h3>
+      <h3>Net Worth Tax</h3>
       <p className="muted card-subtitle">Taxes total wealth (cash + bank + businesses + property + investments, minus loans) instead of just cash on hand.</p>
       <div className="form-row">
         <div>
@@ -290,7 +291,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Business Income Tax by Type</h3>
+      <h3>Business Income Tax by Type</h3>
       <p className="muted card-subtitle">Falls back to the Default rate for any type not overridden. Threshold and frequency are shared across every type.</p>
       <div className="form-row">
         <div>
@@ -319,7 +320,7 @@ export function EconomyConfigPanel() {
         ))}
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Business Licensing Fee by Type</h3>
+      <h3>Business Licensing Fee by Type</h3>
       <p className="muted card-subtitle">A flat, recurring dollar amount per business (not a percentage of treasury): the cost of staying licensed to operate.</p>
       <div className="form-row">
         <div>
@@ -338,7 +339,7 @@ export function EconomyConfigPanel() {
         ))}
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Sales &amp; Luxury Tax</h3>
+      <h3>Sales &amp; Luxury Tax</h3>
       <p className="muted card-subtitle">Skimmed from a storefront's revenue on the sale, not added on top of the price a customer already agreed to.</p>
       <div className="form-row">
         <div>
@@ -358,7 +359,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Transaction &amp; Large Transfer Tax</h3>
+      <h3>Transaction &amp; Large Transfer Tax</h3>
       <p className="muted card-subtitle">Withheld from what the recipient receives on /economy pay, not added on top of what the sender is charged. Neither applies below its own threshold.</p>
       <div className="form-row">
         <div>
@@ -385,7 +386,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Capital Gains Tax</h3>
+      <h3>Capital Gains Tax</h3>
       <p className="muted card-subtitle">Only on an actual profit when selling a stock. A sale at a loss or break-even owes nothing.</p>
       <div className="form-row">
         <div>
@@ -395,7 +396,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h3 style={{ marginTop: 16 }}>Casino Chip Purchase Tax</h3>
+      <h3>Casino Chip Purchase Tax</h3>
       <p className="muted card-subtitle">Skimmed from a chip purchase before the rest reaches the casino's treasury. Membership fees and cashouts are not taxed, only the initial chip purchase.</p>
       <div className="form-row">
         <div>
@@ -405,12 +406,12 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Stock Market</h2>
+      <h2>Stock Market</h2>
       <p className="muted card-subtitle">
         Every stock has a fixed share supply -- price only moves from the daily movement below plus company events, never from trading itself.
       </p>
 
-      <h3 style={{ marginTop: 16 }}>Daily Movement</h3>
+      <h3>Daily Movement</h3>
       <p className="muted card-subtitle">Fires once per stock every intervalHours: a direction coin-flip, then a size tier (weighted by the percentages below), then a uniform roll within that tier's range.</p>
       <div className="form-row">
         <div>
@@ -447,7 +448,7 @@ export function EconomyConfigPanel() {
         </div>
       ))}
 
-      <h3 style={{ marginTop: 16 }}>Company Events</h3>
+      <h3>Company Events</h3>
       <p className="muted card-subtitle">A separate roll from daily movement: fictional company news (contracts, lawsuits, product launches, etc) that also moves price and shows up in a stock's event history.</p>
       <div className="form-row">
         <div>
@@ -484,7 +485,7 @@ export function EconomyConfigPanel() {
         </div>
       ))}
 
-      <h3 style={{ marginTop: 16 }}>Share Issuance</h3>
+      <h3>Share Issuance</h3>
       <p className="muted card-subtitle">The price effect applied when a Super Admin issues additional shares for a stock (see that stock's detail page). Negative by default, since diluting the fixed supply is a structural, bearish change.</p>
       <div className="form-row">
         <div>
@@ -499,7 +500,7 @@ export function EconomyConfigPanel() {
         </div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Systems</h2>
+      <h2>Systems</h2>
       <div className="card-grid">
         {Object.keys(SYSTEM_LABELS).map(key => (
           <label className="checkbox-label" key={key}>
@@ -513,7 +514,7 @@ export function EconomyConfigPanel() {
         ))}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Economy News Sensitivity</h2>
+      <h2>Economy News Sensitivity</h2>
       <p className="muted card-subtitle">
         Controls the automated news system (daily-change sweeps, new highs/lows, large trades, new listings,
         lottery wins, market warnings) -- not the manual crash/rally/event tools, which always post.
@@ -550,7 +551,7 @@ export function EconomyConfigPanel() {
         ))}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Crime System</h2>
+      <h2>Crime System</h2>
       <p className="muted card-subtitle">
         Bank/ATM/store robbery and pickpocket -- optional high-risk ways to earn money. Keep these below what
         jobs/business/investing/casino can pay so crime stays a side activity, not the best strategy.
@@ -595,7 +596,7 @@ export function EconomyConfigPanel() {
         </div>
       ))}
 
-      <h2 style={{ marginTop: 20 }}>Debt System</h2>
+      <h2>Debt System</h2>
       <p className="muted card-subtitle">
         Loan types, rates, and limits (see /loan). Financial reputation (0-1000, 500 neutral) then scales the actual
         rate/limit a player is offered on top of these base numbers -- the swings below control by how much.
@@ -636,7 +637,7 @@ export function EconomyConfigPanel() {
         </div>
       ))}
 
-      <h3 style={{ marginTop: 16 }}>Financial Reputation Effects</h3>
+      <h3>Financial Reputation Effects</h3>
       <div className="form-row">
         <div>
           <label>Rate Swing (+/- percentage points at min/max reputation)</label>
@@ -1036,7 +1037,7 @@ function CasinoGameControls({ casino }) {
     setRules(rules.filter(r => r.id !== id));
   }
 
-  if (!settings) return <p className="muted">Loading…</p>;
+  if (!settings) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -1077,7 +1078,7 @@ function CasinoGameControls({ casino }) {
 
       {profiles.length > 0 && (
         <>
-          <h2 style={{ marginTop: 20 }}>Saved Profiles</h2>
+          <h2>Saved Profiles</h2>
           <div className="loa-list">
             {profiles.map(p => (
               <div className="loa-card loa-card-row" key={p.name}>
@@ -1095,7 +1096,7 @@ function CasinoGameControls({ casino }) {
         </>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Bet-Size Tiers</h2>
+      <h2>Bet-Size Tiers</h2>
       <p className="muted card-subtitle">Different payout rates apply automatically above/below a wager threshold.</p>
       <form onSubmit={addRule} className="form-row">
         <div><label>Min Wager</label><input type="number" required value={tierMin} onChange={e => setTierMin(e.target.value)} /></div>
@@ -1116,7 +1117,7 @@ function CasinoGameControls({ casino }) {
 
       {stats && (
         <>
-          <h2 style={{ marginTop: 20 }}>Profit / Loss</h2>
+          <h2>Profit / Loss</h2>
           <div className="card-grid">
             <div className="stat-tile"><div className="muted">Total Wagered</div><div className="verification-identity-name">{fmt(stats.wagered)}</div></div>
             <div className="stat-tile"><div className="muted">Total Paid Out</div><div className="verification-identity-name">{fmt(stats.paidOut)}</div></div>
@@ -1126,7 +1127,7 @@ function CasinoGameControls({ casino }) {
         </>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Recent Transactions</h2>
+      <h2>Recent Transactions</h2>
       <div className="loa-list">
         {transactions.map(t => (
           <div className="loa-card loa-card-row" key={t.id}>
@@ -1165,7 +1166,7 @@ function CasinoChipOverview({ casino }) {
 
   return (
     <>
-      <h2 style={{ marginTop: 20 }}>Membership &amp; Chips</h2>
+      <h2>Membership &amp; Chips</h2>
       {error && <Banner>{error}</Banner>}
       {stats && (
         <div className="card-grid">
@@ -1178,7 +1179,7 @@ function CasinoChipOverview({ casino }) {
         </div>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Recent Chip Activity</h2>
+      <h2>Recent Chip Activity</h2>
       <div className="loa-list">
         {ledger.map(l => (
           <div className="loa-card loa-card-row" key={l.id}>
@@ -1236,7 +1237,7 @@ export function LotteryPanel() {
     load();
   }
 
-  if (!data) return <p className="muted">Loading…</p>;
+  if (!data) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -1255,7 +1256,7 @@ export function LotteryPanel() {
             <button className="btn-red" type="button" onClick={voidCurrent}>Void Lottery</button>
           </div>
 
-          <h2 style={{ marginTop: 20 }}>Entrants</h2>
+          <h2>Entrants</h2>
           <div className="loa-list">
             {data.entrants.map(en => (
               <div className="loa-card loa-card-row" key={en.discord_id}>
@@ -1281,7 +1282,7 @@ export function LotteryPanel() {
 
       {data.history.length > 0 && (
         <>
-          <h2 style={{ marginTop: 20 }}>History</h2>
+          <h2>History</h2>
           <div className="loa-list">
             {data.history.map(l => (
               <div className="loa-card" key={l.id}>
@@ -1413,7 +1414,7 @@ function StorefrontProductsEditor({ storefront }) {
     <>
       {error && <Banner>{error}</Banner>}
 
-      <h2 style={{ marginTop: 16 }}>Products</h2>
+      <h2>Products</h2>
       <form onSubmit={addProduct} className="form-row">
         <div><label>Name</label><input required value={name} onChange={e => setName(e.target.value)} /></div>
         <div>
@@ -1439,7 +1440,7 @@ function StorefrontProductsEditor({ storefront }) {
 
       {stats && (
         <>
-          <h2 style={{ marginTop: 20 }}>Sales</h2>
+          <h2>Sales</h2>
           <div className="card-grid">
             <div className="stat-tile"><div className="muted">Total Revenue</div><div className="verification-identity-name">{fmt(stats.revenue)}</div></div>
             <div className="stat-tile"><div className="muted">Total Sales</div><div className="verification-identity-name">{stats.sales}</div></div>
@@ -1448,7 +1449,7 @@ function StorefrontProductsEditor({ storefront }) {
         </>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Recent Sales</h2>
+      <h2>Recent Sales</h2>
       <div className="loa-list">
         {sales.map(s => (
           <div className="loa-card loa-card-row" key={s.id}>
@@ -1789,7 +1790,7 @@ export function DebtPanel() {
         </div>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Financial Reputation Lookup</h2>
+      <h2>Financial Reputation Lookup</h2>
       <div style={{ maxWidth: 340 }}>
         <AccountPicker key={lookupPickerKey} onSelect={lookupReputation} />
       </div>
@@ -1804,7 +1805,7 @@ export function DebtPanel() {
         </div>
       )}
 
-      <h2 style={{ marginTop: 20 }}>Economy-Wide Debt Event</h2>
+      <h2>Economy-Wide Debt Event</h2>
       <p className="muted card-subtitle">Bulk-adjusts every active or defaulted loan's remaining balance by a percentage. For example -20% for broad relief, or +10% to simulate a rate hike.</p>
       <form onSubmit={applyEvent} className="button-row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
@@ -1919,7 +1920,7 @@ export function InsurancePanel() {
       {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
       {notice && <Banner variant="success">{notice}</Banner>}
 
-      <h2 style={{ marginTop: 16 }}>Insurance Companies</h2>
+      <h2>Insurance Companies</h2>
       <div className="loa-list">
         {companies.map(c => (
           <div className="loa-card loa-card-row" key={c.id}>
@@ -2052,7 +2053,7 @@ export function TaxDashboardPanel() {
   usePolling(() => apiFetch("/super-admin/tax-dashboard/spending").then(setSpending).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   if (error && !overview) return <Banner>{error}</Banner>;
-  if (!overview) return <p className="muted">Loading…</p>;
+  if (!overview) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -2071,10 +2072,10 @@ export function TaxDashboardPanel() {
         <div className="stat-tile"><div className="muted">Total Spent (all time)</div><div className="verification-identity-name">{fmt(overview.totalSpent)}</div></div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Revenue, last 30 days</h2>
+      <h2>Revenue, last 30 days</h2>
       <TaxRevenueChart data={overview.overTime} />
 
-      <h2 style={{ marginTop: 20 }}>Collected By Category</h2>
+      <h2>Collected By Category</h2>
       <div className="loa-list">
         {overview.byCategory.map(row => (
           <div className="loa-card loa-card-row" key={row.category}>
@@ -2085,7 +2086,7 @@ export function TaxDashboardPanel() {
         {overview.byCategory.length === 0 && <p className="muted">No taxes collected yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Government Spending By Category</h2>
+      <h2>Government Spending By Category</h2>
       <div className="loa-list">
         {overview.spendingByCategory.map(row => (
           <div className="loa-card loa-card-row" key={row.category}>
@@ -2096,7 +2097,7 @@ export function TaxDashboardPanel() {
         {overview.spendingByCategory.length === 0 && <p className="muted">Nothing spent yet. See Withdraw Money on the Economy Overview tab.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Recent Tax Activity</h2>
+      <h2>Recent Tax Activity</h2>
       <div className="form-inline-row" style={{ marginBottom: 12 }}>
         <div className="form-inline-field">
           <label>Category</label>
@@ -2129,7 +2130,7 @@ export function TaxDashboardPanel() {
         {ledger && ledger.entries.length === 0 && <p className="muted">No tax activity matches this filter.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Recent Government Spending</h2>
+      <h2>Recent Government Spending</h2>
       <div className="loa-list">
         {(spending?.entries ?? []).map(entry => (
           <div className="loa-card" key={entry.id}>

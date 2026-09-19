@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { API_BASE } from "../api";
 import PageShell from "../components/primitives/PageShell";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 import { useApiQuery } from "../hooks/useApiQuery";
 import DiscordIdentity from "../components/DiscordIdentity";
@@ -410,7 +411,7 @@ export default function TicketTranscript() {
   if (!data) {
     return (
       <PageShell title="Ticket Transcript">
-        <p className="muted">Loading…</p>
+        <Skeleton variant="text" />
       </PageShell>
     );
   }

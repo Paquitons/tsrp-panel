@@ -16,6 +16,7 @@ import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
 import Modal from "../components/primitives/Modal";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 import { SearchIcon, CalendarIcon, TrophyIcon, HistoryIcon, DoorExitIcon, TerminalIcon, MegaphoneIcon } from "../components/icons";
 import { useLiveEvents } from "../hooks/useLiveEvents";
@@ -774,7 +775,7 @@ export default function Dashboard() {
             <h2>Punishment Logs</h2>
             <input placeholder="Search by username" value={logSearch} onChange={e => setLogSearch(e.target.value)} />
             <div className="log-card-list">
-              {logsLoading && <p className="muted">Loading…</p>}
+              {logsLoading && <Skeleton variant="rows" />}
               {!logsLoading && logs.length === 0 && <p className="muted">No logs found.</p>}
               {logs.map(log => (
                 <LogCard key={log.id} log={log} onChanged={refreshLogs} onUsernameClick={openUser} onIssuerClick={openUserByDiscord} />

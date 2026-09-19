@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Skeleton from "../components/primitives/Skeleton";
 import { apiFetch } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useStaffSearch } from "../hooks/useStaffSearch";
@@ -192,14 +193,20 @@ export default function SuperAdmin() {
 
       {error && <Banner>{error}</Banner>}
 
+      {/* The tab stack sits OUTSIDE the card, as it does on Management.
+          It is sticky and bleeds out to the page gutter with negative
+          margins, and inside a padded card those margins fought the
+          padding and left an empty strip above the tabs. Navigation is
+          page furniture; it does not belong in a content panel. */}
+      <div className="tab-stack">
+        <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
+        {/* Always rendered, including for Staff, which holds one screen.
+            Dropping the row for a family that does not need it moved
+            everything below it whenever you changed family. */}
+        <Tabs tabs={sections} active={tab} onChange={pickScreen} variant="sub" ariaLabel="Screens in this area" />
+      </div>
+
       <div className="card">
-        <div className="tab-stack">
-          <Tabs tabs={TAB_GROUPS} active={group} onChange={pickGroup} ariaLabel="Super Admin areas" />
-          {/* Always rendered, including for Staff, which holds one screen.
-              Dropping the row for a family that does not need it moved
-              everything below it whenever you changed family. */}
-          <Tabs tabs={sections} active={tab} onChange={pickScreen} variant="sub" ariaLabel="Screens in this area" />
-        </div>
 
         {tab === "shifts" && (
           <>
@@ -268,7 +275,7 @@ export default function SuperAdmin() {
 
           <div className="card">
             <h2>Shifts ({shifts.length})</h2>
-            {loading && <p className="muted">Loading…</p>}
+            {loading && <Skeleton variant="rows" />}
             {!loading && shifts.length === 0 && <p className="muted">No shifts found.</p>}
             <div className="log-card-list">
               {shifts.map(s => (
@@ -422,7 +429,7 @@ function EconomyControl() {
         </div>
       )}
 
-      {loading && <p className="muted" style={{ marginTop: 12 }}>Loading…</p>}
+      {loading && <Skeleton variant="rows" />}
 
       {balance !== null && (
         <>

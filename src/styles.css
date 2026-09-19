@@ -103,6 +103,7 @@
      beside a field matches by construction rather than by hoping
      the padding works out. */
   --control-h-sm: 28px;
+  --tab-h-sub: 30px;   /* one sub-tab row, empty or not */
   --control-h-md: 32px;
 
   /* ---- Radius: two sizes and a pill ---- */
@@ -540,6 +541,19 @@ html, body, #root {
   border-color: var(--border-default);
 }
 
+/* A heading that FOLLOWS something owns the gap above itself.
+
+   This was written out inline ninety times in the economy screens, as
+   style={{ marginTop: 20 }} on every h2 and marginTop: 16 on every h3.
+   The values were right and on the scale; the problem was that a spacing
+   rule lived in ninety places, so it could only stay consistent by
+   everybody remembering it. It lives here now.
+
+   A heading that opens a card is not preceded by anything, so it keeps
+   its zero and this never double-spaces the top of a panel. */
+.card * + h2 { margin-top: var(--space-5); }
+.card * + h3 { margin-top: var(--space-4); }
+
 .card h2 {
   margin: 0 0 var(--space-3);
   font-size: var(--text-md);
@@ -551,32 +565,29 @@ html, body, #root {
 
 /* ---------- Tabs (segmented control) ---------- */
 
+/* ---- Tab bars ----
+   One layout for both levels. Two rules define it:
+
+   THEY DO NOT SCROLL, in either axis. The bar used to be overflow-x:auto,
+   and because a box with overflow-x:auto computes overflow-y to auto as
+   well, the sub bar's 1px of overhang (its active underline was drawn
+   with a -1px margin) made it scrollable VERTICALLY by one pixel. A tab
+   bar you can drag up and down by a pixel is the definition of a control
+   that was placed rather than designed. Both axes are locked now.
+
+   THEY WRAP INSTEAD. When the tabs do not fit, they go onto a second row
+   rather than sliding out of sight. Every tab stays visible and in the
+   same place every time, which a scrolling strip cannot promise. */
 .tabs {
   display: flex;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: var(--space-0);
   background: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
   padding: var(--space-0);
   border-radius: var(--radius-sm);
-  margin-bottom: var(--space-5);
-  overflow-x: auto;
-  /* Scroll-shadow hint: when there are more tabs than fit (e.g. Super
-     Admin's 11 tabs even at desktop widths, since .content caps out at
-     980px), a fade appears at whichever edge still has hidden tabs so the
-     cut-off never looks like the end of the list. The two "scroll"
-     background layers are pinned to the viewport (not the scrolling
-     content) while the two "local" layers scroll away with the tabs, so a
-     fade only stays visible while there's actually more to see in that
-     direction. */
-  background:
-    linear-gradient(to right, var(--surface-sunken) 40%, transparent) local,
-    linear-gradient(to left, var(--surface-sunken) 40%, transparent) local,
-    linear-gradient(to right, var(--border-strong), transparent) scroll,
-    linear-gradient(to left, var(--border-strong), transparent) scroll;
-  background-repeat: no-repeat;
-  background-color: var(--surface-sunken);
-  background-size: 36px 100%, 36px 100%, 20px 100%, 20px 100%;
-  background-position: left, right, left, right;
+  margin-bottom: var(--space-4);
+  overflow: hidden;
 }
 
 .tab {
@@ -587,7 +598,9 @@ html, body, #root {
      bar in the panel looks like the same thing. */
   flex: 0 0 auto;
   min-width: max-content;
-  height: 32px;
+  /* Matches --control-h-sm, so a tab is the same height as every other
+     small control in the panel rather than a number of its own. */
+  height: var(--control-h-sm);
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -2547,45 +2560,55 @@ code {
   font-size: var(--text-md);
 }
 
-.home-status-pill {
+/* ---- Server state ----
+   A block, not a pill; a word, not a dot; and nothing animates. The
+   colour is carried by a solid bar on the leading edge, which reads at a
+   glance without being the only thing carrying the meaning: the state is
+   spelled out beside it, so this still works in greyscale. */
+.server-state {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  padding: var(--space-1) var(--space-4);
-  border-radius: var(--radius-full);
+  align-items: stretch;
+  gap: 0;
   border: 1px solid var(--border-default);
-  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  overflow: hidden;
+  font-size: var(--text-sm);
+  line-height: 1;
 }
 
-.home-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.server-state-bar {
+  width: 3px;
+  flex: 0 0 3px;
   background: var(--text-faint);
 }
 
-.home-status-pill.online {
-  color: var(--success);
-  border-color: rgba(46, 230, 160, 0.28);
-  background: rgba(46, 230, 160, 0.08);
-}
-.home-status-pill.online .home-status-dot {
-  background: var(--success);
-  box-shadow: none;
-  animation: pulse 2s var(--ease) infinite;
+.server-state-label,
+.server-state-value {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1-5) var(--space-2);
 }
 
-.home-status-pill.offline {
-  color: var(--danger);
-  border-color: rgba(255, 107, 107, 0.28);
-  background: rgba(255, 107, 107, 0.08);
+.server-state-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: var(--text-xs);
 }
-.home-status-pill.offline .home-status-dot {
-  background: var(--danger);
+
+.server-state-value {
+  font-weight: 650;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border-subtle);
 }
+
+.server-state.is-online  .server-state-bar   { background: var(--success); }
+.server-state.is-online  .server-state-value { color: var(--success); }
+.server-state.is-offline .server-state-bar   { background: var(--danger); }
+.server-state.is-offline .server-state-value { color: var(--danger); }
+
 
 .home-stats {
   display: grid;
@@ -4603,14 +4626,24 @@ code {
 .section-header-title-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex-wrap: wrap;
+  /* The row's own height comes from the tallest child, which is the
+     count pill. Given both children are centred and neither carries a
+     margin, the heading and the count now share a centre line. */
+  min-height: 22px;
 }
 
-.section-header-title {
+/* margin:0 is load-bearing and needs the extra specificity. This is an
+   h2, and inside a .card the `.card h2` rule gives every h2 a 12px bottom
+   margin. Flex centring centres the MARGIN box, so that 12px pushed the
+   heading's visible text up by exactly half of it and the count pill beside
+   it sat 6px low. The header owns the space beneath itself; the heading
+   inside it owns none. */
+.section-header .section-header-title {
   margin: 0;
   font-size: var(--text-lg);
-  line-height: 1.3;
+  line-height: var(--leading-tight);
 }
 
 /* The count sits beside the title rather than inside it, so the heading
@@ -4656,6 +4689,8 @@ code {
 /* The sub bar is an underlined row, not a tray. Two trays stacked read
    as one bar that wrapped, and then nothing says which level a click
    moves you within. */
+/* The second level is an underlined row rather than a tray, so two
+   stacked bars do not read as one bar that wrapped. */
 .tabs-sub {
   background: none;
   border: none;
@@ -4666,11 +4701,12 @@ code {
   margin-bottom: var(--space-4);
 }
 
+/* The active underline is an inset shadow, not a border with a negative
+   margin. A border changes the box and was what pushed the bar 1px past
+   its own height; an inset shadow paints inside it and costs no layout. */
 .tabs-sub .tab {
-  height: 34px;
+  height: var(--tab-h-sub);
   border-radius: 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
   background: none;
   box-shadow: none;
 }
@@ -4679,9 +4715,8 @@ code {
 
 .tabs-sub .tab.active {
   background: none;
-  box-shadow: none;
   color: var(--text-primary);
-  border-bottom-color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent-text);
 }
 
 /* A number on a tab means "this many are waiting for you", so it is
@@ -4934,8 +4969,12 @@ code {
    up and down by the height of a bar as you move between a tab that has
    sub-tabs and one that does not. Empty, it reads as the rule under the
    tab bar. */
-.tabs-sub { min-height: 34px; }
+
+/* An empty bar holds exactly one row, driven by the same token as a
+   populated one, so a tab with no sub-tabs and a tab with two do not
+   differ by the odd pixel. */
 .tabs-empty { pointer-events: none; }
+.tab-spacer { display: block; width: 0; height: var(--tab-h-sub); }
 
 /* ==================================================================
    STICKY TAB STACK

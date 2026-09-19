@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
 import Banner from "../components/primitives/Banner";
+import Skeleton from "../components/primitives/Skeleton";
 import { useApiQuery } from "../hooks/useApiQuery";
 
 const ADMIN_POLL_MS = 15_000;
@@ -68,7 +69,7 @@ export default function BotSettings() {
   }
 
   if (query.isError && !settings) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (!settings) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!settings) return <Skeleton variant="form" />;
 
   const byCategory = {};
   for (const entry of settings) {

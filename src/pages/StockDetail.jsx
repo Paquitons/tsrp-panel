@@ -9,6 +9,7 @@ import { usePolling } from "../hooks/usePolling";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { pctChange, changeClass, CHART_RANGE_OPTIONS } from "../utils";
 import Card from "../components/primitives/Card";
+import Skeleton from "../components/primitives/Skeleton";
 
 const STOCK_DETAIL_POLL_MS = 5_000; // "highly active" tier -- live price + chart
 
@@ -54,7 +55,7 @@ export default function StockDetail() {
         </div>
       )}
 
-      {!stock && !error && <p className="muted">Loading…</p>}
+      {!stock && !error && <Skeleton variant="text" />}
 
       {stock && (
         <>
