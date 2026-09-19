@@ -1,5 +1,47 @@
 [
   {
+    "version": "2.4.0",
+    "slug": "v2-4-0",
+    "title": "TSRP Update",
+    "date": "2026-09-19",
+    "summary": "Two people can no longer claim the same ticket at the same time, and a claimed Staff Complaint now stays readable to the whole of Internal Affairs while only the claimer can post in it. Player lookups and VIP checks have stopped failing in bursts, boosters get VIP reliably again, and the Staff Handbook now sets out the chain of command.",
+    "sections": [
+      {
+        "heading": "Tickets",
+        "items": [
+          "Two people can no longer claim the same ticket. Pressing Claim at the same moment as somebody else used to let both through, and whoever landed second quietly took a ticket the first had already been told was theirs.",
+          "The claim is taken first now, before anything else happens, and only one person can take it. Anybody who presses a moment later is told who holds it, and nothing about the channel changes for them.",
+          "This applies to every ticket type, not just the ones Internal Affairs handles."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "A claimed Staff Complaint no longer disappears from the rest of Internal Affairs. Every IA member keeps the channel and can read the case through.",
+          "Only the IA member who claimed it can post in it. Reading a case and working it are two different things, so colleagues can follow an investigation without talking over the investigator or confusing the person who opened the ticket.",
+          "Who can close it, unclaim it or act on it has not changed. That is still the claimer, with the Director override.",
+          "Complaints claimed before this change come back into view for Internal Affairs the next time the bot restarts.",
+          "Nothing changed for Fast Pass, Ban Appeals, General Support or Community tickets."
+        ]
+      },
+      {
+        "heading": "Player Lookups and VIP",
+        "items": [
+          "Player lookups, Discord account linking and the VIP vehicle check had been failing in bursts. When the linking service started refusing requests, the bot and the Staff Panel each carried on asking, once per player, which kept them refused for longer.",
+          "They stop asking together now, for as long as the service asks them to, and answer from what they already know in the meantime. Manual links and links confirmed earlier keep working throughout.",
+          "Server boosters were not reliably being given VIP. The booster check asked Discord for the whole member list every five minutes, could be turned away for asking too often, and skipped the entire run when it was. It reads the list it already holds now."
+        ]
+      },
+      {
+        "heading": "Staff Handbook",
+        "items": [
+          "The handbook now sets out the chain of command, under The hierarchy. Start with Supervisory, then Management, then the Directors, and work upward from there rather than going straight to the Founders.",
+          "Reporting a staff member is the exception. That still goes to Internal Affairs through a Staff Complaint ticket, whatever rank the person you are reporting holds."
+        ]
+      }
+    ]
+  },
+  {
     "version": "2.3.0",
     "slug": "v2-3-0",
     "title": "TSRP Update",
