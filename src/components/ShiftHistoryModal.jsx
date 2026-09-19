@@ -2,6 +2,7 @@ import { useEffect, useState, Fragment } from "react";
 import { apiFetch } from "../api";
 import { formatDuration } from "../utils";
 import Modal from "./primitives/Modal";
+import Skeleton from "./primitives/Skeleton";
 import Banner from "./primitives/Banner";
 
 export default function ShiftHistoryModal({ onClose }) {
@@ -44,7 +45,7 @@ export default function ShiftHistoryModal({ onClose }) {
           <button className="secondary small" onClick={onClose}>Close</button>
         </div>
 
-        {loading && <p className="muted">Loading…</p>}
+        {loading && <Skeleton variant="rows" />}
         {!loading && history.length === 0 && <p className="muted">No completed shifts yet.</p>}
 
         {history.length > 0 && (

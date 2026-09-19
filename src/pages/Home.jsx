@@ -17,11 +17,27 @@ const STATUS_POLL_MS = 5_000;
 // from ERLC's server API or the current player count. A session can be
 // open with nobody in it yet and this correctly still says Online; it's
 // only Offline once staff actually run /shutdown.
-function StatusPill({ online }) {
+/**
+ * Server state, as a read rather than an ornament.
+ *
+ * This was a rounded pill with a coloured dot that pulsed forever. Three
+ * things were wrong with that. A blinking dot is the house style of every
+ * generated dashboard. It animates continuously to convey a value that
+ * changes a few times a day, so the motion carries no information and
+ * never stops. And it leans entirely on colour, so the state is invisible
+ * to anybody who cannot separate the red from the green.
+ *
+ * What replaced it is a square-cornered block with a solid state bar down
+ * its leading edge and the state as a WORD. The word is the primary
+ * signal, the colour agrees with it, and nothing moves. Scannable in a
+ * glance, and still unambiguous in greyscale.
+ */
+function ServerState({ online }) {
   return (
-    <span className={`home-status-pill ${online ? "online" : "offline"}`}>
-      <span className="home-status-dot" />
-      {online ? "Server Online" : "Server Offline"}
+    <span className={`server-state ${online ? "is-online" : "is-offline"}`}>
+      <span className="server-state-bar" aria-hidden="true" />
+      <span className="server-state-label">Server</span>
+      <span className="server-state-value">{online ? "Online" : "Offline"}</span>
     </span>
   );
 }
@@ -46,7 +62,7 @@ export default function Home() {
       <PublicNav />
 
       <section className="home-hero">
-        <StatusPill online={!!status?.online} />
+        <ServerState online={!!status?.online} />
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
           The official website for Texas State Roleplay | Track who's on

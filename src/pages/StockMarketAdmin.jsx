@@ -8,6 +8,7 @@ import Tabs from "../components/Tabs";
 import { usePolling } from "../hooks/usePolling";
 import { toDateTimeInputValue, parseDateTimeInput, CHART_RANGE_OPTIONS } from "../utils";
 import Modal from "../components/primitives/Modal";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 
 // Read-only list/log views poll at the "moderately active" tier; anything
@@ -97,7 +98,7 @@ function OverviewTab() {
   usePolling(() => apiFetch("/super-admin/stock-market/overview").then(d => { setData(d); setError(null); }).catch(err => setError(err.message)), ADMIN_POLL_MS);
 
   if (error) return <Banner style={{ marginTop: 16 }}>{error}</Banner>;
-  if (!data) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!data) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -106,7 +107,7 @@ function OverviewTab() {
         <div className="stat-tile"><div className="muted">Listed Stocks</div><div className="verification-identity-name">{data.stockCount}</div></div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Top Gainers</h2>
+      <h2>Top Gainers</h2>
       <div className="loa-list">
         {data.gainers.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
@@ -117,7 +118,7 @@ function OverviewTab() {
         {data.gainers.length === 0 && <p className="muted">No data yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Top Losers</h2>
+      <h2>Top Losers</h2>
       <div className="loa-list">
         {data.losers.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
@@ -128,7 +129,7 @@ function OverviewTab() {
         {data.losers.length === 0 && <p className="muted">No data yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Trending (24h volume)</h2>
+      <h2>Trending (24h volume)</h2>
       <div className="loa-list">
         {data.trending.map(s => (
           <div className="loa-card loa-card-row" key={s.ticker}>
@@ -333,7 +334,7 @@ function StockDetail({ ticker, onBack }) {
     }
   }
 
-  if (!stock) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!stock) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -370,7 +371,7 @@ function StockDetail({ ticker, onBack }) {
 
       <StockAdminControls stock={stock} onAct={act} onSaveEdit={saveEdit} onDelete={deleteStock} />
 
-      <h2 style={{ marginTop: 20 }}>Top Holders</h2>
+      <h2>Top Holders</h2>
       <div className="loa-list">
         {holders.map(h => (
           <div className="loa-card loa-card-row" key={h.discord_id}>
@@ -381,7 +382,7 @@ function StockDetail({ ticker, onBack }) {
         {holders.length === 0 && <p className="muted">Nobody holds this stock yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Recent Transactions</h2>
+      <h2>Recent Transactions</h2>
       <div className="loa-list">
         {transactions.map(t => (
           <div className="loa-card" key={t.id}>
@@ -402,7 +403,7 @@ function StockDetail({ ticker, onBack }) {
         {transactions.length === 0 && <p className="muted">No transactions yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Recent Company Events</h2>
+      <h2>Recent Company Events</h2>
       <div className="loa-list">
         {events.map(e => (
           <div className="loa-card" key={e.id}>
@@ -436,7 +437,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
 
   return (
     <>
-      <h2 style={{ marginTop: 20 }}>Company Details</h2>
+      <h2>Company Details</h2>
       <label>Name</label>
       <input value={name} onChange={e => setName(e.target.value)} />
       <label>Description</label>
@@ -451,7 +452,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
         </button>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Issue Shares</h2>
+      <h2>Issue Shares</h2>
       <p className="muted card-subtitle">The only way total shares changes outside a split. A structural event with its own price impact (configurable in Economy Config's Stocks section) and a logged company event.</p>
       <div className="form-inline-row">
         <div className="form-inline-field"><label>Additional Shares</label><input type="number" min="1" value={additionalShares} onChange={e => setAdditionalShares(e.target.value)} /></div>
@@ -467,7 +468,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
         </div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Dividend</h2>
+      <h2>Dividend</h2>
       <div className="form-row">
         <div><label>Rate per payout (%, blank = none)</label><input type="number" step="0.01" min="0" value={dividendRate} onChange={e => setDividendRate(e.target.value)} /></div>
         <div><label>Payout interval (hours)</label><input type="number" min="1" value={dividendIntervalHours} onChange={e => setDividendIntervalHours(e.target.value)} /></div>
@@ -484,7 +485,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
         </button>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Price Controls</h2>
+      <h2>Price Controls</h2>
       <div className="form-inline-row">
         <div className="form-inline-field"><label>Set Exact Price</label><input type="number" min="0.01" step="0.01" value={setPriceValue} onChange={e => setSetPriceValue(e.target.value)} /></div>
         <div className="form-inline-field-btn">
@@ -518,7 +519,7 @@ function StockAdminControls({ stock, onAct, onSaveEdit, onDelete }) {
         <button className="btn-red" type="button" onClick={onDelete}>Delete Stock</button>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Stock Split</h2>
+      <h2>Stock Split</h2>
       <div className="form-inline-row">
         <div className="form-inline-field">
           <label>Ratio (2 = 2-for-1 forward, 0.5 = 1-for-2 reverse)</label>
@@ -591,14 +592,14 @@ function MarketControlsTab() {
     }
   }
 
-  if (!config) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!config) return <Skeleton variant="rows" />;
 
   return (
     <>
       {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
       {notice && <Banner variant="success">{notice}</Banner>}
 
-      <h2 style={{ marginTop: 16 }}>Trading Status</h2>
+      <h2>Trading Status</h2>
       <p className="muted card-subtitle">Pausing blocks buy/sell but prices keep moving. Freezing the market stops price movement too, a harder stop.</p>
       <div className="button-row">
         <button className="secondary" type="button" disabled={busy} onClick={() => toggleConfig("tradingPaused")}>
@@ -613,7 +614,7 @@ function MarketControlsTab() {
         <div className="stat-tile"><div className="muted">Market</div><div className={config.marketFrozen ? "loa-status-denied" : "loa-status-approved"}>{config.marketFrozen ? "Frozen" : "Live"}</div></div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Market Crash</h2>
+      <h2>Market Crash</h2>
       <div className="form-inline-row">
         <div className="form-inline-field"><label>Percent Down</label><input type="number" min="1" max="90" value={crashPercent} onChange={e => setCrashPercent(e.target.value)} /></div>
         <div className="form-inline-field-btn">
@@ -622,7 +623,7 @@ function MarketControlsTab() {
         </div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Market Rally</h2>
+      <h2>Market Rally</h2>
       <div className="form-inline-row">
         <div className="form-inline-field"><label>Percent Up</label><input type="number" min="1" max="200" value={rallyPercent} onChange={e => setRallyPercent(e.target.value)} /></div>
         <div className="form-inline-field-btn">
@@ -631,7 +632,7 @@ function MarketControlsTab() {
         </div>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Industry Event</h2>
+      <h2>Industry Event</h2>
       <div className="form-row">
         <div><label>Category</label><input value={industryCategory} onChange={e => setIndustryCategory(e.target.value)} placeholder="e.g. Tech" /></div>
         <div><label>Percent (+/-)</label><input type="number" value={industryPercent} onChange={e => setIndustryPercent(e.target.value)} /></div>
@@ -976,7 +977,7 @@ function NewsTab() {
   return (
     <>
       {error && <Banner style={{ marginTop: 16 }}>{error}</Banner>}
-      <h2 style={{ marginTop: 16 }}>Post News</h2>
+      <h2>Post News</h2>
       <form onSubmit={post}>
         <label>Headline</label>
         <input required value={headline} onChange={e => setHeadline(e.target.value)} />
@@ -987,7 +988,7 @@ function NewsTab() {
         <button className="primary" type="submit" style={{ marginTop: 8 }}>Post</button>
       </form>
 
-      <h2 style={{ marginTop: 20 }}>Recent News</h2>
+      <h2>Recent News</h2>
       <div className="loa-list">
         {news.map(n => (
           <div className="loa-card" key={n.id}>
@@ -1002,7 +1003,7 @@ function NewsTab() {
         {news.length === 0 && <p className="muted">No news yet.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Automated Announcements</h2>
+      <h2>Automated Announcements</h2>
       <p className="muted card-subtitle">
         Every event the news sensitivity system generated -- daily-change sweeps, new highs/lows, large trades,
         new listings, lottery wins, market warnings -- whether or not it actually met the Discord posting floor.
@@ -1117,7 +1118,7 @@ function InsightsTab() {
     }
   }
 
-  if (!config) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (!config) return <Skeleton variant="rows" />;
 
   return (
     <>
@@ -1141,7 +1142,7 @@ function InsightsTab() {
         <button className="secondary" type="button" disabled={sending} onClick={sendNow}>{sending ? "Sending…" : "Send Now"}</button>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Price Target Alerts</h2>
+      <h2>Price Target Alerts</h2>
       <p className="muted card-subtitle">Get flagged in the next digest the moment a ticker crosses a price you're watching.</p>
       <form onSubmit={addAlert} className="button-row" style={{ flexWrap: "wrap", alignItems: "flex-end" }}>
         <div>
@@ -1178,7 +1179,7 @@ function InsightsTab() {
         {alerts.length === 0 && <p className="muted">No price alerts set.</p>}
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Recent Sends</h2>
+      <h2>Recent Sends</h2>
       <div className="loa-list">
         {log.map(entry => (
           <div className="loa-card loa-card-row" key={entry.id}>

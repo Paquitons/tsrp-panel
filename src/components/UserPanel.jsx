@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Skeleton from "./primitives/Skeleton";
 import { apiFetch } from "../api";
 import { timeAgo } from "../utils";
 import Avatar from "./Avatar";
@@ -58,7 +59,7 @@ export default function UserPanel({ username, discordId, onClose }) {
         <button className="secondary small" onClick={onClose}>Back</button>
       </div>
 
-      {loading && <p className="muted">Loading…</p>}
+      {loading && <Skeleton variant="text" />}
       {error && <div className="error-banner">{error}</div>}
 
       {data && (
