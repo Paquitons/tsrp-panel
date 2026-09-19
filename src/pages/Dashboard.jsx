@@ -562,7 +562,7 @@ export default function Dashboard() {
         <div className="hero-top">
           <div className="hero-greeting">
             <DiscordAvatar discordId={user?.discordId} avatarHash={user?.avatarHash} size={40} />
-            <h2>Hey, {user?.username}!</h2>
+            <h2>{user?.username}</h2>
           </div>
 
           <div className="hero-shift">
@@ -739,7 +739,7 @@ export default function Dashboard() {
 
           <div className="card">
             <div className="modal-title-row" style={{ marginBottom: 12 }}>
-              <h2 style={{ margin: 0 }}>What's Happening In-Game?</h2>
+              <h2 style={{ margin: 0 }}>In-Game Activity</h2>
               <button className="secondary small" onClick={() => setActivityModalOpen(true)}>Expand</button>
             </div>
             {events.length === 0 ? (

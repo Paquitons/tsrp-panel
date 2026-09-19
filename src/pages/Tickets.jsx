@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DiscordIdentity from "../components/DiscordIdentity";
 import PageShell from "../components/primitives/PageShell";
+import Skeleton from "../components/primitives/Skeleton";
 import Banner from "../components/primitives/Banner";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useAuth } from "../context/AuthContext";
@@ -42,7 +43,7 @@ export default function Tickets() {
   if (query.isLoading) {
     return (
       <PageShell title="Ticket Transcripts">
-        <p className="muted">Loading…</p>
+        <Skeleton variant="rows" />
       </PageShell>
     );
   }

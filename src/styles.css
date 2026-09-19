@@ -7,45 +7,89 @@
    one-off hardcoded values, so the whole app stays visually
    consistent and any future adjustment happens in one place.
    ============================================================ */
+/* ============================================================
+   DESIGN SYSTEM
+   An internal operations console, not a product page. The rules
+   below are what that means in practice:
+
+   COLOUR IS INFORMATION. The accent marks what is interactive;
+   green, amber and red mean a state, never decoration. Nothing is
+   coloured to look interesting. The accent used to be #5865f2,
+   which is Discord blurple at 86% saturation, and it was being
+   used for glows, button gradients and tinted scroll fades as
+   much as for anything you could click. It is now a desaturated
+   steel blue at 41%, which reads as a control rather than a brand.
+
+   TWO ACCENTS, NOT ONE. --accent is a FILL, dark enough that white
+   sits on it at 5.1:1. --accent-text is the same hue lightened for
+   TEXT on a dark surface, at 6.5:1. One token could not do both
+   without failing one of them.
+
+   DENSITY. This is read all day, in long lists. Controls are 28
+   and 32px, page padding 24px, card padding 16px. Comfortable
+   enough to hit, tight enough to see a screenful of rows.
+
+   EVERY VALUE HERE IS A SCALE POSITION. No rule below invents its
+   own number.
+   ============================================================ */
 :root {
-  /* ---- Color: surfaces ---- */
-  --bg-gradient-start: #14171f;
-  --bg-gradient-end: #0b0d12;
+  /* ---- Surfaces ---- */
+  /* Flat. The page used to sit on a radial gradient, which is an
+     ambient decoration with nothing to say. */
+  --bg-page: #0e1015;
   --card-bg: #12141b;
   --card-bg-raised: #161925;
-  --sidebar-bg: #12141b;
+  --card-pad: 16px;
+  --sidebar-bg: #101218;
   --surface-sunken: #0b0d12;
   --surface-hover: #181b25;
 
-  /* ---- Color: borders ---- */
+  /* ---- Borders ---- */
   --border-subtle: #1e212b;
   --border-default: #262a36;
   --border-strong: #333849;
 
-  /* ---- Color: text ---- */
+  /* ---- Text ---- */
+  /* Every one of these clears 4.5:1 on the lightest surface it can
+     land on. --text-faint was #6b6f7a, which was 3.48:1 on a raised
+     card: legible enough to ship and not legible enough to read,
+     across 58 uses. */
   --text-primary: #f4f5f7;
   --text-secondary: #c2c6ce;
   --text-muted: #8b909c;
-  --text-faint: #6b6f7a;
+  --text-faint: #7d828e;
 
-  /* ---- Color: accent + semantic ---- */
-  --accent: #5865f2;
-  --accent-hover: #4752c4;
-  --accent-soft: rgba(88, 101, 242, 0.14);
+  /* ---- Accent ---- */
+  --accent: #3f7396;
+  --accent-hover: #35627f;
+  --accent-text: #6f9fc4;
+  --accent-soft: rgba(63, 115, 150, 0.18);
 
-  --btn-green-1: #2ee6a0; --btn-green-2: #16b87a;
-  --btn-orange-1: #ffb648; --btn-orange-2: #f2932a;
-  --btn-red-1: #ff6b6b; --btn-red-2: #e8433f;
-  --btn-blue-1: #7c8bff; --btn-blue-2: #5865f2;
-  --btn-pink-1: #ff7fb0; --btn-pink-2: #e8548c;
+  /* ---- Semantic: a STATE, never decoration ---- */
+  /* Muted from the originals, which ran 79 to 100% saturation. A
+     neon palette on a dark ground is the look this is moving away
+     from, and a status dot does not need to glow to be found. */
+  --success: #3fbf87;
+  --warning: #d99a3c;
+  --danger: #e05a5a;
+  --info: #6f9fc4;
 
-  --success: #2ee6a0;
-  --warning: #ffb648;
-  --danger: #ff6b6b;
-  --info: #7c8bff;
+  /* Fills for the coloured action buttons. Flat, single value: the
+     gradients these replace were the most template-looking thing in
+     the panel. The paired dark text colour is what sits on them. */
+  --fill-green: #2f9e6c;
+  --fill-amber: #b8802e;
+  --fill-red: #c9484a;
+  --fill-on-colour: #ffffff;
 
-  /* ---- Spacing scale ---- */
+  /* ---- Spacing ---- */
+  /* 2, 4, 6, 8, 12, 16, 20, 24, 32, 40. The 2 and 6 steps are real
+     positions rather than exceptions, because dense UI needs them;
+     what is gone is the 3, 5, 7, 9 and 10 that were scattered
+     through the file with no scale behind them. */
+  --space-0: 2px;
   --space-1: 4px;
+  --space-1-5: 6px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
@@ -54,47 +98,55 @@
   --space-8: 32px;
   --space-10: 40px;
 
-  /* ---- Control height scale ---- */
-  /* Every text input/select and every button (except icon-only buttons,
-     which set their own fixed square size) uses one of these, so a
-     button sitting next to an input is guaranteed the same height by
-     construction -- not by hoping padding/font-size happen to match. */
-  --control-h-sm: 32px;
-  --control-h-md: 40px;
+  /* ---- Control heights ---- */
+  /* Every input, select and button takes one of these, so a button
+     beside a field matches by construction rather than by hoping
+     the padding works out. */
+  --control-h-sm: 28px;
+  --control-h-md: 32px;
 
-  /* ---- Radius scale ---- */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-full: 999px;
+  /* ---- Radius: two sizes and a pill ---- */
+  /* Was five. Five radii means no radius reads as a decision. */
+  --radius-sm: 4px;   /* controls, chips, inputs, table cells */
+  --radius-md: 8px;   /* cards, modals, panels */
+  --radius-full: 999px; /* status dots and count pills only */
 
-  /* ---- Shadow scale (layered: ambient + direct, for real depth) ---- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 8px 20px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.18);
-  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 16px 40px rgba(0, 0, 0, 0.32), 0 4px 12px rgba(0, 0, 0, 0.24);
-  --shadow-accent: 0 4px 16px rgba(88, 101, 242, 0.28);
+  /* ---- Elevation ---- */
+  /* Neutral and shallow. Depth separates layers; it is not an
+     effect. The accent glow that used to live here is gone. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.40);
 
   /* ---- Motion ---- */
+  /* Standard material easing for state changes, a gentler out-curve
+     for things that arrive. Nothing elastic, nothing that overshoots. */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration-fast: 120ms;
-  --duration-base: 200ms;
-  --duration-slow: 320ms;
+  --duration-fast: 100ms;
+  --duration-base: 160ms;
+  --duration-slow: 240ms;
 
-  /* ---- Type scale ---- */
-  --text-xs: 11.5px;
-  --text-sm: 12.5px;
-  --text-base: 14px;
+  /* ---- Type ---- */
+  /* One family, the system UI stack, because an operations console
+     should look like the operating system it runs on rather than
+     announce a typeface. Sizes are tight and close together: this is
+     a dense tool, and a 28px heading over 12px body is a landing
+     page's proportion, not a console's. */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
   --text-md: 15px;
   --text-lg: 17px;
-  --text-xl: 22px;
-  --text-2xl: 28px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+
+  /* ---- Line heights ---- */
+  --leading-tight: 1.25;  /* headings, single-line rows */
+  --leading-normal: 1.45; /* labels, table cells */
+  --leading-loose: 1.6;   /* paragraphs and help text */
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -120,8 +172,7 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: radial-gradient(circle at 15% 0%, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 55%);
-  background-attachment: fixed;
+  background: var(--bg-page);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   font-size: var(--text-base);
@@ -129,7 +180,7 @@ body {
 }
 
 a { color: var(--accent); text-decoration: none; transition: color var(--duration-fast) var(--ease); }
-a:hover { color: var(--btn-blue-1); }
+a:hover { color: var(--accent-text); }
 
 h1, h2, h3 { font-weight: 650; letter-spacing: -0.01em; color: var(--text-primary); }
 
@@ -257,7 +308,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-3);
+  padding: var(--space-3) var(--space-3);
   color: var(--text-muted);
   text-decoration: none;
   font-size: var(--text-base);
@@ -292,7 +343,7 @@ html, body, #root {
 
 .sidebar-link.active .sidebar-link-icon {
   opacity: 1;
-  color: var(--btn-blue-1);
+  color: var(--accent-text);
 }
 
 .sidebar-exit-link {
@@ -300,7 +351,7 @@ html, body, #root {
   align-items: center;
   gap: var(--space-3);
   margin: 0 var(--space-3) var(--space-2);
-  padding: 10px var(--space-3);
+  padding: var(--space-3) var(--space-3);
   color: var(--text-muted);
   text-decoration: none;
   font-size: var(--text-base);
@@ -348,7 +399,7 @@ html, body, #root {
 }
 
 .sidebar-profile-title {
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -439,7 +490,7 @@ html, body, #root {
   flex: 1;
   /* Named so anything that needs to bleed out to the page edges (the
      sticky tab stack) can cancel exactly this much, at whatever width. */
-  --page-gutter: var(--space-8);
+  --page-gutter: var(--space-6);
   padding: var(--page-gutter);
   max-width: 980px;
   width: 100%;
@@ -452,21 +503,37 @@ html, body, #root {
   margin-bottom: var(--space-6);
 }
 
+/* ---- Heading hierarchy ----
+   Three levels and no more. Each is a scale position with its own
+   weight, so two headings a single step apart are still told apart by
+   weight rather than by two pixels of size. Tight leading throughout:
+   these are labels for regions, not prose. */
 .page-header h1 {
   margin: 0 0 var(--space-1);
   font-size: var(--text-xl);
+  font-weight: 650;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.012em;
   color: var(--text-primary);
 }
 
+.page-header .muted {
+  font-size: var(--text-base);
+  line-height: var(--leading-loose);
+  max-width: 76ch;
+}
+
+/* A card is a boundary around a group of related controls, not an
+   object that reacts to being looked at. No shadow, because on a flat
+   dark ground a 1px border separates it perfectly well and a drop
+   shadow under every panel is what makes a dense screen feel padded
+   and soft. No transform on hover: a card is not a button. */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: var(--space-6);
-  margin-bottom: var(--space-5);
-  box-shadow: var(--shadow-md);
-  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
-  transition: border-color var(--duration-base) var(--ease), transform var(--duration-base) var(--ease), box-shadow var(--duration-base) var(--ease);
+  padding: var(--card-pad);
+  margin-bottom: var(--space-4);
 }
 
 .card:hover {
@@ -474,10 +541,11 @@ html, body, #root {
 }
 
 .card h2 {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-3);
   font-size: var(--text-md);
   color: var(--text-primary);
-  font-weight: 650;
+  font-weight: 620;
+  line-height: var(--leading-tight);
   letter-spacing: -0.005em;
 }
 
@@ -488,7 +556,7 @@ html, body, #root {
   gap: 2px;
   background: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
-  padding: 3px;
+  padding: var(--space-0);
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-5);
   overflow-x: auto;
@@ -503,8 +571,8 @@ html, body, #root {
   background:
     linear-gradient(to right, var(--surface-sunken) 40%, transparent) local,
     linear-gradient(to left, var(--surface-sunken) 40%, transparent) local,
-    linear-gradient(to right, rgba(88, 101, 242, 0.4), transparent) scroll,
-    linear-gradient(to left, rgba(88, 101, 242, 0.4), transparent) scroll;
+    linear-gradient(to right, var(--border-strong), transparent) scroll,
+    linear-gradient(to left, var(--border-strong), transparent) scroll;
   background-repeat: no-repeat;
   background-color: var(--surface-sunken);
   background-size: 36px 100%, 36px 100%, 20px 100%, 20px 100%;
@@ -521,7 +589,7 @@ html, body, #root {
   min-width: max-content;
   height: 32px;
   padding: 0 var(--space-3);
-  border-radius: calc(var(--radius-sm) - 2px);
+  border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: var(--text-sm);
   color: var(--text-muted);
@@ -558,8 +626,8 @@ input:not([type="checkbox"]):not([type="radio"]), select {
 }
 
 textarea {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
   resize: none;
   overflow: hidden;
 }
@@ -705,7 +773,7 @@ label {
   border-radius: 50%;
   background: var(--info);
   color: #0d1024;
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 800;
 }
 
@@ -738,13 +806,13 @@ button.secondary,
 }
 
 button.primary {
-  background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+  background: var(--accent);
   color: #fff;
   border: none;
   font-weight: 600;
-  box-shadow: var(--shadow-accent);
+  box-shadow: var(--shadow-md);
 }
-button.primary:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 6px 20px rgba(88,101,242,0.4); transform: translateY(-1px); }
+button.primary:hover:not(:disabled) { background: var(--accent-hover); }
 button.primary:active:not(:disabled) { transform: scale(0.97) translateY(0); }
 button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -781,9 +849,9 @@ button.small {
   font-weight: 650;
   box-shadow: var(--shadow-sm);
 }
-.btn-green  { background: linear-gradient(180deg, var(--btn-green-1), var(--btn-green-2)); }
-.btn-orange { background: linear-gradient(180deg, var(--btn-orange-1), var(--btn-orange-2)); }
-.btn-red    { background: linear-gradient(180deg, var(--btn-red-1), var(--btn-red-2)); color: #1a0d0d; }
+.btn-green  { background: var(--fill-green);  color: var(--fill-on-colour); }
+.btn-orange { background: var(--fill-amber);  color: var(--fill-on-colour); }
+.btn-red    { background: var(--fill-red);    color: var(--fill-on-colour); }
 
 .btn-green:hover, .btn-orange:hover, .btn-red:hover {
   filter: brightness(1.08);
@@ -804,7 +872,6 @@ button.small {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-4);
   font-size: var(--text-base);
-  animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
 .success-banner {
@@ -815,7 +882,6 @@ button.small {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-4);
   font-size: var(--text-base);
-  animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
 .warning-banner {
@@ -826,7 +892,6 @@ button.small {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-4);
   font-size: var(--text-base);
-  animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
 .info-banner {
@@ -837,7 +902,6 @@ button.small {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-4);
   font-size: var(--text-base);
-  animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
 /* ---------- Badges ---------- */
@@ -933,8 +997,8 @@ tbody tr:hover { background: var(--surface-hover); }
   height: 10px;
   border-radius: 50%;
 }
-.status-active { background: var(--success); box-shadow: 0 0 8px rgba(46,230,160,0.55); animation: pulse 2s ease-in-out infinite; }
-.status-break { background: var(--warning); box-shadow: 0 0 8px rgba(255,182,72,0.55); }
+.status-active { background: var(--success); animation: pulse 2s var(--ease) infinite; }
+.status-break { background: var(--warning); }
 
 /* ---------- Activity feed ---------- */
 
@@ -949,7 +1013,7 @@ tbody tr:hover { background: var(--surface-hover); }
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-2);
+  padding: var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--border-subtle);
   font-size: var(--text-base);
   border-radius: var(--radius-sm);
@@ -973,7 +1037,7 @@ tbody tr:hover { background: var(--surface-hover); }
   flex-direction: column;
   gap: var(--space-6);
   padding: var(--space-5);
-  background: radial-gradient(circle at 50% 30%, #171a24 0%, #0b0d12 70%);
+  background: var(--bg-page);
 }
 
 .login-card {
@@ -986,14 +1050,13 @@ tbody tr:hover { background: var(--surface-hover); }
   padding: var(--space-8) var(--space-6);
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   text-align: center;
-  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
 }
 
 .login-card h1 {
-  font-size: 22px;
+  font-size: var(--text-xl);
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
@@ -1076,7 +1139,7 @@ tbody tr:hover { background: var(--surface-hover); }
 }
 
 .changelog-thumb span {
-  font-size: 28px;
+  font-size: var(--text-2xl);
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: -0.01em;
@@ -1110,7 +1173,7 @@ tbody tr:hover { background: var(--surface-hover); }
 }
 
 .changelog-entry-banner span {
-  font-size: 36px;
+  font-size: var(--text-2xl);
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: -0.01em;
@@ -1139,7 +1202,7 @@ tbody tr:hover { background: var(--surface-hover); }
   padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
   color: var(--text-secondary);
   line-height: 1.6;
 }
@@ -1156,7 +1219,7 @@ tbody tr:hover { background: var(--surface-hover); }
 code {
   background: var(--surface-hover);
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: var(--text-sm);
 }
 
@@ -1177,7 +1240,7 @@ code {
 
 .avatar-fallback {
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #3a41a8);
+  background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1256,11 +1319,11 @@ code {
 }
 
 .discord-mention {
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   padding: 0 2px;
   font-weight: 500;
   color: var(--info);
-  background: rgba(88, 101, 242, 0.15);
+  background: var(--accent-soft);
 }
 
 .discord-mention-everyone {
@@ -1270,25 +1333,36 @@ code {
 
 /* ---------- Log cards ---------- */
 
+/* A list of records, not a stack of cards. The gap is zero because the
+   rows are separated by a hairline instead of by air. */
 .log-card-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
-/* .log-card and .loa-card were byte-identical rules -- one styles a
-   punishment log entry, the other an LOA request, but visually they're
-   the same "sunken row" card. Merged into one shared declaration instead
-   of two copies that would silently drift the next time either one gets
-   tweaked. */
+/* One punishment log entry, or one LOA request. The same shape, so one
+   rule.
+
+   These used to be sunken boxes with their own border and radius,
+   sitting inside a .card that already had a border and a radius. A
+   bordered box inside a bordered box makes a list of eight records read
+   as eight objects rather than as one list, and costs 2px of frame plus
+   a gap per row on a screen whose whole job is showing many rows.
+
+   Now they are rows: a hairline between them, and the row bleeds out to
+   the card's padding edge so the hover band spans the full width rather
+   than floating inside it. */
 .log-card, .loa-card {
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  transition: border-color var(--duration-fast) var(--ease);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  margin: 0 calc(var(--card-pad) * -1);
+  padding: var(--space-3) var(--card-pad);
+  transition: background var(--duration-fast) var(--ease);
 }
-.log-card:hover, .loa-card:hover { border-color: var(--border-default); }
+.log-card:last-child, .loa-card:last-child { border-bottom: none; }
+.log-card:hover, .loa-card:hover { background: var(--surface-hover); }
 
 .log-card-issuer-row {
   display: flex;
@@ -1336,7 +1410,7 @@ code {
 .log-card-target {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   font-weight: 600;
 }
 
@@ -1344,7 +1418,7 @@ code {
   transition: color var(--duration-fast) var(--ease);
 }
 .log-card-clickable-name:hover {
-  color: var(--btn-blue-1);
+  color: var(--accent-text);
   text-decoration: underline;
 }
 
@@ -1369,7 +1443,7 @@ code {
   background: none;
   border: none;
   color: var(--text-faint);
-  font-size: 18px;
+  font-size: var(--text-lg);
   line-height: 1;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
@@ -1530,7 +1604,6 @@ code {
   position: fixed;
   inset: 0;
   background: rgba(6, 7, 10, 0.68);
-  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1542,7 +1615,7 @@ code {
 .modal {
   background: var(--card-bg-raised);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: var(--space-6);
   width: 100%;
   max-width: 420px;
@@ -1565,7 +1638,6 @@ code {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: var(--space-5);
-  animation: fadeInUp var(--duration-base) var(--ease-out);
 }
 
 .user-panel-header {
@@ -1665,7 +1737,7 @@ code {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 7px var(--space-2);
+  padding: var(--space-2) var(--space-2);
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: var(--text-base);
@@ -1700,7 +1772,7 @@ code {
 }
 
 .players-list-flag-icon {
-  font-size: 12px;
+  font-size: var(--text-sm);
   line-height: 1;
 }
 
@@ -1772,7 +1844,7 @@ code {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 10px 13px;
+  padding: var(--space-3) 13px;
   background: none;
   border: none;
   color: var(--text-primary);
@@ -1835,7 +1907,7 @@ code {
    greyed-out "Start Shift" invites a click and reads as a fault. */
 .hero-shift-note {
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .hero-shift-start {
@@ -1879,7 +1951,7 @@ code {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 9px var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   font-size: var(--text-base);
   font-weight: 600;
@@ -1954,7 +2026,7 @@ code {
   grid-template-columns: 26px auto 1fr auto;
   align-items: center;
   gap: var(--space-2) var(--space-3);
-  padding: 9px var(--space-2);
+  padding: var(--space-2) var(--space-2);
   border-radius: var(--radius-sm);
   transition: background var(--duration-fast) var(--ease);
 }
@@ -2005,7 +2077,7 @@ code {
   position: absolute;
   top: -3px;
   left: -3px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   line-height: 1;
 }
 
@@ -2101,13 +2173,13 @@ code {
 .quota-progress-track {
   margin-top: var(--space-2);
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--card-bg-raised);
   overflow: hidden;
 }
 .quota-progress-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--danger);
   transition: width var(--duration-fast) var(--ease);
 }
@@ -2136,7 +2208,7 @@ code {
   background: var(--card-bg-raised);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  padding: var(--space-1-5) var(--space-3);
   pointer-events: none;
   white-space: nowrap;
   box-shadow: var(--shadow-md);
@@ -2172,7 +2244,6 @@ code {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   font-size: var(--text-base);
-  animation: fadeInUp var(--duration-base) var(--ease-out) both;
 }
 
 .activity-text-clickable {
@@ -2272,7 +2343,7 @@ code {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 10px var(--space-4);
+  padding: var(--space-3) var(--space-4);
   background: none;
   border: none;
   color: var(--text-primary);
@@ -2285,7 +2356,7 @@ code {
 .log-card-dropdown-portal .dropdown-item-danger { color: var(--danger); }
 .log-card-dropdown-portal .dropdown-empty {
   display: block;
-  padding: 10px var(--space-4);
+  padding: var(--space-3) var(--space-4);
   color: var(--text-faint);
   font-size: var(--text-sm);
 }
@@ -2316,7 +2387,7 @@ code {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   color: var(--text-faint);
-  font-size: 16px;
+  font-size: var(--text-md);
   line-height: 1;
   padding: 4px 11px;
   cursor: pointer;
@@ -2434,7 +2505,6 @@ code {
   margin: calc(var(--space-5) * -1) 0 var(--space-6);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
-  animation: fadeInUp var(--duration-fast) var(--ease-out) both;
 }
 
 .home-mobile-menu a {
@@ -2463,7 +2533,6 @@ code {
 .home-hero {
   text-align: center;
   padding: var(--space-8) 0 var(--space-6);
-  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
 }
 
 .home-hero h1 {
@@ -2505,7 +2574,7 @@ code {
 }
 .home-status-pill.online .home-status-dot {
   background: var(--success);
-  box-shadow: 0 0 0 3px rgba(46, 230, 160, 0.18);
+  box-shadow: none;
   animation: pulse 2s var(--ease) infinite;
 }
 
@@ -2534,7 +2603,7 @@ code {
   padding: var(--space-5) var(--space-4);
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2612,7 +2681,7 @@ code {
   justify-content: center;
 }
 .home-update-thumb span {
-  font-size: 20px;
+  font-size: var(--text-xl);
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: -0.01em;
@@ -2662,7 +2731,7 @@ code {
 .board-card {
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: var(--space-5);
 }
@@ -2825,7 +2894,7 @@ code {
   padding: var(--space-5) var(--space-3);
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2849,7 +2918,7 @@ code {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -2918,7 +2987,7 @@ code {
   padding: var(--space-5);
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   transition: border-color var(--duration-base) var(--ease), transform var(--duration-base) var(--ease);
 }
@@ -3094,7 +3163,7 @@ code {
 }
 .news-dot.positive { background: var(--success); }
 .news-dot.negative { background: var(--danger); }
-.news-dot.major { background: var(--warning); box-shadow: 0 0 0 3px rgba(255, 182, 72, 0.18); }
+.news-dot.major { background: var(--warning); }
 
 .news-row-body { flex: 1; min-width: 0; }
 
@@ -3146,9 +3215,9 @@ code {
    inside cards. Collapsed by default so a hub of a dozen entries is a
    scannable list rather than a wall of forms.
    ================================================================== */
-.dc-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.dc-list { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-3); }
 
-.dc-row { display: flex; align-items: flex-start; gap: 8px; }
+.dc-row { display: flex; align-items: flex-start; gap: var(--space-2); }
 
 /* Sized to sit inside the row's collapsed header rather than overhang
    it. The header is 10px + 1em + 10px, about 40px; two 22px buttons with
@@ -3163,13 +3232,13 @@ code {
   gap: 2px;
   flex-shrink: 0;
   align-self: flex-start;
-  padding-top: 3px;
+  padding-top: var(--space-0);
 }
 .dc-move {
   width: 26px; height: 17px; padding: 0; line-height: 1;
   border: 1px solid var(--border-default); border-radius: var(--radius-sm);
   background: var(--card-bg-raised); color: var(--text-secondary); cursor: pointer;
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 .dc-move:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .dc-move:disabled { opacity: .35; cursor: default; }
@@ -3184,17 +3253,17 @@ code {
 
 .dc-entry-head {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 10px 14px; background: none; border: none; cursor: pointer;
+  gap: 12px; padding: var(--space-3) 14px; background: none; border: none; cursor: pointer;
   text-align: left; color: var(--text-primary); font-size: var(--text-sm);
 }
 .dc-entry-head:hover { background: var(--surface-hover); }
 .dc-entry-name { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
-.dc-entry-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.dc-entry-meta { display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; }
 .dc-chevron { font-size: var(--text-xs); color: var(--text-faint); }
 
 .dc-tag {
-  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-  padding: 2px 6px; border-radius: 3px;
+  font-size: var(--text-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: var(--radius-sm);
   background: var(--surface-hover); color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
 }
@@ -3202,7 +3271,7 @@ code {
 
 .dc-entry-body {
   display: flex; flex-direction: column; gap: 12px;
-  padding: 14px; border-top: 1px solid var(--border-subtle);
+  padding: var(--space-4); border-top: 1px solid var(--border-subtle);
 }
 .dc-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dc-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--text-xs); color: var(--text-secondary); }
@@ -3218,7 +3287,7 @@ code {
   background: var(--surface-hover); overflow: hidden;
 }
 .dc-preview-label {
-  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  font-size: var(--text-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--text-faint); padding: 8px 12px;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -3238,7 +3307,7 @@ code {
 .dc-preview-body a:hover { text-decoration: underline; }
 .dc-preview-body code {
   background: var(--card-bg-raised); border: 1px solid var(--border-subtle);
-  border-radius: 3px; padding: 0 4px; font-size: .92em;
+  border-radius: var(--radius-sm); padding: 0 4px; font-size: .92em;
 }
 
 .dc-audit-scroll { overflow-x: auto; margin-top: 16px; }
@@ -3253,8 +3322,8 @@ code {
 .dc-audit-target { margin-left: 6px; }
 .dc-audit-val { max-width: 260px; word-break: break-word; }
 .dc-action {
-  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-  padding: 2px 6px; border-radius: 3px; background: var(--surface-hover); color: var(--text-secondary);
+  font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  padding: 2px 6px; border-radius: var(--radius-sm); background: var(--surface-hover); color: var(--text-secondary);
 }
 .dc-action-create { color: var(--success); }
 .dc-action-delete { color: var(--danger); }
@@ -3282,7 +3351,7 @@ code {
   margin-top: 8px;
 }
 
-.legal-section { display: flex; flex-direction: column; gap: 10px; }
+.legal-section { display: flex; flex-direction: column; gap: var(--space-3); }
 
 .legal-section h2 {
   font-size: var(--text-base);
@@ -3351,12 +3420,12 @@ code {
 .perm-rank { text-transform: capitalize; }
 .perm-detail { word-break: break-word; }
 
-.perm-meta { display: flex; align-items: center; gap: 10px; font-size: var(--text-xs); white-space: nowrap; }
+.perm-meta { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-xs); white-space: nowrap; }
 
 .perm-tag {
   display: inline-block;
-  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 3px;
+  font-size: var(--text-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: var(--space-0) 8px; border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   background: var(--surface-hover);
   color: var(--text-secondary);
@@ -3545,7 +3614,7 @@ code {
 .ann-count { font-size: var(--text-xs); white-space: nowrap; }
 
 .ann-cat { margin-top: 24px; }
-.ann-cat-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ann-cat-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .ann-cat-head h3 { margin: 0; font-size: var(--text-sm); }
 .ann-cat-sub { font-size: var(--text-xs); margin: 4px 0 0; }
 .ann-full { color: var(--danger); border-color: var(--danger); }
@@ -3631,7 +3700,7 @@ code {
 .hb-doc {
   background: var(--card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   padding: clamp(var(--space-6), 5vw, 64px);
 }
@@ -3645,7 +3714,7 @@ code {
   height: 3px;
   background: var(--text-primary);
   margin-bottom: var(--space-5);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .hb-org {
@@ -3906,7 +3975,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   background: var(--surface-sunken);
@@ -4014,7 +4083,7 @@ code {
 .hb-footer-rule {
   height: 3px;
   background: var(--text-primary);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   margin-bottom: var(--space-5);
 }
 
@@ -4126,7 +4195,6 @@ code {
   justify-content: center;
   padding: var(--space-5);
   background: rgba(6, 8, 12, 0.72);
-  backdrop-filter: blur(3px);
   /* No onClick handler anywhere on this element, on purpose. A backdrop
      that dismisses would make "acknowledged" indistinguishable from
      "clicked slightly off the dialog". */
@@ -4138,7 +4206,7 @@ code {
   background: var(--card-bg-raised);
   border: 1px solid var(--border-default);
   border-top: 3px solid var(--accent);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   padding: var(--space-6);
   max-height: calc(100vh - var(--space-10));
@@ -4287,7 +4355,7 @@ code {
   border: 0;
   background: none;
   color: var(--text-faint);
-  font-size: 18px;
+  font-size: var(--text-lg);
   line-height: 1;
   padding: 0 2px;
   cursor: pointer;
@@ -4355,7 +4423,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
   background: var(--card-bg);
@@ -4471,7 +4539,7 @@ code {
 }
 
 .sv-history { margin: 0; padding-left: 1.1em; }
-.sv-history li { margin-bottom: 3px; }
+.sv-history li { margin-bottom: var(--space-0); }
 
 .sv-bolo-actions { margin-top: var(--space-5); flex-wrap: wrap; }
 
@@ -4551,7 +4619,7 @@ code {
 .section-header-count {
   flex: 0 0 auto;
   padding: 2px var(--space-2);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
   font-size: var(--text-xs);
@@ -4621,9 +4689,9 @@ code {
 .tab-count {
   margin-left: var(--space-2);
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--accent-soft);
-  color: var(--btn-blue-1);
+  color: var(--accent-text);
   font-size: var(--text-xs);
   font-weight: 700;
 }
@@ -4644,7 +4712,6 @@ code {
   inset: 0;
   z-index: 1000;
   background: rgba(5, 6, 10, 0.72);
-  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   /* Sat high rather than centred: the list grows downwards, so a centred
@@ -4661,7 +4728,7 @@ code {
   flex-direction: column;
   background: var(--card-bg-raised);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: scaleIn var(--duration-slow) var(--ease-out);
@@ -4780,7 +4847,7 @@ code {
   padding: 1px 4px;
   margin-right: 2px;
   border: 1px solid var(--border-default);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
   text-align: center;
 }
@@ -4848,7 +4915,7 @@ code {
   flex: 0 0 auto;
   padding: 1px 5px;
   border: 1px solid var(--border-subtle);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   font-weight: 600;
   line-height: 1.5;
@@ -4896,9 +4963,8 @@ code {
   padding: var(--page-gutter) var(--page-gutter) 0;
   /* Translucent over a blur rather than a flat colour: the page sits on a
      fixed radial gradient, so no single colour matches it everywhere. */
-  background: rgba(11, 13, 18, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* The bars own their spacing inside the stack; the stack owns the gap to
@@ -4907,9 +4973,53 @@ code {
 .tab-stack > .tabs-primary { margin-bottom: var(--space-3); }
 .tab-stack { margin-bottom: var(--space-5); }
 
-/* No blur support (older Firefox, and it is disabled in some browsers):
-   fall back to an opaque ground, which is less pretty and still legible,
-   rather than letting rows scroll visibly through the bars. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .tab-stack { background: var(--bg-gradient-end); }
+
+/* ==================================================================
+   SKELETONS
+   Shaped like the thing that is coming, at its real size, so content
+   lands in the space already held for it instead of shoving the page
+   down when it arrives.
+   ================================================================== */
+.sk { display: flex; flex-direction: column; gap: var(--space-2); }
+
+.sk-bar,
+.sk-input,
+.sk-dot {
+  display: block;
+  background: var(--surface-hover);
+  border-radius: var(--radius-sm);
+  /* One shared sweep so every bar on screen moves together. Two
+     seconds, low contrast: this sits under real work, and a fast
+     bright shimmer is the thing that makes a loading state feel like
+     a screensaver. */
+  animation: sk-sweep 2s var(--ease) infinite;
+}
+
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sk-row:last-child { border-bottom: none; }
+
+.sk-dot { width: 22px; height: 22px; border-radius: var(--radius-full); flex: 0 0 22px; }
+
+.sk-row-main { flex: 1; display: flex; flex-direction: column; gap: var(--space-1-5); min-width: 0; }
+
+.sk-field { display: flex; flex-direction: column; gap: var(--space-1-5); margin-bottom: var(--space-3); }
+.sk-input { height: var(--control-h-md); width: 100%; }
+
+.sk-text { display: flex; flex-direction: column; gap: var(--space-1-5); }
+
+@keyframes sk-sweep {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.85; }
+}
+
+/* Somebody who has asked for less motion still gets the shape, which
+   is the part that actually carries the information. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-bar, .sk-input, .sk-dot { animation: none; }
 }

@@ -24,6 +24,7 @@ import { useAuth } from "../context/AuthContext";
 import Avatar from "../components/Avatar";
 import DiscordIdentity from "../components/DiscordIdentity";
 import Card from "../components/primitives/Card";
+import Skeleton from "../components/primitives/Skeleton";
 import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
@@ -81,7 +82,7 @@ function BoloQueue({ onError }) {
   }
 
   if (query.isError && !query.data) return <Banner>{query.error.message}</Banner>;
-  if (!query.data) return <p className="muted">Loading…</p>;
+  if (!query.data) return <Skeleton variant="rows" />;
 
   if (!bolo) {
     return (
@@ -236,7 +237,7 @@ function CooldownList({ onError }) {
         subtitle="Everyone currently on a rejoin cooldown from a logged kick. These start automatically when a kick is logged from the Dashboard, and the bot re-kicks anyone who comes back inside their window."
       />
 
-      {query.isLoading && <p className="muted">Loading…</p>}
+      {query.isLoading && <Skeleton variant="rows" />}
       {!query.isLoading && cooldowns.length === 0 && <p className="muted">Nobody is on a rejoin cooldown.</p>}
 
       {cooldowns.length > 0 && (

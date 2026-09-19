@@ -3,6 +3,7 @@ import { formatDuration } from "../utils";
 import DiscordIdentity from "../components/DiscordIdentity";
 import Tabs from "../components/Tabs";
 import Banner from "../components/primitives/Banner";
+import Skeleton from "../components/primitives/Skeleton";
 import { useApiQuery } from "../hooks/useApiQuery";
 
 const ADMIN_POLL_MS = 15_000;
@@ -30,7 +31,7 @@ export default function HrQuotas() {
   const data = query.data;
 
   if (query.isError) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
-  if (query.isLoading) return <p className="muted" style={{ marginTop: 16 }}>Loading…</p>;
+  if (query.isLoading) return <Skeleton variant="rows" />;
 
   const quotaSeconds = data.quotaHours * 3600;
   const filtered = data.staff.filter(m => matchesFilter(m, filter));
