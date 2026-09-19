@@ -669,7 +669,13 @@ export default function HrPanel({ embedded = false, view = "all" }) {
             <p className="muted card-subtitle">
               /fastpass approves an applicant into training. Passing them with /passtraining onboards them and starts the 7-day trial from that moment.
             </p>
-            {fastPassTrials.length === 0 ? (
+            {fastPassTrialsQuery.isLoading ? (
+              <Skeleton variant="rows" />
+            ) : fastPassTrialsQuery.isError && fastPassTrials.length === 0 ? (
+              <p className="muted">
+                This list could not be loaded. It is not empty: try again in a moment.
+              </p>
+            ) : fastPassTrials.length === 0 ? (
               <p className="muted">Nobody is currently awaiting training or on a Fast Pass trial.</p>
             ) : (
               <div className="loa-list">
@@ -685,6 +691,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
                           avatarHash={t.target_avatar_hash}
                           size={22}
                           showId={false}
+                          fallback="Name unavailable"
                         />
                       </span>
                       {t.awaitingTraining ? (
@@ -695,6 +702,12 @@ export default function HrPanel({ embedded = false, view = "all" }) {
                         </span>
                       )}
                     </div>
+                    {t.target_identity_state === "unknown" && (
+                      <div className="identity-unresolved">
+                        Discord returned no name for them. Still listed: only a confirmed
+                        departure closes a record out.
+                      </div>
+                    )}
                     <div className="muted" style={{ marginBottom: 4 }}>
                       Approved {new Date(t.issued_at).toLocaleDateString()} by{" "}
                       {t.issuer_nickname || t.issuer_username || "Unknown Member"}

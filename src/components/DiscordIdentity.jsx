@@ -7,10 +7,12 @@ import DiscordAvatar from "./DiscordAvatar";
  * the Discord ID -- and the ID is NEVER the only thing shown if a name is
  * available at all, per the standing "never display a bare Discord ID"
  * requirement. Falls back to "Unknown Member" (still paired with the ID,
- * never just the ID alone) if literally nothing resolved.
+ * never just the ID alone) if literally nothing resolved -- or to whatever
+ * `fallback` a caller passes, when it knows something truer about WHY the
+ * name is missing than the generic default can say.
  */
-export function discordDisplayName(nickname, username, discordId) {
-  const primary = nickname || username || "Unknown Member";
+export function discordDisplayName(nickname, username, discordId, fallback = "Unknown Member") {
+  const primary = nickname || username || fallback;
   const parts = [primary];
   if (nickname && username) parts.push(`@${username}`);
   if (discordId) parts.push(discordId);
@@ -32,13 +34,20 @@ export function discordDisplayName(nickname, username, discordId) {
  * etc, just spelled out explicitly here since prefixes aren't consistent
  * enough across tables (opener_discord_id, issuer_discord_id, claimed_by,
  * ...) to derive automatically.
+ *
+ * `fallback` is the label shown when neither a nickname nor a username
+ * resolved. The default says the only thing this component can know on its
+ * own. A caller that knows more -- that the lookup itself failed, say,
+ * rather than the person being unidentifiable -- should pass the accurate
+ * wording instead, because "Unknown Member" reads as a statement about the
+ * person when it is really a statement about the lookup.
  */
 export default function DiscordIdentity({
   nickname, username, discordId, avatarHash,
   variant = "text", size = 22, showId = true, showAvatar = true, className = "",
-  onPrimaryClick, primaryClassName = "",
+  onPrimaryClick, primaryClassName = "", fallback = "Unknown Member",
 }) {
-  const primary = nickname || username || (discordId ? "Unknown Member" : "Unknown");
+  const primary = nickname || username || (discordId ? fallback : "Unknown");
   const secondary = [];
   if (nickname && username) secondary.push(`@${username}`);
   if (showId && discordId) secondary.push(discordId);
