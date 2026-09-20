@@ -7,7 +7,7 @@ import { MenuIcon, CloseIcon } from "./icons";
 const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
 
 /**
- * Shared header for every public-facing page (Home, Leaderboards, Roster,
+ * Shared header for every public-facing page (Home, Roster,
  * Changelog). Renders in two modes:
  *  - public: the normal marketing-site header, with a "Staff Panel" button
  *    that sends a logged-out visitor to /login.
@@ -31,8 +31,6 @@ export default function PublicNav() {
   }, [location.pathname]);
 
   const links = [
-    { to: `${base}/economy`, label: "Economy" },
-    { to: `${base}/leaderboards`, label: "Leaderboards" },
     { to: `${base}/roster`, label: "Staff Roster" },
     { to: "/changelog", label: "Changelog" },
   ];

@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react";
  * polling entirely without unmounting whatever renders the fetched data.
  *
  * `deps` restarts the interval AND fires an immediate fetch when any of
- * them change -- for a page like StockDetail.jsx, where `fn` closes over
+ * them change -- for a page whose `fn` closes over
  * a route param, this is what makes navigating from one ticker to
  * another fetch right away instead of showing the previous stock's data
  * until the next tick happens to land.

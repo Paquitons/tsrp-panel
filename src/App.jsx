@@ -4,16 +4,11 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import Leaderboards from "./pages/Leaderboards";
 import Roster from "./pages/Roster";
 import IdentityGate from "./components/IdentityGate";
 import Permissions from "./pages/Permissions";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import Economy from "./pages/Economy";
-import StockMarket from "./pages/StockMarket";
-import StockDetail from "./pages/StockDetail";
-import EconomyNews from "./pages/EconomyNews";
 import Dashboard from "./pages/Dashboard";
 import InternalAffairs from "./pages/InternalAffairs";
 import Changelog from "./pages/Changelog";
@@ -50,12 +45,7 @@ const Management = lazy(() => import("./pages/Management"));
 // once here instead of twice so the two never drift out of sync.
 const PUBLIC_PAGES = [
   { path: "/", element: <Home /> },
-  { path: "/leaderboards", element: <Leaderboards /> },
   { path: "/roster", element: <Roster /> },
-  { path: "/economy", element: <Economy /> },
-  { path: "/stocks", element: <StockMarket /> },
-  { path: "/stocks/:ticker", element: <StockDetail /> },
-  { path: "/economy/news", element: <EconomyNews /> },
   { path: "/changelog", element: <Changelog standalone /> },
   { path: "/changelog/:slug", element: <ChangelogEntry standalone /> },
   { path: "/privacy", element: <Privacy /> },

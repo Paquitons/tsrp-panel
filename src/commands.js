@@ -150,7 +150,7 @@ export const COMMANDS = [
   { id: "internalaffairs", label: "Internal Affairs", group: "Go to", to: "/internalaffairs", show: canSeeInternalAffairs, keywords: "ia complaints investigation" },
   { id: "management", label: "Management", group: "Go to", to: "/management", show: canSeeManagement, keywords: "hr director console" },
   { id: "permissions", label: "In-Game Permissions", group: "Go to", to: "/permissions", show: canSeeManagement, keywords: "mod admin grants revoke erlc" },
-  { id: "super-admin", label: "Super Admin", group: "Go to", to: "/super-admin", show: canSeeSuperAdmin, keywords: "economy wallets stocks bot settings" },
+  { id: "super-admin", label: "Super Admin", group: "Go to", to: "/super-admin", show: canSeeSuperAdmin, keywords: "bot settings shifts mod security" },
   { id: "handbook", label: "Staff Handbook", group: "Go to", to: "/staff-handbook", keywords: "rules guide policy how do i documentation" },
   { id: "changelog", label: "Changelog", group: "Go to", to: "/changelog", keywords: "updates what changed release notes version" },
 ];

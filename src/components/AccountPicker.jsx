@@ -7,7 +7,7 @@ import DiscordAvatar from "./DiscordAvatar";
  * nickname and pick from real matches, instead of requiring staff to
  * already have a Discord ID copied somewhere. Originally built inline in
  * Verification.jsx; extracted here so every feature that needs to target
- * an account (Economy Control, business ownership, reputation lookup,
+ * an account (manual verification, Super Admin lookups,
  * etc.) uses the exact same search/select behavior.
  *
  * `endpoint` controls which pool it searches:

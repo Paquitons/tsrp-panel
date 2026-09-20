@@ -66,7 +66,7 @@ export default function Home() {
         <h1>Texas State RP</h1>
         <p className="home-hero-sub">
           The official website for Texas State Roleplay | Track who's on
-          duty, check the leaderboards, and catch up on the latest server
+          duty and catch up on the latest server
           updates.
         </p>
       </section>

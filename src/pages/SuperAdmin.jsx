@@ -9,8 +9,6 @@ import AccountPicker from "../components/AccountPicker";
 import PortalDropdown from "../components/PortalDropdown";
 import Tabs from "../components/Tabs";
 import { formatDuration, toDateTimeInputValue, parseDateTimeInput, scrollPageToTop } from "../utils";
-import { EconomyOverviewPanel, EconomyConfigPanel, BusinessesPanel, CasinoControlsPanel, StorefrontsPanel, GovernmentCatalogPanel, LotteryPanel, DebtPanel, InsurancePanel, TaxDashboardPanel } from "./SuperAdminEconomy";
-import StockMarketAdmin from "./StockMarketAdmin";
 import BotSettings from "./BotSettings";
 import DiscordModSecurity from "./DiscordModSecurity";
 
@@ -27,30 +25,6 @@ import DiscordModSecurity from "./DiscordModSecurity";
 // of a section is the same key the body below already switches on, so
 // this is a regrouping of the existing routing rather than a new one.
 const TAB_GROUPS = [
-  {
-    value: "economy",
-    label: "Economy",
-    sections: [
-      { value: "economy", label: "Wallets" },
-      { value: "overview", label: "Overview" },
-      { value: "econconfig", label: "Config" },
-      { value: "taxes", label: "Taxes" },
-      { value: "businesses", label: "Businesses" },
-    ],
-  },
-  {
-    value: "market",
-    label: "Market",
-    sections: [
-      { value: "stocks", label: "Stock Market" },
-      { value: "storefronts", label: "Storefronts" },
-      { value: "govcatalog", label: "Government Catalog" },
-      { value: "casino", label: "Casino Controls" },
-      { value: "lottery", label: "Lottery" },
-      { value: "debt", label: "Debt and Loans" },
-      { value: "insurance", label: "Insurance" },
-    ],
-  },
   {
     value: "staff",
     label: "Staff",
@@ -234,18 +208,6 @@ export default function SuperAdmin() {
           </>
         )}
 
-        {tab === "economy" && <EconomyControl />}
-        {tab === "overview" && <EconomyOverviewPanel />}
-        {tab === "econconfig" && <EconomyConfigPanel />}
-        {tab === "taxes" && <TaxDashboardPanel />}
-        {tab === "businesses" && <BusinessesPanel />}
-        {tab === "casino" && <CasinoControlsPanel />}
-        {tab === "storefronts" && <StorefrontsPanel />}
-        {tab === "govcatalog" && <GovernmentCatalogPanel />}
-        {tab === "lottery" && <LotteryPanel />}
-        {tab === "stocks" && <StockMarketAdmin />}
-        {tab === "debt" && <DebtPanel />}
-        {tab === "insurance" && <InsurancePanel />}
         {tab === "botsettings" && <BotSettings />}
         {tab === "modsecurity" && <DiscordModSecurity />}
       </div>
@@ -342,126 +304,5 @@ function SuperAdminShiftRow({ shift, onSave, onDelete }) {
         <button className="btn-red small" type="button" onClick={onDelete}>Delete</button>
       </div>
     </div>
-  );
-}
-
-/**
- * Unrestricted economy controls -- targets anyone via the standard
- * account picker (search by username/nickname, or still paste a Discord
- * ID if that's genuinely what you have) since anyone active in the
- * server can have a wallet, not just people who've logged into the panel.
- */
-function EconomyControl() {
-  const [target, setTarget] = useState(null); // { discordId, username, nickname, avatarHash }
-  const [balance, setBalanceState] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [amount, setAmount] = useState("");
-  const [setAmountValue, setSetAmountValue] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [pickerKey, setPickerKey] = useState(0); // bump to reset AccountPicker's search box
-
-  async function selectTarget(member) {
-    setTarget(member);
-    setBalanceState(null);
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await apiFetch(`/super-admin/economy/${member.discordId}`);
-      setBalanceState(result.balance);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function adjust(sign) {
-    const parsed = Math.trunc(Number(amount));
-    if (!target || !Number.isFinite(parsed) || parsed <= 0) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const result = await apiFetch("/super-admin/economy/adjust", {
-        method: "POST",
-        body: { discordId: target.discordId, amount: parsed * sign },
-      });
-      setBalanceState(result.balance);
-      setAmount("");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function applySet(e) {
-    e.preventDefault();
-    const parsed = Math.trunc(Number(setAmountValue));
-    if (!target || !Number.isFinite(parsed)) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const result = await apiFetch("/super-admin/economy/set", {
-        method: "POST",
-        body: { discordId: target.discordId, amount: parsed },
-      });
-      setBalanceState(result.balance);
-      setSetAmountValue("");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <>
-      <p className="muted card-subtitle">Give, take, or set anyone's balance directly. No limits or checks.</p>
-      {error && <Banner>{error}</Banner>}
-
-      <AccountPicker key={pickerKey} onSelect={selectTarget} placeholder="Search by username, nickname, or Discord ID" />
-
-      {target && (
-        <div className="button-row" style={{ marginTop: 8, alignItems: "center" }}>
-          <DiscordIdentity variant="row" nickname={target.nickname} username={target.username} discordId={target.discordId} avatarHash={target.avatarHash} />
-          <button className="secondary" type="button" onClick={() => { setTarget(null); setBalanceState(null); setPickerKey(k => k + 1); }}>Change</button>
-        </div>
-      )}
-
-      {loading && <Skeleton variant="rows" />}
-
-      {balance !== null && (
-        <>
-          <p style={{ marginTop: 12 }}>Current balance: <strong>${balance.toLocaleString()}</strong></p>
-
-          <div className="form-inline-row" style={{ marginTop: 8 }}>
-            <div className="form-inline-field">
-              <label>Amount</label>
-              <input type="number" min="1" value={amount} onChange={e => setAmount(e.target.value)} />
-            </div>
-            <div className="form-inline-field form-inline-field-btn">
-              <label aria-hidden="true">&nbsp;</label>
-              <button className="primary" type="button" disabled={busy} onClick={() => adjust(1)}>Give</button>
-            </div>
-            <div className="form-inline-field form-inline-field-btn">
-              <label aria-hidden="true">&nbsp;</label>
-              <button className="btn-red" type="button" disabled={busy} onClick={() => adjust(-1)}>Take</button>
-            </div>
-          </div>
-
-          <form onSubmit={applySet} className="form-inline-row" style={{ marginTop: 8 }}>
-            <div className="form-inline-field">
-              <label>Set Balance To</label>
-              <input type="number" value={setAmountValue} onChange={e => setSetAmountValue(e.target.value)} />
-            </div>
-            <div className="form-inline-field form-inline-field-btn">
-              <label aria-hidden="true">&nbsp;</label>
-              <button className="secondary" type="submit" disabled={busy}>Set</button>
-            </div>
-          </form>
-        </>
-      )}
-    </>
   );
 }
