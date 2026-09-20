@@ -25,7 +25,7 @@ export default function Privacy() {
 
       <LegalSection heading="If you just visit the website">
         <p>
-          Public pages such as the roster, leaderboards and economy pages
+          Public pages such as the roster and the server status
           need no account and set no tracking cookies. We do not use
           advertising networks and we do not sell data to anyone.
         </p>

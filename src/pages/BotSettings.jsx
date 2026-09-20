@@ -11,8 +11,8 @@ const ADMIN_POLL_MS = 15_000;
 // require a code change. This form is not hardcoded: it renders whatever
 // tsrp-panel-api's botSettingsShared.js SETTINGS_MANIFEST declares, so a
 // new setting needs a manifest entry there and nothing here. See that
-// file for why casino/stock/crime/debt rates and the rank hierarchy's
-// role IDs are deliberately kept out of it.
+// file for why the rank hierarchy's role IDs are deliberately kept out
+// of it.
 // ==================================================================
 export default function BotSettings() {
   const [pending, setPending] = useState({}); // key -> locally-edited value, not yet saved
@@ -80,9 +80,8 @@ export default function BotSettings() {
   return (
     <>
       <p className="muted card-subtitle" style={{ marginTop: 16 }}>
-        Reward amounts, cooldowns, formula constants, and catalog prices -- every change here is logged (who,
-        before, after, when). Casino payout rates, stock market config, crime rates, and loan/debt rates each
-        have their own dedicated tab. The rank hierarchy and the role IDs behind it aren't editable here, since a
+        Thresholds, cooldowns and feature toggles. Every change here is logged (who, before, after, when).
+        The rank hierarchy and the role IDs behind it aren't editable here, since a
         bad value there breaks permission checks bot-wide; the role and channel IDs that do appear (Moderation,
         Discord Mod Security, Member Suggestions) each drive one feature only, so a wrong value affects that
         feature and nothing else. Any field expecting a Discord ID is checked on save, so a typo is rejected

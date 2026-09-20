@@ -1,33 +1,3 @@
-/**
- * Formats a percent change (or any signed delta) for display, and
- * separately the CSS class that should color it. Kept as one function
- * pair so "no data yet" (null/undefined) can never accidentally render as
- * green -- `null >= 0` is true in JS, so any version of this that reused
- * the >= 0 check directly against a possibly-null value colored a missing
- * value as a gain.
- */
-// Shared "chart range" options for every price-history chart (public
-// StockDetail and the Super Admin stock detail page) -- one definition so
-// the two stay in sync, ms-based since that's what both APIs' `since`
-// query param expects. Default (5 hours) is the first entry so callers
-// can do CHART_RANGE_OPTIONS[0].value for the initial useState.
-export const CHART_RANGE_OPTIONS = [
-  { value: String(5 * 60 * 60 * 1000), label: "5 hours" },
-  { value: String(24 * 60 * 60 * 1000), label: "1 day" },
-  { value: String(3 * 24 * 60 * 60 * 1000), label: "3 days" },
-  { value: String(7 * 24 * 60 * 60 * 1000), label: "7 days" },
-  { value: String(30 * 24 * 60 * 60 * 1000), label: "1 month" },
-];
-
-export function pctChange(n) {
-  if (n === null || n === undefined) return "—";
-  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
-}
-
-export function changeClass(n) {
-  if (n === null || n === undefined) return "";
-  return n >= 0 ? "positive" : "negative";
-}
 
 export function timeAgo(timestamp) {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -117,7 +87,7 @@ export function discordAvatarUrl(discordId, avatarHash, size = 64) {
   // Discord's default avatar set (current formula: (id >> 22) % 6). Wrapped
   // because BigInt() throws on anything that isn't a clean integer string --
   // a real Discord ID always is one, but a bad/synthetic ID (e.g. an
-  // internal system wallet ID leaking into a list of real users) should
+  // an internal system ID leaking into a list of real users) should
   // fall back to a placeholder avatar, not crash whatever rendered it.
   let index = 0;
   try {

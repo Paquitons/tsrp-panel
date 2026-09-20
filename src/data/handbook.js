@@ -804,7 +804,7 @@ export const HANDBOOK = [
   {
     id: "command-reference", group: "reference", title: "Command reference",
     blocks: [
-      { type: "p", text: "Discord slash commands relevant to staff work. Player-facing commands (economy, casino, business, banking, stocks, insurance, property, crime) are not listed; they are not staff duties." },
+      { type: "p", text: "Discord slash commands relevant to staff work." },
       { type: "table", head: ["Command", "Minimum rank", "What it does"], rows: [
         { tier: "Duty" },
         ["/shift start stop leaderboard", "Staff Team, not IA", "Manage your own shift"],
