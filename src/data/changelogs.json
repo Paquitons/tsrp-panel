@@ -1,5 +1,51 @@
 [
   {
+    "version": "3.0.0",
+    "slug": "v3-0-0",
+    "title": "TSRP Update",
+    "date": "2026-09-27",
+    "summary": "The economy has been removed. Wallets, banks, businesses, the stock market, casinos, crime, storefronts, insurance and the item system are gone, along with every command and website page that went with them. Tickets also stop posting the same claim or unclaim message over and over, and a claimed Staff Complaint now stays readable to the whole of Internal Affairs.",
+    "sections": [
+      {
+        "heading": "The Economy",
+        "items": [
+          "The economy has been removed. Wallets, banks, loans, businesses, properties, the stock market, casinos, crime, storefronts, insurance, contracts, the marketplace and the item system are all gone.",
+          "That is 25 commands, and they no longer appear in Discord: /economy, /bank, /business, /casino, /stock, /crime, /storefront, /insurance, /loan, /invest, /market, /property, /shop, /item, /inventory, /lottery, /poker, /blackjack, /roulette, /slots, /work, /contract, and the three owner commands that went with them.",
+          "The website loses its Economy, Economy News, Stock Market and Leaderboards pages, and the staff panel loses the screens that managed any of it.",
+          "The data behind all of it has been deleted: balances, businesses, properties, stock price history, casino records and every transaction. That part is permanent and cannot be undone.",
+          "It is removed rather than switched off, so it is no longer running in the background, no longer holding a third of the bot, and no longer using the server it ran on.",
+          "Nothing outside the economy changed. Tickets, shifts, strikes, leaves of absence, punishments, moderation, verification and Internal Affairs all work exactly as before."
+        ]
+      },
+      {
+        "heading": "Tickets",
+        "items": [
+          "Claiming or unclaiming a ticket posts one message. Unclaiming used to check who held the claim, spend several seconds applying permissions, and only release it at the end, so every press in that window passed the same check and posted its own message. Ten impatient presses meant ten messages and ten audit entries.",
+          "Pressing the button again while a change is still running is now ignored quietly. It used to answer every extra press with a private notice, which turned one burst into ten of those instead.",
+          "The ticket itself is unaffected. The same person ends up holding it, with the same permissions and the same log entry, once.",
+          "/trepair re-applies a ticket's permissions and shows who can reach it. Run it inside a ticket to fix that one, or with the `all` option to sweep every open ticket. Until now the only thing that ever re-applied permissions was restarting the bot, so a ticket whose access had drifted stayed wrong until the next update. Director and above."
+        ]
+      },
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "A claimed Staff Complaint stays readable to the whole of Internal Affairs. The team can follow a case through without it disappearing the moment somebody picks it up.",
+          "Only the member who claimed it can post in it, and only they can close it, send a close request or hand it on. Reading a case and working it are two different things, so nobody talks over the person handling it or confuses whoever opened the ticket.",
+          "A Director can still override any of that, and an unclaimed complaint is open to the whole team again.",
+          "Complaints claimed before this change come back into view once a Director runs /trepair on them.",
+          "Every other ticket type is unchanged: claiming still takes it away from the rest of the tier."
+        ]
+      },
+      {
+        "heading": "Wording",
+        "items": [
+          "Messages, command descriptions, buttons and menus across the bot have been rewritten to read the way a person would write them.",
+          "Command descriptions no longer announce which rank may use them. The commands already enforce that, and saying it again in the description helped nobody."
+        ]
+      }
+    ]
+  },
+  {
     "version": "2.4.0",
     "slug": "v2-4-0",
     "title": "TSRP Update",
