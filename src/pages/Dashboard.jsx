@@ -68,17 +68,11 @@ function describeEvent(e) {
 export default function Dashboard() {
   const { user } = useAuth();
 
-  // What this panel user may DO here, as opposed to what they outrank.
-  // Both are false only for Internal Affairs: they read the punishment log
-  // for investigations and never write to it, and they work no shifts
-  // because they hold no in-game moderation powers to be on duty with.
+  // Internal Affairs used to be refused the shift card and the log form
+  // here, on two session claims the API no longer issues. Both are gone
+  // rather than defaulted to true: IA works shifts and writes logs like
+  // every other tier, so there is nothing left for a flag to say.
   //
-  // `!== false` rather than a truthy test on purpose -- a session issued
-  // before these claims existed has neither, and must keep behaving
-  // exactly as it did rather than losing the shift card and the log form
-  // until the token expires.
-  const canWriteLogs = user?.canWriteLogs !== false;
-  const canUseShifts = user?.canUseShifts !== false;
   // Named once rather than spelled out at each of the three places that
   // ask, so the quick action, the modal and the palette arrival cannot
   // drift apart on who may run a command.
@@ -260,9 +254,9 @@ export default function Dashboard() {
   // from Internal Affairs since calling for backup is time-sensitive and
   // shouldn't require a page navigation to reach.
   //
-  // Internal Affairs no longer has it. Requesting staff coverage is
-  // staffing the server, and IA runs no shifts and is not part of the
-  // duty roster it would be summoning.
+  // Internal Affairs does not have it. Calling the team out to cover the
+  // server is the staff team's, and IA oversees that rather than running
+  // it. Gated on the tier here, not on anything shift-related.
   const [staffRequestModalOpen, setStaffRequestModalOpen] = useState(false);
   const [staffRequestReason, setStaffRequestReason] = useState("");
   const [staffRequestStatus, setStaffRequestStatus] = useState(null);
@@ -297,10 +291,10 @@ export default function Dashboard() {
   useOpenOnArrival(what => {
     if (what === "lookup") setLookupModalOpen(true);
     else if (what === "loa") setLoaModalOpen(true);
-    else if (what === "leaderboard" && canUseShifts) setLeaderboardModalOpen(true);
-    else if (what === "shift-history" && canUseShifts) setHistoryModalOpen(true);
+    else if (what === "leaderboard") setLeaderboardModalOpen(true);
+    else if (what === "shift-history") setHistoryModalOpen(true);
     else if (what === "run-command" && canRunCommands) setCommandModalOpen(true);
-    else if (what === "new-log" && canWriteLogs) {
+    else if (what === "new-log") {
       // After paint: the card may not be in the document yet on a cold
       // load straight to this URL.
       requestAnimationFrame(() => {
@@ -567,9 +561,7 @@ export default function Dashboard() {
           </div>
 
           <div className="hero-shift">
-            {!canUseShifts ? (
-              <span className="muted hero-shift-note">Internal Affairs does not work shifts.</span>
-            ) : active ? (
+            {active ? (
               <>
                 <span className={`status-dot ${onBreak ? "status-break" : "status-active"}`} />
                 <span className="timer-value">{formatDurationWithSeconds(Math.max(0, liveDurationSeconds))}</span>
@@ -626,16 +618,8 @@ export default function Dashboard() {
         <div className="quick-actions">
           <button className="quick-action" onClick={() => setLookupModalOpen(true)}><SearchIcon />Player Lookup</button>
           <button className="quick-action" onClick={() => setLoaModalOpen(true)}><CalendarIcon />Manage LOA</button>
-          {/* Both are about shifts of one's own: a leaderboard IA cannot
-              place on and a history that will always be empty. Another
-              person's shift history is still reachable from the player
-              lookup, which is the investigative use of it. */}
-          {canUseShifts && (
-            <>
-              <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
-              <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
-            </>
-          )}
+          <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
+          <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
           {canRunCommands && (
             <button className="quick-action" onClick={() => setStaffRequestModalOpen(true)}><MegaphoneIcon />Request Staff</button>
           )}
@@ -678,16 +662,6 @@ export default function Dashboard() {
 
         {/* ---------- CENTER: Create log + live activity ---------- */}
         <div className="dashboard-col">
-          {!canWriteLogs ? (
-            <div className="card">
-              <h2>Punishment Log Access</h2>
-              <p className="muted" style={{ marginBottom: 0 }}>
-                Internal Affairs has view-only access to the punishment log. Search and read every
-                entry on the right, including logs issued by the staff member you are investigating.
-                Creating, editing and deleting logs belongs to the staff team you oversee.
-              </p>
-            </div>
-          ) : (
           <div className="card" id="create-log">
             <h2>Create New Log</h2>
             {createError && <Banner>{createError}</Banner>}
@@ -736,7 +710,6 @@ export default function Dashboard() {
               <button className="primary" type="submit" disabled={creating}>{creating ? "Creating…" : "Create Log"}</button>
             </form>
           </div>
-          )}
 
           <div className="card">
             <div className="modal-title-row" style={{ marginBottom: 12 }}>
