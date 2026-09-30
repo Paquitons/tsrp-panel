@@ -241,9 +241,10 @@ export default function InternalAffairs() {
         <Card>
           <h2>Read only</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Your IA rank carries no actions yet. You can read the punishment log from the Dashboard and any
-            Staff Complaint transcript from Ticket Transcripts, which is what an investigation runs on.
-            Striking, demoting and terminating come with Internal Affairs and above.
+            Your IA rank carries no actions against staff yet. You can read and write the punishment log
+            from the Dashboard and read any Staff Complaint transcript from Ticket Transcripts, which is
+            what an investigation runs on. Striking comes with Internal Affairs, demoting and terminating
+            with IA Officer.
           </p>
         </Card>
       )}

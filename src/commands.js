@@ -29,8 +29,6 @@ import {
 } from "./access";
 
 const isDirector = user => !!user?.isDirectorOrAbove;
-const canWriteLogs = user => !!user?.canWriteLogs;
-const canUseShifts = user => !!user?.canUseShifts;
 const iaCan = perm => user =>
   canSeeInternalAffairs(user) && (user?.iaPermissions ?? []).includes(perm);
 
@@ -42,7 +40,7 @@ export const COMMANDS = [
   },
   {
     id: "new-log", label: "Create New Log", group: "Actions",
-    to: "/?do=new-log", show: canWriteLogs,
+    to: "/?do=new-log",
     keywords: "punishment warn kick ban note moderation record",
   },
   {
@@ -51,11 +49,11 @@ export const COMMANDS = [
   },
   {
     id: "shift-history", label: "My Shift History", group: "Actions",
-    to: "/?do=shift-history", show: canUseShifts, keywords: "duty hours past shifts",
+    to: "/?do=shift-history", keywords: "duty hours past shifts",
   },
   {
     id: "leaderboard", label: "Shift Leaderboard", group: "Actions",
-    to: "/?do=leaderboard", show: canUseShifts, keywords: "top hours ranking duty",
+    to: "/?do=leaderboard", keywords: "top hours ranking duty",
   },
   {
     id: "run-command", label: "Run Command", group: "Actions",
