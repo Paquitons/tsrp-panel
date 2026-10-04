@@ -1,5 +1,51 @@
 [
   {
+    "version": "3.1.0",
+    "slug": "v3-1-0",
+    "title": "TSRP Update",
+    "date": "2026-10-04",
+    "summary": "Internal Affairs moderates in game now, works shifts and writes the punishment log, which is most of this update. Support Staff claim a ticket before replying to it, a claimed ban appeal stops being readable by the rest of Administration, and strikes, terminations and training results finally have artwork.",
+    "sections": [
+      {
+        "heading": "Internal Affairs",
+        "items": [
+          "Internal Affairs moderates in game. Trial Internal Affairs and Internal Affairs hold Moderator, IA Officer and IA Supervisor hold Administrator, which is the group the ban command sits in. It is granted when you go on duty and taken away when you clock off, the same as for everybody else.",
+          "Internal Affairs works shifts. Start, break and end one with /shift or from the Dashboard. Going on duty is what hands you your in-game powers, so it is the step that makes the rest of this work.",
+          "Holding two ranks now gives you whichever grants the most. Somebody who is Internal Affairs and also Chief Administrator keeps Administrator. Before this, joining Internal Affairs could quietly cost you the powers you already had.",
+          "Internal Affairs reads and writes the punishment log. Which entries you can file follows your in-game level: warnings, kicks, BOLOs and notes at the two ranks below Officer, and bans, temporary bans and unbans as well from IA Officer up.",
+          "Ban requests can be reviewed from IA Officer up, for the same reason. Accepting one issues the ban, so it goes to the ranks that can ban.",
+          "Terminating and demoting from the panel works. IA Officer and IA Supervisor hold both, and the panel was letting them press the button and then refusing with a message naming a rank they are never going to hold. Demotion had the same fault.",
+          "Internal Affairs can act on staff who outrank them, for the three things their rank carries. Strikes already worked this way; terminations and demotions now do too.",
+          "You are still exempt from the duty quota. You work shifts and appear on the leaderboard, but the quota measures cover on the duty roster and your hours go on investigations instead."
+        ]
+      },
+      {
+        "heading": "Tickets",
+        "items": [
+          "Support Staff claim a ticket before replying to it. A message sent in an unclaimed General Support or Community Related ticket is removed and you are told to claim it first. A ticket gets one handler, and three people answering at once is how somebody leaves with three different answers.",
+          "This is only Support Staff. The person who opened the ticket is never affected, and neither is Management or above.",
+          "A claimed ban appeal is no longer readable by the rest of Administration. Appeals are handled by Administration and above, and everybody who qualified went on reading an appeal somebody else had taken. It now narrows to whoever claimed it, with Management and above still able to see it.",
+          "Close requests on a ticket somebody else holds are Management and above, down from Directors. A close request does not close anything, it asks the person who opened the ticket to confirm they are finished. Actually closing somebody else's ticket, or taking it off them, still needs a Director.",
+          "The word filter has stopped removing staff messages inside tickets. It is meant to leave ticket channels alone entirely, and it was deciding whether a channel was a ticket from a setting that could point at the wrong place. It now checks the ticket itself."
+        ]
+      },
+      {
+        "heading": "Staff Cards",
+        "items": [
+          "Strikes, strike removals, terminations, resignations, training passes and fails, Fast Pass approvals and new staff alerts all have artwork now. Promotions and demotions already did.",
+          "Each strike has its own banner, so you can see at a glance whether it is the first, second or third.",
+          "Cards posted from the Staff Panel look the same as the ones posted from Discord. A promotion done on the panel used to arrive in the same channel, minutes after one done in Discord, with no artwork on it."
+        ]
+      },
+      {
+        "heading": "Booster Perks",
+        "items": [
+          "Boosters and VIP have access to the Mansion in game, at postal 601. It has been added to the perks panel."
+        ]
+      }
+    ]
+  },
+  {
     "version": "3.0.0",
     "slug": "v3-0-0",
     "title": "TSRP Update",
