@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState, useId } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { createPortal } from "react-dom";
+import useAnchoredPosition from "../hooks/useAnchoredPosition";
 
 /**
  * A custom-styled dropdown, used in place of native <select> elements.
@@ -24,22 +25,19 @@ import { createPortal } from "react-dom";
  */
 export default function CustomSelect({ value, onChange, options, placeholder = "Select…" }) {
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const triggerRef = useRef(null);
   const dropdownRef = useRef(null);
   const typeaheadRef = useRef({ query: "", timer: null });
+  const openedOnPointerRef = useRef(false);
   const listboxId = useId();
 
-  function computeCoords() {
-    const rect = triggerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setCoords({ top: rect.bottom + 4, left: rect.left, width: rect.width });
-  }
-
-  useLayoutEffect(() => {
-    if (open) computeCoords();
-  }, [open]);
+  // Shared with PortalDropdown. It decides whether the list opens below
+  // or above the trigger and caps its height to the room actually there,
+  // which is what stops the last options being stranded off the bottom
+  // of the screen, and it coalesces repositioning so scrolling past an
+  // open list is free. See useAnchoredPosition.
+  const coords = useAnchoredPosition({ anchorRef: triggerRef, panelRef: dropdownRef, open, maxHeight: 280 });
 
   useEffect(() => {
     if (!open) return;
@@ -54,25 +52,31 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
         setOpen(false);
       }
     }
-    // Recompute position if the page scrolls or resizes while open, so the
-    // dropdown stays attached to its trigger instead of drifting away.
-    function onReposition() { computeCoords(); }
 
     document.addEventListener("mousedown", onClickOutside);
-    window.addEventListener("scroll", onReposition, true);
-    window.addEventListener("resize", onReposition);
     return () => {
       document.removeEventListener("mousedown", onClickOutside);
-      window.removeEventListener("scroll", onReposition, true);
-      window.removeEventListener("resize", onReposition);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Keeps the highlighted option in view while arrowing through the list.
+  //
+  // Done by setting the panel's own scrollTop rather than with
+  // scrollIntoView. scrollIntoView walks up the ancestor chain and will
+  // scroll the PAGE as well when it judges that necessary, which is both
+  // unwanted here and useless: the panel is position:fixed, so moving
+  // the page does not bring any part of it into view, it just yanks the
+  // page out from under whatever the person was looking at.
   useEffect(() => {
-    if (open && highlightedIndex >= 0) {
-      dropdownRef.current?.children[highlightedIndex]?.scrollIntoView({ block: "nearest" });
-    }
+    if (!open || highlightedIndex < 0) return;
+    const panel = dropdownRef.current;
+    const option = panel?.children[highlightedIndex];
+    if (!panel || !option) return;
+    const top = option.offsetTop;
+    const bottom = top + option.offsetHeight;
+    if (top < panel.scrollTop) panel.scrollTop = top;
+    else if (bottom > panel.scrollTop + panel.clientHeight) panel.scrollTop = bottom - panel.clientHeight;
   }, [open, highlightedIndex]);
 
   function selectIndex(idx) {
@@ -151,20 +155,54 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        onClick={() => setOpen(o => !o)}
+        // A mouse opens this on press, not on release. A native select
+        // opens on mousedown, and matching that is the difference between
+        // the list being there when the button goes down and it appearing
+        // after the button comes back up, which is what "it does not
+        // respond immediately" was.
+        //
+        // Mouse only. On touch, pointerdown fires at the start of a
+        // gesture that may turn out to be a scroll, so opening there
+        // would pop the list open every time somebody dragged the page
+        // from this control. Touch keeps the click.
+        //
+        // Keyboard is neither: handleTriggerKeyDown opens on Enter, Space
+        // and the arrows, and preventDefaults them, so no synthetic click
+        // follows for the guard below to worry about.
+        onPointerDown={e => {
+          if (e.pointerType !== "mouse" || e.button !== 0) return;
+          openedOnPointerRef.current = true;
+          setOpen(o => !o);
+        }}
+        onClick={() => {
+          // The click that follows the pointerdown above is the same
+          // press, not a second one.
+          if (openedOnPointerRef.current) { openedOnPointerRef.current = false; return; }
+          setOpen(o => !o);
+        }}
         onKeyDown={handleTriggerKeyDown}
       >
         <span className="custom-select-label">{selected?.label ?? placeholder}</span>
         <span className={`custom-select-chevron ${open ? "custom-select-chevron-open" : ""}`}>⌄</span>
       </button>
-      {open && coords && createPortal(
+      {open && createPortal(
         <div
           ref={dropdownRef}
           id={listboxId}
           role="listbox"
           tabIndex={-1}
           className="custom-select-dropdown custom-select-dropdown-portal"
-          style={{ top: coords.top, left: coords.left, width: coords.width }}
+          data-placement={coords?.placement}
+          style={{
+            top: coords?.top,
+            left: coords?.left,
+            width: coords?.width,
+            maxHeight: coords?.maxHeight,
+            maxWidth: coords?.maxWidth,
+            // In the DOM but not shown for the one frame before it has
+            // been measured; it cannot be measured without being here.
+            visibility: coords ? undefined : "hidden",
+          }}
           onKeyDown={handleListKeyDown}
         >
           {options.map((o, idx) => (
