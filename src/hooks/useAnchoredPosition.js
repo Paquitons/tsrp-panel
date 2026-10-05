@@ -38,6 +38,30 @@ const VIEWPORT_MARGIN = 8;
  * opened from a focused input is sized against a viewport the keyboard is
  * covering half of.
  */
+/**
+ * The rectangle the anchor is actually visible within: the viewport,
+ * narrowed by every scrolling ancestor that clips it.
+ *
+ * A trigger inside one of the dashboard's scrolling columns can be
+ * scrolled out of that column while still being within the window. Only
+ * looking at the viewport would call it visible and leave a panel
+ * pointing at a row that is no longer on screen.
+ */
+function clipRectFor(el, vpWidth, vpHeight) {
+  let top = 0, left = 0, right = vpWidth, bottom = vpHeight;
+  for (let node = el?.parentElement; node && node !== document.body; node = node.parentElement) {
+    const style = getComputedStyle(node);
+    const clips = /(auto|scroll|hidden|clip)/.test(style.overflowY + style.overflowX);
+    if (!clips) continue;
+    const r = node.getBoundingClientRect();
+    top = Math.max(top, r.top);
+    left = Math.max(left, r.left);
+    right = Math.min(right, r.right);
+    bottom = Math.min(bottom, r.bottom);
+  }
+  return { top, left, right, bottom };
+}
+
 export function useAnchoredPosition({
   anchorRef,
   panelRef,
@@ -65,6 +89,24 @@ export function useAnchoredPosition({
     const natural = panelRef?.current?.scrollHeight ?? maxHeight;
     const wanted = Math.min(maxHeight, natural);
 
+    // Has the trigger itself scrolled out of sight?
+    //
+    // This is what produced a menu floating detached at the top of the
+    // page over the header. The clamps below keep a panel on screen,
+    // which is right while its trigger is on screen and wrong the moment
+    // it is not: the panel got pinned to the top edge and stayed there,
+    // anchored to a row that had scrolled away long before.
+    //
+    // The panel is hidden rather than closed. These host half-filled
+    // filters and search boxes, and throwing that away because somebody
+    // scrolled is worse than letting it come back when they scroll
+    // return. Hidden also means not clickable, so it cannot be used
+    // while pointing at something off screen.
+    const clip = clipRectFor(anchorRef.current, vpWidth, vpHeight);
+    const hidden =
+      rect.bottom <= clip.top || rect.top >= clip.bottom ||
+      rect.right <= clip.left || rect.left >= clip.right;
+
     const spaceBelow = vpHeight - rect.bottom - gap - VIEWPORT_MARGIN;
     const spaceAbove = rect.top - gap - VIEWPORT_MARGIN;
 
@@ -90,7 +132,14 @@ export function useAnchoredPosition({
     }
 
     return {
-      top: placeAbove ? Math.max(VIEWPORT_MARGIN, rect.top - gap - height) : rect.bottom + gap,
+      hidden,
+      // While hidden, the panel tracks the anchor exactly rather than
+      // being clamped on screen. If it were clamped it would creep back
+      // into view as a sliver at the edge the moment the maths rounded
+      // the other way.
+      top: hidden
+        ? (placeAbove ? rect.top - gap - height : rect.bottom + gap)
+        : (placeAbove ? Math.max(VIEWPORT_MARGIN, rect.top - gap - height) : rect.bottom + gap),
       left,
       right,
       width: matchWidth ? rect.width : undefined,
@@ -109,7 +158,8 @@ export function useAnchoredPosition({
       if (prev
         && prev.top === next.top && prev.left === next.left && prev.right === next.right
         && prev.width === next.width && prev.maxHeight === next.maxHeight
-        && prev.maxWidth === next.maxWidth && prev.placement === next.placement) {
+        && prev.maxWidth === next.maxWidth && prev.placement === next.placement
+        && prev.hidden === next.hidden) {
         return prev;
       }
       return next;

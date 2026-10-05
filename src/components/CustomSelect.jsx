@@ -200,8 +200,11 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
             maxHeight: coords?.maxHeight,
             maxWidth: coords?.maxWidth,
             // In the DOM but not shown for the one frame before it has
-            // been measured; it cannot be measured without being here.
-            visibility: coords ? undefined : "hidden",
+            // been measured (it cannot be measured without being here),
+            // and hidden again once the trigger has scrolled out of
+            // sight, so the list never floats detached over the page.
+            visibility: !coords || coords.hidden ? "hidden" : undefined,
+            pointerEvents: coords?.hidden ? "none" : undefined,
           }}
           onKeyDown={handleListKeyDown}
         >
