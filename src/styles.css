@@ -1837,6 +1837,7 @@ code {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
+  -webkit-overflow-scrolling: touch;
   background: var(--card-bg-raised);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
@@ -1849,8 +1850,10 @@ code {
 
 .custom-select-dropdown-portal {
   position: fixed;
-  max-height: min(280px, calc(100vh - 24px));
+  /* Same as .portal-dropdown: the real cap arrives inline. */
+  max-height: min(280px, calc(100vh - 16px));
   z-index: 500;
+  overscroll-behavior: contain;
 }
 
 .custom-select-option {
@@ -2329,6 +2332,13 @@ code {
 
 /* ---------- Portal dropdown base + remaining variants ---------- */
 
+/* max-height is set inline, from the room actually available between the
+   trigger and the edge of the screen (see useAnchoredPosition). A fixed
+   cap here was the bug: a panel opened near the bottom got its full
+   320px and simply ran off the screen, and being position:fixed, the
+   part past the edge could not be scrolled to by any means. The value
+   below is only a floor-level fallback for the frame before the first
+   measurement, and for the no-JS case. */
 .portal-dropdown {
   position: fixed;
   background: var(--card-bg-raised);
@@ -2336,8 +2346,13 @@ code {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
   z-index: 500;
-  max-height: min(320px, calc(100vh - 24px));
+  max-height: min(320px, calc(100vh - 16px));
   overflow-y: auto;
+  /* Momentum scrolling inside the panel on iOS, and it stops a scroll
+     that reaches the end of this list from continuing into the page
+     behind it, which reads as the page jumping while a menu is open. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   animation: scaleIn var(--duration-fast) var(--ease-out);
   padding: var(--space-2);
 }
