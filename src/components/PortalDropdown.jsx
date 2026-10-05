@@ -61,10 +61,13 @@ export default function PortalDropdown({ anchorRef, open, onClose, align = "left
         width: coords?.width,
         maxHeight: coords?.maxHeight,
         maxWidth: coords?.maxWidth,
-        // Hidden for the single frame before the first measurement. It
-        // has to be in the DOM to be measured, and rendering nothing
-        // until coords existed is what cost an extra frame on open.
-        visibility: coords ? undefined : "hidden",
+        // Hidden for the frame before the first measurement (it has to
+        // be in the DOM to be measured), and hidden again whenever the
+        // trigger has scrolled out of sight, so the panel never floats
+        // detached over the rest of the page. pointerEvents goes with
+        // it: something invisible must not still be clickable.
+        visibility: !coords || coords.hidden ? "hidden" : undefined,
+        pointerEvents: coords?.hidden ? "none" : undefined,
       }}
     >
       {children}
