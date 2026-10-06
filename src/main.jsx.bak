@@ -7,22 +7,17 @@ import { queryClient } from "./queryClient.js";
 import { captureManualDeepLink } from "./manualVerifyDeepLink.js";
 import "./styles.css";
 
-// Validate required environment variables
-function validateRequiredEnvVars(requiredVars) {
-  const missing = requiredVars.filter(varName => !import.meta.env[varName]);
-  if (missing.length > 0) {
-    console.error(`FATAL: Missing required environment variables: ${missing.join(', ')}`);
-    process.exit(1);
-  }
-}
-
-// Validate critical environment variables
-// Note: VITE_API_BASE has a default value, but we still validate for consistency
-validateRequiredEnvVars([
-  'VITE_API_BASE'
-]);
-
 // Before React renders, and before anything redirects to Discord to sign
 // in: the parameter does not survive that round trip, so it has to be
 // taken off the URL and put somewhere that does.
 captureManualDeepLink();
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </React.StrictMode>
+);
