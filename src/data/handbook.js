@@ -85,6 +85,7 @@ export const HANDBOOK = [
         { tier: "Leadership" },
         ["Founder", "F", "Own the community and have final say. Directors and above process resignations and can delete tickets outright."],
         ["Co-Founder", "CF", ""],
+        ["Assistant Founder", "AF", ""],
         ["Director", "D", ""],
         ["Assistant Director", "AD", ""],
         ["Deputy Director", "DD", ""],
