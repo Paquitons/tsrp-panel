@@ -5,6 +5,7 @@
 // viewer's IA rank may ACTUALLY DO, rather than showing every control and
 // refusing afterwards:
 //
+//   IA Director     strike, terminate, demote
 //   IA Supervisor   strike, terminate, demote
 //   IA Officer      strike, terminate, demote
 //   Internal Affairs  strike
