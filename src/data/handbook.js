@@ -83,6 +83,7 @@ export const HANDBOOK = [
       { type: "p", text: "Twenty-nine ranks in six bands. Your rank is the single highest rank role you hold, and it decides your nickname prefix, who you outrank, and what you can do everywhere except in game." },
       { type: "table", head: ["Rank", "Prefix", "Notes"], rows: [
         { tier: "Leadership" },
+        ["Owners", "O", ""],
         ["Founder", "F", "Own the community and have final say. Directors and above process resignations and can delete tickets outright."],
         ["Co-Founder", "CF", ""],
         ["Assistant Founder", "AF", ""],
