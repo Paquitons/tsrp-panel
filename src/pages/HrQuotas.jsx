@@ -33,14 +33,13 @@ export default function HrQuotas() {
   if (query.isError) return <Banner style={{ marginTop: 16 }}>{query.error.message}</Banner>;
   if (query.isLoading) return <Skeleton variant="rows" />;
 
-  const quotaSeconds = data.quotaHours * 3600;
   const filtered = data.staff.filter(m => matchesFilter(m, filter));
   const metCount = data.staff.filter(m => m.metQuota).length;
 
   return (
     <>
       <p className="muted card-subtitle">
-        On-duty time for the same period as the shift leaderboard{data.lastReset ? ` (since it was last reset)` : ` (all time, since the leaderboard has never been reset)`}, against a {data.quotaHours}-hour quota. Every current staff member appears here, even with 0 hours.
+        On-duty time for the same period as the shift leaderboard{data.lastReset ? ` (since it was last reset)` : ` (all time, since the leaderboard has never been reset)`}, against a {data.quotaHours}-hour quota, or {data.iaQuotaHours} hours for Internal Affairs. Every current staff member appears here, even with 0 hours.
       </p>
 
       <div className="card-grid" style={{ marginTop: 8 }}>
@@ -55,6 +54,10 @@ export default function HrQuotas() {
 
       <div className="loa-list" style={{ marginTop: 12 }}>
         {filtered.map(member => {
+          // Each row carries its own quota: Internal Affairs has a
+          // lower one, so a single shared figure would draw their bars
+          // against the wrong target.
+          const quotaSeconds = member.quotaHours * 3600;
           const percent = quotaSeconds > 0 ? Math.min(100, Math.round((member.totalSeconds / quotaSeconds) * 100)) : 100;
           return (
             <div className="loa-card" key={member.discordId}>
@@ -73,7 +76,7 @@ export default function HrQuotas() {
                 </div>
               </div>
               <div className="log-card-field">
-                {formatDuration(member.totalSeconds)} / {data.quotaHours}h
+                {formatDuration(member.totalSeconds)} / {member.quotaHours}h
               </div>
               <div className="quota-progress-track">
                 <div
