@@ -853,6 +853,7 @@ export const HANDBOOK = [
         ["/say", "Trial Supervisor", "Send a message as the bot"],
         ["/poll create close", "Community Manager", "Run a poll"],
         ["/giveaway create", "Trial Supervisor", "Run a giveaway"],
+        ["/reroll", "Trial Supervisor", "Draw again on an ended giveaway: every winner, or just one with the user option"],
         ["/playtime", "Staff Team; reset is Community Manager", "Department playtime"],
       ]},
     ],
