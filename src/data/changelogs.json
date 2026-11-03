@@ -1,5 +1,54 @@
 [
   {
+    "version": "3.2.0",
+    "slug": "v3-2-0",
+    "title": "TSRP Update",
+    "date": "2026-11-03",
+    "summary": "Staff who are marked on duty but are not in the server are now taken off duty automatically. This update also adds the new Management and Director ranks, Owners and Assistant Founder, a /reroll command for giveaways, and a round of dropdown fixes across the panel.",
+    "sections": [
+      {
+        "heading": "Duty",
+        "items": [
+          "Somebody marked on duty who is not in the ER:LC server is taken off duty automatically. The bot flags them first, and if it still cannot find them about five minutes later, the shift ends. Your on duty role, in game powers and nickname are removed the same way they are when you clock off.",
+          "Management is told when it happens, and the member gets a DM so they know why.",
+          "Breaks, accounts the bot cannot verify and server shutdowns are never affected, and the time you worked before being ended still counts.",
+          "The Internal Affairs weekly on duty quota is 2 hours. Everyone else stays at 4."
+        ]
+      },
+      {
+        "heading": "Ranks",
+        "items": [
+          "Owners sits above Founder.",
+          "Assistant Founder is a new rank.",
+          "Management and Director each have a full ladder now. Management runs from Chief of Staff down to Assistant Community Manager, and Directors run from Director down to Associate Director. Each has its own prefix, and the panel, nicknames and permissions all recognise them.",
+          "Internal Affairs Director is a new rank at the top of Internal Affairs."
+        ]
+      },
+      {
+        "heading": "Tickets",
+        "items": [
+          "Directors can request to close any claimed ticket, including ones claimed by other Directors.",
+          "Invite links posted in the Department Hub channel and the one it feeds are no longer deleted by automod."
+        ]
+      },
+      {
+        "heading": "Giveaways",
+        "items": [
+          "/reroll picks new winners for a giveaway that has already ended, from the people who entered and are still in the server."
+        ]
+      },
+      {
+        "heading": "Panel",
+        "items": [
+          "Dropdowns open instantly instead of lagging behind your click.",
+          "Options are no longer cut off by the edge of the screen. A dropdown flips above its button when there is no room below.",
+          "A dropdown no longer drifts away from its button when you scroll, and it closes cleanly when the button scrolls out of view. This applies on desktop, tablet and mobile.",
+          "The handbook describes the automatic off duty."
+        ]
+      }
+    ]
+  },
+  {
     "version": "3.1.0",
     "slug": "v3-1-0",
     "title": "TSRP Update",
