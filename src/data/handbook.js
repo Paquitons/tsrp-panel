@@ -196,7 +196,7 @@ export const HANDBOOK = [
         "You are marked on duty but are not actually in the ER:LC server.",
         "You are marked on duty while the server itself is shut down.",
       ]},
-      { type: "p", text: "A flag is not a punishment and nothing is ended automatically. Starting a break clears any existing flag, so a break is also how you answer one. If you are flagged repeatedly, expect a conversation." },
+      { type: "p", text: "If the bot still cannot find you in the server after about five more minutes, your shift is ended automatically and you are taken off duty, with a note to management and a DM to you. It only acts after several checks in a row, and never while you are on a break or when your account cannot be verified. Starting a break clears any existing flag, so a break is also how you answer one. A server shutdown flag does not end anything by itself. If you are flagged repeatedly, expect a conversation." },
 
       { type: "h3", text: "Off-duty command alerts" },
       { type: "p", text: "Running a moderation command in game while you are not clocked in posts an alert to management, naming you and the command. :pm and :h are excluded, since neither is a moderation action. Everything else counts." },
