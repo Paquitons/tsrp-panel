@@ -168,7 +168,7 @@ export const HANDBOOK = [
     id: "shifts", group: "duty", title: "Shifts and breaks",
     blocks: [
       { type: "p", text: "A shift is the record of you being on duty. It is what your activity is measured against, what grants your in-game powers, and what the rest of the team sees when they check who is available." },
-      { type: "note", title: "Not for Internal Affairs", body: "This whole section is about moderation duty, and IA does none. IA members cannot start a shift from either the panel or Discord, and are exempt from the quota. See *Internal Affairs*." },
+      { type: "note", title: "Not for Internal Affairs", body: "Internal Affairs works shifts like everybody else, but is held to a lower weekly quota of **2 hours**. See *Internal Affairs*." },
       { type: "h3", text: "Going on duty" },
       { type: "steps", items: [
         "Join the in-game server and join the staff team.",
@@ -196,7 +196,7 @@ export const HANDBOOK = [
         "You are marked on duty but are not actually in the ER:LC server.",
         "You are marked on duty while the server itself is shut down.",
       ]},
-      { type: "p", text: "A flag is not a punishment and nothing is ended automatically. Starting a break clears any existing flag, so a break is also how you answer one. If you are flagged repeatedly, expect a conversation." },
+      { type: "p", text: "If the bot still cannot find you in the server after about five more minutes, your shift is ended automatically and you are taken off duty, with a note to management and a DM to you. It only acts after several checks in a row, and never while you are on a break or when your account cannot be verified. Starting a break clears any existing flag, so a break is also how you answer one. A server shutdown flag does not end anything by itself. If you are flagged repeatedly, expect a conversation." },
 
       { type: "h3", text: "Off-duty command alerts" },
       { type: "p", text: "Running a moderation command in game while you are not clocked in posts an alert to management, naming you and the command. :pm and :h are excluded, since neither is a moderation action. Everything else counts." },
@@ -235,7 +235,7 @@ export const HANDBOOK = [
     id: "activity", group: "duty", title: "Activity and quotas",
     blocks: [
       { type: "h3", text: "The weekly quota" },
-      { type: "p", text: "Every staff member is expected to log **4 hours on duty per calendar week**. Progress is on the Management area's Records tab and resets at the start of each week. Falling short without telling anyone in advance may cost you a strike." },
+      { type: "p", text: "Every staff member is expected to log **4 hours on duty per calendar week**, and Internal Affairs **2 hours**. Progress is on the Management area's Records tab and resets at the start of each week. Falling short without telling anyone in advance may cost you a strike." },
       { type: "p", text: "Time on break does not count. Time on an approved LOA is not held against you." },
 
       { type: "h3", text: "Activity checks" },
@@ -692,7 +692,7 @@ export const HANDBOOK = [
         "**In-game moderation.** Trial Internal Affairs and Internal Affairs are eligible for Moderator; IA Officer, IA Supervisor and IA Director are eligible for Administrator, which is the group :ban sits in. Go on duty and it is granted; clock off and it is taken away.",
         "**Shifts.** Start, break and end one with /shift or from the Dashboard, the same as anybody else. Going on duty is what grants your in-game power, so it is the step that makes the rest of this usable.",
         "**The punishment log**, read and write. Search every entry, including those issued by a staff member under investigation, and create your own for what you do in game. Which types you may log follows your in-game level: warning, kick, BOLO and note at the two ranks below Officer, and ban, temporary ban and unban as well from IA Officer up.",
-        "**Leave of absence**, with /loa or from the Dashboard, the same as anybody else. Being exempt from the duty quota is not the same as being unable to take time off: an LOA is how you tell the team you are away, and yours goes to Management like everyone else's.",
+        "**Leave of absence**, with /loa or from the Dashboard, the same as anybody else. An LOA is how you tell the team you are away, and it excuses you from the quota. Yours goes to Management like everyone else's.",
       ]},
       { type: "h3", text: "What IA does not have" },
       { type: "list", items: [
@@ -701,7 +701,7 @@ export const HANDBOOK = [
         "**Requesting staff coverage.** Request Staff does not appear on your dashboard and /callstaff refuses you. Calling the team out to cover the server is the staff team's, and IA oversees it rather than running it.",
         "**Promotion.** Demotion is granted at IA Officer and above; promotion is not, at any IA rank.",
       ]},
-      { type: "note", title: "You are still exempt from the duty quota", body: "You work shifts and you appear on the leaderboard, but you are not counted against the on-duty quota and will not show on it. The quota measures cover on the duty roster, and your hours go on investigations rather than on covering it." },
+      { type: "note", title: "Your quota is 2 hours", body: "You work shifts and appear on the leaderboard, and you are on the weekly on-duty quota at **2 hours** rather than the staff figure of 4. Part of your time goes on investigations, which is why yours is lower. It appears on the Quotas tab against your own figure." },
       { type: "note", variant: "hard", title: "Log what you do in game", body: "Every moderation action you take in game gets a punishment log, the same as it would from anybody else. Your entries are part of the record the next investigation reads, including one about you." },
       { type: "h3", text: "Reporting a staff member" },
       { type: "p", text: "Open a **Staff Complaint** ticket. It is visible only to Internal Affairs, Management and Directors, and the person you are reporting cannot see it. Bring evidence: clips, screenshots, message links, timestamps." },
@@ -853,6 +853,7 @@ export const HANDBOOK = [
         ["/say", "Trial Supervisor", "Send a message as the bot"],
         ["/poll create close", "Community Manager", "Run a poll"],
         ["/giveaway create", "Trial Supervisor", "Run a giveaway"],
+        ["/reroll", "Trial Supervisor", "Draw again on an ended giveaway: every winner, or just one with the user option"],
         ["/playtime", "Staff Team; reset is Community Manager", "Department playtime"],
       ]},
     ],
@@ -863,7 +864,7 @@ export const HANDBOOK = [
     id: "numbers", group: "reference", title: "Numbers at a glance",
     blocks: [
       { type: "table", head: ["Thing", "Value"], rows: [
-        ["Weekly on-duty quota", "4 hours per calendar week"],
+        ["Weekly on-duty quota", "4 hours per calendar week, 2 hours for Internal Affairs"],
         ["Strike duration", "14 days, each strike independently"],
         ["Strikes before a decision", "3 active at once"],
         ["Fast Pass trial", "7 days from passing training"],
