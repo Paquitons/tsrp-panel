@@ -853,6 +853,7 @@ export const HANDBOOK = [
         ["/fixnick", "Junior Supervisor", "Re-apply somebody's nickname"],
         ["/feedback", "Anyone", "Rate a staff member who helped you"],
         ["/suggest", "Configured roles", "Post a suggestion"],
+        ["/mysuggestion", "Anyone", "Jump back to your latest suggestion, its votes and its discussion"],
         ["/say", "Trial Supervisor", "Send a message as the bot"],
         ["/poll create close", "Community Manager", "Run a poll"],
         ["/giveaway create", "Trial Supervisor", "Run a giveaway"],
