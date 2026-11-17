@@ -1,5 +1,27 @@
 [
   {
+    "version": "3.3.1",
+    "slug": "v3-3-1",
+    "title": "TSRP Update",
+    "date": "2026-11-17",
+    "summary": "Warnings and strikes are now your call. Instead of always going through three warnings first, whoever issues the action picks a warning or a strike for each offense.",
+    "sections": [
+      {
+        "heading": "Warnings and Strikes",
+        "items": [
+          "There is no set order anymore. You decide whether an offense gets a warning or a strike.",
+          "/warn issues a warning and /strike issues a strike. The confirmation shows exactly which one it will be, for example Warning 2 or Strike 1, before you confirm.",
+          "On the panel, the Warn / Strike form and the Internal Affairs form both have a Warning or Strike choice. It starts on Warning, and it shows the person's current warnings and strikes and what you are about to issue.",
+          "A serious offense can go straight to a strike, with no warnings first.",
+          "A warning can be given to somebody who already has strikes.",
+          "Warnings and strikes are counted separately, up to three active of each. Once someone has three active warnings, remove one or issue a strike instead.",
+          "Both still expire on their own after 14 days, /unstrike still removes either one, and three active strikes still go to the termination or demotion decision.",
+          "Activity checks still follow a fixed order, since nobody is choosing: a warning, or a strike if the person already has three warnings or any strike."
+        ]
+      }
+    ]
+  },
+  {
     "version": "3.3.0",
     "slug": "v3-3-0",
     "title": "TSRP Update",

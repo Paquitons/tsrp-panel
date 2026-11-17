@@ -18,7 +18,7 @@ import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
 import { useApiQuery } from "../hooks/useApiQuery";
-import DisciplinePreview, { DisciplineCounts, stepLabel, useNextStep } from "../components/DisciplinePreview";
+import DisciplinePreview, { DisciplineCounts, DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
 
 // One entry per person, warnings and strikes kept apart: [discordId, { warnings, strikes }].
 // Somebody on strikes sorts above somebody who only has warnings.
@@ -92,8 +92,9 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   const [strikeError, setStrikeError] = useState(null);
   const [strikeSubmitting, setStrikeSubmitting] = useState(false);
   const [strikeDone, setStrikeDone] = useState(null);
-  const nextStepQuery = useNextStep(strikeTarget?.discordId);
-  const nextLabel = stepLabel(nextStepQuery.data?.nextStep);
+  const [strikeKind, setStrikeKind] = useState("warning");
+  const standingQuery = useDisciplineStanding(strikeTarget?.discordId);
+  const nextLabel = issueLabel(standingQuery.data, strikeKind);
 
   // ---------- Extend LOA modal state ----------
   const [extendingDiscordId, setExtendingDiscordId] = useState(null);
@@ -216,7 +217,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
     }
     setStrikeSubmitting(true);
     try {
-      const result = await apiFetch("/strikes", { method: "POST", body: { discordId: strikeTarget.discordId, reason: strikeReason } });
+      const result = await apiFetch("/strikes", { method: "POST", body: { discordId: strikeTarget.discordId, reason: strikeReason, kind: strikeKind } });
       const record = result.kind === "warning" ? result.warning : result.strike;
       const who = strikeTarget.nickname ?? strikeTarget.username;
       setStrikeDone(record
@@ -452,7 +453,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
 
         {actionTab === "strike" && (
           <>
-            <p className="muted card-subtitle">Three warnings come first, then strikes. Each one expires on its own after 2 weeks, and three active strikes go to the termination or demotion decision.</p>
+            <p className="muted card-subtitle">Choose a warning or a strike for each offense. They are counted separately, up to three of each, and each expires on its own after 2 weeks. Three active strikes go to the termination or demotion decision.</p>
             {strikeError && <Banner>{strikeError}</Banner>}
             {strikeDone && <Banner variant="success">{strikeDone}</Banner>}
             <form onSubmit={submitStrike}>
@@ -476,11 +477,13 @@ export default function HrPanel({ embedded = false, view = "all" }) {
                   ))}
                 </PortalDropdown>
               </div>
-              <DisciplinePreview query={nextStepQuery} />
+              <label>Issue</label>
+              <DisciplineKindPicker value={strikeKind} onChange={setStrikeKind} />
+              <DisciplinePreview query={standingQuery} kind={strikeKind} />
               <label>Reason</label>
               <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
-              <button className="primary" type="submit" disabled={strikeSubmitting || (strikeTarget && nextStepQuery.data && !nextLabel)}>
-                {strikeSubmitting ? "Issuing…" : nextLabel ? `Issue ${nextLabel}` : "Issue"}
+              <button className="primary" type="submit" disabled={strikeSubmitting || (strikeTarget && standingQuery.data && !nextLabel)}>
+                {strikeSubmitting ? "Issuing…" : nextLabel ? `Issue ${nextLabel}` : `Issue ${strikeKind === "warning" ? "Warning" : "Strike"}`}
               </button>
             </form>
           </>

@@ -4841,3 +4841,25 @@ code {
 .discipline-next { font-size: var(--text-sm); }
 .discipline-label-warning { color: var(--warning); font-weight: 650; }
 .discipline-label-strike { color: var(--danger); font-weight: 650; }
+
+/* Warning / Strike choice on the issue forms. */
+.discipline-kind {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  margin: 4px 0 8px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+.discipline-kind-option {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-weight: 650;
+  color: inherit;
+  cursor: pointer;
+}
+.discipline-kind-option.selected.warning { border-color: var(--warning); color: var(--warning); }
+.discipline-kind-option.selected.strike { border-color: var(--danger); color: var(--danger); }
+.discipline-kind-option:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
