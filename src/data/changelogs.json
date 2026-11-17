@@ -1,5 +1,47 @@
 [
   {
+    "version": "3.3.0",
+    "slug": "v3-3-0",
+    "title": "TSRP Update",
+    "date": "2026-11-17",
+    "summary": "Warnings now come before strikes, so discipline runs three warnings first and then three strikes. This update also adds /ping for finding your recent mentions and /mysuggestion for getting back to your suggestion, turns automod off in a few channels, and fixes Chief of Staff being unable to claim tickets.",
+    "sections": [
+      {
+        "heading": "Warnings and Strikes",
+        "items": [
+          "Discipline goes in order: Warning 1, Warning 2, Warning 3, then Strike 1, Strike 2, Strike 3. /strike and the panel always give the next step, and the confirmation tells you which one it will be before you press it.",
+          "Warnings and strikes are counted separately and shown side by side everywhere, on the Discord cards, in /unstrike and on the panel.",
+          "Once you have an active strike, the next step is another strike, even if your warnings have expired. You only go back to warnings with no active strikes and fewer than three warnings.",
+          "Warnings last 14 days, the same as strikes, and each one expires on its own.",
+          "/unstrike removes a warning or a strike early. On the panel, the list is now Warnings & Strikes, with a Remove button on each.",
+          "Activity checks follow the same order, so missing one gives your next warning, or a strike if you are already past your warnings.",
+          "Three active strikes still go to the termination or demotion decision, and either outcome now clears warnings as well as strikes."
+        ]
+      },
+      {
+        "heading": "Commands",
+        "items": [
+          "/ping shows your ten most recent mentions from the last 30 days: who pinged you, where, a short quote, and a link straight to the message. Only you can see it, and it only counts mentions from now on.",
+          "Deleted messages drop off your /ping list, and you only see mentions in channels you can still view.",
+          "The old latency check that used to be /ping is now /latency.",
+          "/mysuggestion takes you back to your latest suggestion, with its current votes, a link to its discussion if one has started, and links to a few of your earlier ones."
+        ]
+      },
+      {
+        "heading": "Automod",
+        "items": [
+          "Automod is switched off completely in four channels, threads inside them included. Nothing posted there is deleted, filtered or logged."
+        ]
+      },
+      {
+        "heading": "Tickets",
+        "items": [
+          "Chief of Staff, and anyone else in Management or Directors who also holds an Internal Affairs role, can claim tickets again. Before this they could see every ticket and claim none of them."
+        ]
+      }
+    ]
+  },
+  {
     "version": "3.2.0",
     "slug": "v3-2-0",
     "title": "TSRP Update",
