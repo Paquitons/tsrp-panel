@@ -854,6 +854,8 @@ export const HANDBOOK = [
         ["/feedback", "Anyone", "Rate a staff member who helped you"],
         ["/suggest", "Configured roles", "Post a suggestion"],
         ["/mysuggestion", "Anyone", "Jump back to your latest suggestion, its votes and its discussion"],
+        ["/ping", "Anyone", "Your recent mentions from the last 30 days, with a link to each message"],
+        ["/latency", "Anyone", "Check the bot's response time"],
         ["/say", "Trial Supervisor", "Send a message as the bot"],
         ["/poll create close", "Community Manager", "Run a poll"],
         ["/giveaway create", "Trial Supervisor", "Run a giveaway"],
