@@ -4815,3 +4815,29 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .sk-bar, .sk-input, .sk-dot { animation: none; }
 }
+
+/* ---------- Warnings and strikes ----------
+   Warnings come before strikes, so the two are always shown side by side
+   and never as one count. Warnings in the warning hue, strikes in danger. */
+.discipline-counts { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.discipline-pill {
+  font-size: var(--text-sm);
+  font-weight: 650;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.discipline-pill.warning { color: var(--warning); }
+.discipline-pill.strike { color: var(--danger); }
+.discipline-pill.empty { opacity: 0.45; }
+.discipline-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 8px 0 4px;
+}
+.discipline-next { font-size: var(--text-sm); }
+.discipline-label-warning { color: var(--warning); font-weight: 650; }
+.discipline-label-strike { color: var(--danger); font-weight: 650; }

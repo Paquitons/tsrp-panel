@@ -18,14 +18,20 @@ import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
 import { useApiQuery } from "../hooks/useApiQuery";
+import DisciplinePreview, { DisciplineCounts, stepLabel, useNextStep } from "../components/DisciplinePreview";
 
-function groupByDiscordId(strikes) {
+// One entry per person, warnings and strikes kept apart: [discordId, { warnings, strikes }].
+// Somebody on strikes sorts above somebody who only has warnings.
+function groupDiscipline(warnings, strikes) {
   const map = new Map();
-  for (const s of strikes) {
-    if (!map.has(s.discord_id)) map.set(s.discord_id, []);
-    map.get(s.discord_id).push(s);
-  }
-  return [...map.entries()];
+  const entry = id => {
+    if (!map.has(id)) map.set(id, { warnings: [], strikes: [] });
+    return map.get(id);
+  };
+  for (const w of warnings) entry(w.discord_id).warnings.push(w);
+  for (const s of strikes) entry(s.discord_id).strikes.push(s);
+  return [...map.entries()].sort((a, b) =>
+    (b[1].strikes.length - a[1].strikes.length) || (b[1].warnings.length - a[1].warnings.length));
 }
 
 /**
@@ -50,14 +56,15 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   // never affects a sibling query) -- with refreshAll() below replacing
   // every `await refresh()` call site 1:1.
   const HR_POLL_MS = 3_000;
-  const strikesQuery = useApiQuery(["strikes", "active"], canAccess && "/strikes/active", { refetchInterval: HR_POLL_MS, select: d => d.strikes });
+  const strikesQuery = useApiQuery(["strikes", "active"], canAccess && "/strikes/active", { refetchInterval: HR_POLL_MS });
   const pendingLOAsQuery = useApiQuery(["loa", "pending"], canAccess && "/loa/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const activeLOAsQuery = useApiQuery(["loa", "active"], canAccess && "/loa/active", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const loaHistoryQuery = useApiQuery(["loa", "history"], canAccess && "/loa/history", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const fastPassTrialsQuery = useApiQuery(["fastpass-trials", "active"], canAccess && "/fastpass-trials/active", { refetchInterval: HR_POLL_MS, select: d => d.trials });
   const pendingPromotionsQuery = useApiQuery(["rank-changes", "pending"], canAccess && canReviewBigActions && "/rank-changes/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
 
-  const activeStrikes = strikesQuery.data ?? [];
+  const activeStrikes = strikesQuery.data?.strikes ?? [];
+  const activeWarnings = strikesQuery.data?.warnings ?? [];
   const pendingLOAs = pendingLOAsQuery.data ?? [];
   const activeLOAs = activeLOAsQuery.data ?? [];
   const loaHistory = loaHistoryQuery.data ?? [];
@@ -84,6 +91,9 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   const [strikeReason, setStrikeReason] = useState("");
   const [strikeError, setStrikeError] = useState(null);
   const [strikeSubmitting, setStrikeSubmitting] = useState(false);
+  const [strikeDone, setStrikeDone] = useState(null);
+  const nextStepQuery = useNextStep(strikeTarget?.discordId);
+  const nextLabel = stepLabel(nextStepQuery.data?.nextStep);
 
   // ---------- Extend LOA modal state ----------
   const [extendingDiscordId, setExtendingDiscordId] = useState(null);
@@ -199,13 +209,19 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   async function submitStrike(e) {
     e.preventDefault();
     setStrikeError(null);
+    setStrikeDone(null);
     if (!strikeTarget) {
       setStrikeError("Pick a staff member from the search results first.");
       return;
     }
     setStrikeSubmitting(true);
     try {
-      await apiFetch("/strikes", { method: "POST", body: { discordId: strikeTarget.discordId, reason: strikeReason } });
+      const result = await apiFetch("/strikes", { method: "POST", body: { discordId: strikeTarget.discordId, reason: strikeReason } });
+      const record = result.kind === "warning" ? result.warning : result.strike;
+      const who = strikeTarget.nickname ?? strikeTarget.username;
+      setStrikeDone(record
+        ? `${result.kind === "warning" ? "Warning" : "Strike"} ${record.role_slot} issued to ${who}.${result.standing ? ` They now have ${result.standing}.` : ""}`
+        : `Issued to ${who}.`);
       setStrikeTarget(null);
       setStaffQuery("");
       setStrikeReason("");
@@ -214,6 +230,16 @@ export default function HrPanel({ embedded = false, view = "all" }) {
       setStrikeError(err.message);
     } finally {
       setStrikeSubmitting(false);
+    }
+  }
+
+  async function removeWarning(id) {
+    if (!confirm("Remove this warning early? It would otherwise auto-expire in 2 weeks.")) return;
+    try {
+      await apiFetch(`/strikes/warnings/${id}`, { method: "DELETE" });
+      await refreshAll();
+    } catch (err) {
+      alert(err.message);
     }
   }
 
@@ -306,10 +332,10 @@ export default function HrPanel({ embedded = false, view = "all" }) {
     return embedded ? denied : <PageShell title="Management">{denied}</PageShell>;
   }
 
-  const groupedStrikes = groupByDiscordId(activeStrikes);
+  const groupedDiscipline = groupDiscipline(activeWarnings, activeStrikes);
   const pendingCount = pendingPromotions.length + pendingLOAs.length;
   const actionTabs = [
-    { value: "strike", label: "Issue Strike" },
+    { value: "strike", label: "Warn / Strike" },
     ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
@@ -426,8 +452,9 @@ export default function HrPanel({ embedded = false, view = "all" }) {
 
         {actionTab === "strike" && (
           <>
-            <p className="muted card-subtitle">Every strike automatically expires after 2 weeks.</p>
+            <p className="muted card-subtitle">Three warnings come first, then strikes. Each one expires on its own after 2 weeks, and three active strikes go to the termination or demotion decision.</p>
             {strikeError && <Banner>{strikeError}</Banner>}
+            {strikeDone && <Banner variant="success">{strikeDone}</Banner>}
             <form onSubmit={submitStrike}>
               <label>Staff Member</label>
               <div className="autocomplete-wrap">
@@ -449,9 +476,12 @@ export default function HrPanel({ embedded = false, view = "all" }) {
                   ))}
                 </PortalDropdown>
               </div>
+              <DisciplinePreview query={nextStepQuery} />
               <label>Reason</label>
               <AutoGrowTextarea required value={strikeReason} onChange={e => setStrikeReason(e.target.value)} />
-              <button className="primary" type="submit" disabled={strikeSubmitting}>{strikeSubmitting ? "Issuing…" : "Issue Strike"}</button>
+              <button className="primary" type="submit" disabled={strikeSubmitting || (strikeTarget && nextStepQuery.data && !nextLabel)}>
+                {strikeSubmitting ? "Issuing…" : nextLabel ? `Issue ${nextLabel}` : "Issue"}
+              </button>
             </form>
           </>
         )}
@@ -593,37 +623,46 @@ export default function HrPanel({ embedded = false, view = "all" }) {
       <div className="multi-col-grid">
         <div className="dashboard-col">
           <div className="card">
-            <SectionHeader title="Currently On Strike" count={groupedStrikes.length} />
+            <SectionHeader title="Warnings & Strikes" count={groupedDiscipline.length} />
             {loading && <Skeleton variant="rows" />}
-            {!loading && groupedStrikes.length === 0 && <p className="muted">Nobody currently has an active strike.</p>}
+            {!loading && groupedDiscipline.length === 0 && <p className="muted">Nobody currently has an active warning or strike.</p>}
             <div className="log-card-list">
-              {groupedStrikes.map(([discordId, strikes]) => (
-                <div className="log-card" key={discordId}>
-                  <div className="log-card-issuer-row">
-                    <DiscordIdentity
-                      variant="row"
-                      nickname={strikes[0].target_nickname}
-                      username={strikes[0].target_username}
-                      discordId={discordId}
-                      avatarHash={strikes[0].target_avatar_hash}
-                      size={28}
-                      showId={false}
-                    />
-                    <span className="active-bolo-label" style={{ marginLeft: "auto" }}>{strikes.length} / 3 active</span>
+              {groupedDiscipline.map(([discordId, { warnings, strikes }]) => {
+                const first = warnings[0] ?? strikes[0];
+                const rows = [
+                  ...warnings.map(w => ({ ...w, kind: "warning" })),
+                  ...strikes.map(st => ({ ...st, kind: "strike" })),
+                ];
+                return (
+                  <div className="log-card" key={discordId}>
+                    <div className="log-card-issuer-row">
+                      <DiscordIdentity
+                        variant="row"
+                        nickname={first.target_nickname}
+                        username={first.target_username}
+                        discordId={discordId}
+                        avatarHash={first.target_avatar_hash}
+                        size={28}
+                        showId={false}
+                      />
+                      <span style={{ marginLeft: "auto" }}>
+                        <DisciplineCounts warnings={warnings.length} strikes={strikes.length} />
+                      </span>
+                    </div>
+                    <div className="log-card-body">
+                      {rows.map(r => (
+                        <div key={`${r.kind}-${r.id}`} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                          <span>
+                            <span className={`discipline-label-${r.kind}`}>{r.kind === "warning" ? "Warning" : "Strike"} {r.role_slot}:</span> {r.reason}
+                            <span className="muted"> ({expiresLabel(r.expires_at)}, issued by {r.issuer_nickname || r.issuer_username || "Unknown Member"} {timeAgo(r.created_at)})</span>
+                          </span>
+                          <button className="secondary small" onClick={() => r.kind === "warning" ? removeWarning(r.id) : removeStrike(r.id)}>Remove</button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="log-card-body">
-                    {strikes.map(s => (
-                      <div key={s.id} className="log-card-field" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                        <span>
-                          <span className="muted">Strike {s.role_slot}:</span> {s.reason}
-                          <span className="muted"> ({expiresLabel(s.expires_at)}, issued by {s.issuer_nickname || s.issuer_username || "Unknown Member"} {timeAgo(s.created_at)})</span>
-                        </span>
-                        <button className="secondary small" onClick={() => removeStrike(s.id)}>Remove</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

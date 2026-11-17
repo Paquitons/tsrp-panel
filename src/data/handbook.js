@@ -243,11 +243,11 @@ export const HANDBOOK = [
       { type: "steps", items: [
         "The check is posted with a deadline and every staff member is pinged.",
         "React before the deadline. That is the whole requirement.",
-        "When the deadline passes, a list of everyone who missed it goes to Directors for approval, showing what strike number each person would receive.",
+        "When the deadline passes, a list of everyone who missed it goes to Directors for approval, showing what each person would receive: their next warning, or their next strike if they already have three warnings or any strike.",
         "Directors can add or remove people from that list before approving it. Nothing is issued until somebody approves it.",
       ]},
       { type: "p", text: "Two automatic exemptions apply: anyone on an approved LOA, and anyone who joined the staff team after the check was posted." },
-      { type: "note", title: "Missing one is serious", body: "An approved activity check issues real strikes, and for somebody already on two strikes it goes to the third-strike decision. If you know you will be away, file an LOA before the check goes out rather than explaining afterwards." },
+      { type: "note", title: "Missing one is serious", body: "An approved activity check issues real warnings and strikes, and for somebody already on two strikes it goes to the third-strike decision. If you know you will be away, file an LOA before the check goes out rather than explaining afterwards." },
 
       { type: "h3", text: "Weekly performance review" },
       { type: "p", text: "Staff are reviewed weekly, Monday to Sunday, against eight criteria:" },
@@ -548,21 +548,24 @@ export const HANDBOOK = [
 
   // ------------------------------------------------------------------
   {
-    id: "strikes", group: "record", title: "Strikes",
+    id: "strikes", group: "record", title: "Warnings and Strikes",
     blocks: [
       { type: "reqs", items: ["Trial Supervisor and above to issue"] },
+      { type: "h3", text: "Warnings come first" },
+      { type: "p", text: "Discipline goes in order: **Warning 1, Warning 2, Warning 3, then Strike 1, Strike 2, Strike 3**. /strike and the panel always give the next step, so nobody picks which one you get. The confirmation shows which it will be before it is issued." },
+      { type: "p", text: "Warnings and strikes are counted separately. Once you have any active strike, the next step is another strike, even if your warnings have since expired. You go back to warnings only when you have no active strikes and fewer than three active warnings." },
       { type: "h3", text: "How they expire" },
-      { type: "note", title: "Each strike expires on its own clock", body: "A strike is active for **14 days from the day it was issued**, then it clears itself. A new strike does *not* reset the older ones. If you receive strike 1 on the 1st and strike 2 on the 10th, the first clears on the 15th and the second on the 24th, independently." },
-      { type: "p", text: "Strikes are held in three numbered slots and you are given the lowest free slot, not \"your count plus one\". If slot 1 expired while slot 2 is still active, your next strike is slot 1 again." },
+      { type: "note", title: "Each warning and strike expires on its own clock", body: "Warnings and strikes both last 14 days. A strike is active for **14 days from the day it was issued**, then it clears itself. A new strike does *not* reset the older ones. If you receive strike 1 on the 1st and strike 2 on the 10th, the first clears on the 15th and the second on the 24th, independently." },
+      { type: "p", text: "Warnings and strikes are each held in three numbered slots and you are given the lowest free slot, not \"your count plus one\". If Strike 1 expired while Strike 2 is still active, your next strike is Strike 1 again." },
       { type: "h3", text: "Three active strikes" },
       { type: "p", text: "Reaching three *simultaneously active* strikes triggers a decision card sent to Community Manager and above. There are two outcomes and somebody has to choose one:" },
       { type: "defs", items: [
         ["Terminate", "Removed from the staff team."],
         ["Demote", "Dropped to a lower rank, chosen from the normal rank picker."],
       ]},
-      { type: "p", text: "Nothing happens automatically at three strikes. A human decides." },
+      { type: "p", text: "Nothing happens automatically at three strikes. A human decides. Either outcome clears your active warnings and strikes." },
       { type: "h3", text: "Getting one removed" },
-      { type: "p", text: "/unstrike removes a strike early, at Community Manager and above. If you believe a strike was issued in error, take it to management or Internal Affairs with your reasoning; do not argue it with the person who issued it in a public channel." },
+      { type: "p", text: "/unstrike removes a warning or a strike early, at Community Manager and above. If you believe a warning or strike was issued in error, take it to management or Internal Affairs with your reasoning; do not argue it with the person who issued it in a public channel." },
     ],
   },
 
@@ -829,8 +832,8 @@ export const HANDBOOK = [
         ["/ingameperms status check revokeall", "Community Manager", "Inspect and control in-game permissions"],
         ["/modsecurity restore", "Management Team", "Reverse an automatic security response"],
         { tier: "Staff record" },
-        ["/strike", "Trial Supervisor", "Issue a strike"],
-        ["/unstrike", "Community Manager", "Remove a strike early"],
+        ["/strike", "Trial Supervisor", "Issue the next warning or strike"],
+        ["/unstrike", "Community Manager", "Remove a warning or strike early"],
         ["/loa", "Staff Team and Internal Affairs", "File a leave of absence"],
         ["/endloa", "Management", "End somebody's LOA early"],
         ["/promote /demote", "Trial Supervisor to request, Community Manager to apply", "Change somebody's rank"],
@@ -865,7 +868,8 @@ export const HANDBOOK = [
     blocks: [
       { type: "table", head: ["Thing", "Value"], rows: [
         ["Weekly on-duty quota", "4 hours per calendar week, 2 hours for Internal Affairs"],
-        ["Strike duration", "14 days, each strike independently"],
+        ["Warning and strike duration", "14 days, each one independently"],
+        ["Warnings before strikes", "3"],
         ["Strikes before a decision", "3 active at once"],
         ["Fast Pass trial", "7 days from passing training"],
         ["Rank change request expiry", "24 hours"],
