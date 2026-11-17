@@ -73,8 +73,8 @@ export const COMMANDS = [
     keywords: "rejoin lockout kicked timer lift remove",
   },
   {
-    id: "ia-strike", label: "Issue a Strike (Internal Affairs)", group: "Oversight",
-    to: "/internalaffairs", show: iaCan("strike"), keywords: "discipline staff misconduct",
+    id: "ia-strike", label: "Issue a Warning or Strike (Internal Affairs)", group: "Oversight",
+    to: "/internalaffairs", show: iaCan("strike"), keywords: "discipline staff misconduct warn warning",
   },
   {
     id: "ia-demote", label: "Demote (Internal Affairs)", group: "Oversight",
@@ -94,7 +94,7 @@ export const COMMANDS = [
   {
     id: "take-action", label: "Take Action on a Staff Member", group: "Management",
     to: "/management?do=actions", show: canSeeManagement,
-    keywords: "strike promote demote terminate resign fire discipline",
+    keywords: "strike warn warning promote demote terminate resign fire discipline",
   },
   {
     id: "quotas", label: "Weekly Quotas", group: "Management",
