@@ -39,7 +39,7 @@ import PageShell from "../components/primitives/PageShell";
 import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import { canSeeInternalAffairs } from "../access";
-import DisciplinePreview, { stepLabel, useNextStep } from "../components/DisciplinePreview";
+import DisciplinePreview, { DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
 
 /** The staff picker, which all three actions need in the same shape. */
 function StaffPicker({ search, label = "Staff Member" }) {
@@ -81,15 +81,16 @@ function StrikeCard() {
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null);
   const [busy, setBusy] = useState(false);
-  const next = useNextStep(search.target?.discordId);
-  const nextLabel = stepLabel(next.data?.nextStep);
+  const [kind, setKind] = useState("warning");
+  const next = useDisciplineStanding(search.target?.discordId);
+  const nextLabel = issueLabel(next.data, kind);
 
   async function submit(e) {
     e.preventDefault();
     setError(null); setDone(null); setBusy(true);
     try {
       if (!search.target) throw new Error("Pick a staff member first.");
-      const result = await apiFetch("/strikes", { method: "POST", body: { discordId: search.target.discordId, reason } });
+      const result = await apiFetch("/strikes", { method: "POST", body: { discordId: search.target.discordId, reason, kind } });
       const record = result.kind === "warning" ? result.warning : result.strike;
       setDone(record ? `${result.kind === "warning" ? "Warning" : "Strike"} ${record.role_slot} issued.` : "Issued.");
       setReason(""); search.reset();
@@ -100,17 +101,19 @@ function StrikeCard() {
     <Card>
       <SectionHeader
         title="Issue a Warning or Strike"
-        subtitle="Three warnings come first, then strikes. Each expires on its own after 14 days. Three active strikes go to the third-strike decision."
+        subtitle="Choose a warning or a strike for each offense. Up to three of each, and each expires on its own after 14 days. Three active strikes go to the third-strike decision."
       />
       {error && <Banner>{error}</Banner>}
       {done && <Banner variant="success">{done}</Banner>}
       <form onSubmit={submit}>
         <StaffPicker search={search} />
-        <DisciplinePreview query={next} />
+        <label>Issue</label>
+        <DisciplineKindPicker value={kind} onChange={setKind} />
+        <DisciplinePreview query={next} kind={kind} />
         <label>Reason</label>
         <AutoGrowTextarea required value={reason} onChange={e => setReason(e.target.value)} />
         <button className="primary" type="submit" disabled={busy || (search.target && next.data && !nextLabel)}>
-          {busy ? "Issuing…" : nextLabel ? `Issue ${nextLabel}` : "Issue"}
+          {busy ? "Issuing…" : nextLabel ? `Issue ${nextLabel}` : `Issue ${kind === "warning" ? "Warning" : "Strike"}`}
         </button>
       </form>
     </Card>
