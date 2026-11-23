@@ -873,7 +873,7 @@ export default function DirectorConsole() {
   if (!user?.isDirectorOrAbove) {
     return (
       <div className="content">
-        <Banner>This area is limited to the Directors Board and above.</Banner>
+        <Banner>This area is limited to the Directive Board and above.</Banner>
       </div>
     );
   }
@@ -882,7 +882,7 @@ export default function DirectorConsole() {
     <div className="content">
       <h1>Director Console</h1>
       <p className="muted card-subtitle">
-        Server configuration and administrative controls for the Directors Board and above.
+        Server configuration and administrative controls for the Directive Board and above.
       </p>
 
       <Tabs tabs={SECTIONS} active={section} onChange={s => { setSection(s); setError(null); }} />
