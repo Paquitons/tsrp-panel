@@ -35,9 +35,12 @@ export function DisciplineCounts({ warnings, strikes }) {
   );
 }
 
-/** Warning or Strike, chosen per offense. Behaves as a radio group. */
-export function DisciplineKindPicker({ value, onChange }) {
-  const options = ["warning", "strike"];
+/**
+ * Warning or Strike, chosen per offense. Behaves as a radio group.
+ * `options` narrows the choice, for an Internal Affairs rank that may
+ * warn but not strike.
+ */
+export function DisciplineKindPicker({ value, onChange, options = ["warning", "strike"] }) {
   function onKeyDown(e) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
     e.preventDefault();

@@ -74,7 +74,7 @@ export const COMMANDS = [
   },
   {
     id: "ia-strike", label: "Issue a Warning or Strike (Internal Affairs)", group: "Oversight",
-    to: "/internalaffairs", show: iaCan("strike"), keywords: "discipline staff misconduct warn warning",
+    to: "/internalaffairs", show: iaCan("warn"), keywords: "discipline staff misconduct warn warning",
   },
   {
     id: "ia-demote", label: "Demote (Internal Affairs)", group: "Oversight",
