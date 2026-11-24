@@ -239,7 +239,7 @@ export const HANDBOOK = [
     blocks: [
       { type: "h3", text: "The weekly quota" },
       { type: "p", text: "Every staff member is expected to log **4 hours on duty per calendar week**, and Internal Affairs **2 hours**. Progress is on the Management area's Records tab and resets at the start of each week. Falling short without telling anyone in advance may cost you a strike." },
-      { type: "p", text: "Staff given the **Quota Exempt** role for a week can still go on duty as normal, but are not counted as missing the quota that week. It can be requested once every two weeks." },
+      { type: "p", text: "Staff given the **Quota Exempt** role for a week can still go on duty as normal, but are not counted as missing the quota that week. Request it from **Quota Exemption** on your dashboard; management approves or denies it, and it lasts one week from approval. You can ask once every two weeks." },
       { type: "p", text: "Time on break does not count. Time on an approved LOA is not held against you." },
 
       { type: "h3", text: "Activity checks" },
