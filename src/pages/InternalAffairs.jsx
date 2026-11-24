@@ -40,6 +40,7 @@ import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import { canSeeInternalAffairs } from "../access";
 import DisciplinePreview, { DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
+import SuspensionsCard from "../components/SuspensionsCard";
 
 /** The staff picker, which all three actions need in the same shape. */
 function StaffPicker({ search, label = "Staff Member" }) {
@@ -243,7 +244,7 @@ export default function InternalAffairs() {
   // drawing too much offers actions the server will refuse.
   const held = Array.isArray(user?.iaPermissions) ? user.iaPermissions : [];
   const can = p => held.includes(p);
-  const hasAnyAction = can("warn") || can("strike") || can("demote") || can("terminate");
+  const hasAnyAction = can("warn") || can("strike") || can("suspend") || can("demote") || can("terminate");
 
   return (
     <PageShell
@@ -264,6 +265,7 @@ export default function InternalAffairs() {
 
       <div className="card-grid">
         {(can("warn") || can("strike")) && <StrikeCard canWarn={can("warn")} canStrike={can("strike")} />}
+        {can("suspend") && <SuspensionsCard />}
         {can("demote") && <DemoteCard />}
         {can("terminate") && <TerminateCard />}
       </div>

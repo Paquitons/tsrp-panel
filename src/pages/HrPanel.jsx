@@ -19,6 +19,7 @@ import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
 import { useApiQuery } from "../hooks/useApiQuery";
 import DisciplinePreview, { DisciplineCounts, DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
+import SuspensionsCard from "../components/SuspensionsCard";
 
 // One entry per person, warnings and strikes kept apart: [discordId, { warnings, strikes }].
 // Somebody on strikes sorts above somebody who only has warnings.
@@ -339,6 +340,7 @@ export default function HrPanel({ embedded = false, view = "all" }) {
     { value: "strike", label: "Warn / Strike" },
     ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
+    ...(canReviewBigActions ? [{ value: "suspend", label: "Suspend" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
     ...(embedded ? [] : [
       { value: "automod", label: "Automod Offenses" },
@@ -542,6 +544,8 @@ export default function HrPanel({ embedded = false, view = "all" }) {
             </form>
           </>
         )}
+
+        {actionTab === "suspend" && canReviewBigActions && <SuspensionsCard bare />}
 
         {actionTab === "terminate" && canReviewBigActions && (
           <>
