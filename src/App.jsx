@@ -9,6 +9,7 @@ import IdentityGate from "./components/IdentityGate";
 import Permissions from "./pages/Permissions";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Verify from "./pages/Verify";
 import Dashboard from "./pages/Dashboard";
 import InternalAffairs from "./pages/InternalAffairs";
 import Changelog from "./pages/Changelog";
@@ -55,6 +56,13 @@ const PUBLIC_PAGES = [
 function AppShell() {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  // Member verification from the bot's Verify button. Stands on its own,
+  // signed in or not: the token in its link is the credential, and a
+  // staff member opening it should see the same page a member does.
+  if (location.pathname === "/verify") {
+    return <div className="public-shell"><Verify /></div>;
+  }
 
   if (loading) {
     return <div className="login-screen">Loading...</div>;

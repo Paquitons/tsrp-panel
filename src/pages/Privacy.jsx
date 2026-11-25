@@ -59,13 +59,16 @@ export default function Privacy() {
 
       <LegalSection heading="Signing in with Roblox">
         <p>
-          Staff can be asked to confirm their Roblox account through
-          Roblox's own sign in. We receive only your Roblox user ID,
+          Members verifying in our Discord, and staff signing in to the
+          panel, can confirm their Roblox account through Roblox's own sign
+          in, or by putting a one-time sentence in their Roblox profile that
+          we read back from Roblox. We receive only your Roblox user ID,
           username, display name and avatar picture. <strong>We never see
           your Roblox password, and we cannot act on your Roblox account or
-          read anything else on it.</strong> We use it for one purpose: to
-          be sure the right person is behind a staff account before that
-          account is given moderation powers in our server.
+          read anything else on it.</strong> We use it to link your Discord
+          account to your Roblox account, set your nickname to your Roblox
+          username, and, for staff, to be sure the right person is behind a
+          staff account before it is given moderation powers in our server.
         </p>
       </LegalSection>
 
