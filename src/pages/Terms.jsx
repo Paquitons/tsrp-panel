@@ -12,7 +12,7 @@ export default function Terms() {
   return (
     <LegalPage
       title="Terms of Service"
-      intro="The rules for using the Texas State RP website, staff panel and Discord bot."
+      intro="The rules for using the Georgia State Roleplay website, staff panel and Discord bot."
     >
       <LegalSection heading="Using this site">
         <p>
@@ -21,7 +21,7 @@ export default function Terms() {
           them.
         </p>
         <p>
-          Texas State RP is a community roleplay server. We are not
+          Georgia State Roleplay is a community roleplay server. We are not
           affiliated with, endorsed by, or run by Roblox Corporation or
           Discord.
         </p>

@@ -12,12 +12,12 @@ export default function Privacy() {
   return (
     <LegalPage
       title="Privacy Policy"
-      intro="What Texas State RP collects, why, and what we do not do with it."
+      intro="What Georgia State Roleplay collects, why, and what we do not do with it."
     >
       <LegalSection heading="Who this covers">
         <p>
-          This covers the Texas State RP website, the staff panel at this
-          domain, and our Discord bot. Texas State RP is a community
+          This covers the Georgia State Roleplay website, the staff panel at this
+          domain, and our Discord bot. Georgia State Roleplay is a community
           roleplay server. We are not affiliated with Roblox Corporation or
           with Discord.
         </p>

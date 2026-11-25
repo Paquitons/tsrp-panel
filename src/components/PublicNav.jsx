@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { usePublicBase } from "../hooks/usePublicBase";
 import { MenuIcon, CloseIcon } from "./icons";
 
-const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
+const LOGO_URL = "/images/gsrp-logo.png";
 
 /**
  * Shared header for every public-facing page (Home, Roster,
@@ -40,7 +40,7 @@ export default function PublicNav() {
       <header className="home-topbar">
         <Link to={base || "/"} className="home-brand">
           <img src={LOGO_URL} alt="" className="home-brand-mark" />
-          <span>Texas State RP</span>
+          <span>Georgia State Roleplay</span>
         </Link>
 
         <nav className="home-topbar-nav">

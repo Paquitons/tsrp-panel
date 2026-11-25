@@ -152,7 +152,7 @@ function sameUser(a, b) {
 function describeError(code) {
   switch (code) {
     case "not_in_server":
-      return "You must be a member of the Texas State RP Discord server to use this panel.";
+      return "You must be a member of the Georgia State Roleplay Discord server to use this panel.";
     case "not_staff":
       return "You must be on the staff team to access this panel.";
     case "blacklisted":

@@ -63,9 +63,9 @@ export default function Home() {
 
       <section className="home-hero">
         <ServerState online={!!status?.online} />
-        <h1>Texas State RP</h1>
+        <h1>Georgia State Roleplay</h1>
         <p className="home-hero-sub">
-          The official website for Texas State Roleplay | Track who's on
+          The official website for Georgia State Roleplay | Track who's on
           duty and catch up on the latest server
           updates.
         </p>
@@ -109,7 +109,7 @@ export default function Home() {
       </section>
 
       <footer className="home-footer">
-        <span>Texas State RP</span>
+        <span>Georgia State Roleplay</span>
         <Link to="/changelog" className="muted">Changelog</Link>
       </footer>
     </div>

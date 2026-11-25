@@ -8,9 +8,9 @@ export default function Login() {
   return (
     <div className="login-screen">
       <div className="login-card">
-        <img src="https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png" alt="" className="login-logo" />
-        <h1>TSRP Staff Panel</h1>
-        <p className="muted">You must be a Texas State RP staff member to access this panel.</p>
+        <img src="/images/gsrp-logo.png" alt="" className="login-logo" />
+        <h1>GSRP Staff Panel</h1>
+        <p className="muted">You must be a Georgia State Roleplay staff member to access this panel.</p>
 
         {error && <div className="error-banner">{error}</div>}
 
@@ -21,7 +21,7 @@ export default function Login() {
       </div>
 
       <div className="login-footer-links">
-        <Link to="/" className="muted login-footer-link">&larr; Back to Texas State RP</Link>
+        <Link to="/" className="muted login-footer-link">&larr; Back to Georgia State Roleplay</Link>
         <Link to="/changelog" className="muted login-footer-link">View changelog</Link>
       </div>
     </div>
