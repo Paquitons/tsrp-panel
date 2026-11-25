@@ -40,6 +40,7 @@ import Banner from "../components/primitives/Banner";
 import SectionHeader from "../components/primitives/SectionHeader";
 import { canSeeInternalAffairs } from "../access";
 import DisciplinePreview, { DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
+import SuspensionsCard from "../components/SuspensionsCard";
 
 /** The staff picker, which all three actions need in the same shape. */
 function StaffPicker({ search, label = "Staff Member" }) {
@@ -75,13 +76,14 @@ function StaffPicker({ search, label = "Staff Member" }) {
 }
 
 // ------------------------------------------------------------------
-function StrikeCard() {
+function StrikeCard({ canWarn = true, canStrike = true }) {
   const search = useStaffSearch();
   const [reason, setReason] = useState("");
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [kind, setKind] = useState("warning");
+  const kinds = [...(canWarn ? ["warning"] : []), ...(canStrike ? ["strike"] : [])];
+  const [kind, setKind] = useState(kinds[0] ?? "warning");
   const next = useDisciplineStanding(search.target?.discordId);
   const nextLabel = issueLabel(next.data, kind);
 
@@ -100,7 +102,7 @@ function StrikeCard() {
   return (
     <Card>
       <SectionHeader
-        title="Issue a Warning or Strike"
+        title={kinds.length === 1 ? `Issue a ${kinds[0] === "warning" ? "Warning" : "Strike"}` : "Issue a Warning or Strike"}
         subtitle="Choose a warning or a strike for each offense. Up to three of each, and each expires on its own after 14 days. Three active strikes go to the third-strike decision."
       />
       {error && <Banner>{error}</Banner>}
@@ -108,7 +110,7 @@ function StrikeCard() {
       <form onSubmit={submit}>
         <StaffPicker search={search} />
         <label>Issue</label>
-        <DisciplineKindPicker value={kind} onChange={setKind} />
+        <DisciplineKindPicker value={kind} onChange={setKind} options={kinds} />
         <DisciplinePreview query={next} kind={kind} />
         <label>Reason</label>
         <AutoGrowTextarea required value={reason} onChange={e => setReason(e.target.value)} />
@@ -242,7 +244,7 @@ export default function InternalAffairs() {
   // drawing too much offers actions the server will refuse.
   const held = Array.isArray(user?.iaPermissions) ? user.iaPermissions : [];
   const can = p => held.includes(p);
-  const hasAnyAction = can("strike") || can("demote") || can("terminate");
+  const hasAnyAction = can("warn") || can("strike") || can("suspend") || can("demote") || can("terminate");
 
   return (
     <PageShell
@@ -255,14 +257,15 @@ export default function InternalAffairs() {
           <p className="muted" style={{ margin: 0 }}>
             Your IA rank carries no actions against staff yet. You can read and write the punishment log
             from the Dashboard and read any Staff Complaint transcript from Ticket Transcripts, which is
-            what an investigation runs on. Striking comes with Internal Affairs, demoting and terminating
-            with IA Officer.
+            what an investigation runs on. Warnings come with Trial Internal Affairs, strikes with Internal
+            Affairs, and demoting and terminating with IA Supervisor.
           </p>
         </Card>
       )}
 
       <div className="card-grid">
-        {can("strike") && <StrikeCard />}
+        {(can("warn") || can("strike")) && <StrikeCard canWarn={can("warn")} canStrike={can("strike")} />}
+        {can("suspend") && <SuspensionsCard />}
         {can("demote") && <DemoteCard />}
         {can("terminate") && <TerminateCard />}
       </div>

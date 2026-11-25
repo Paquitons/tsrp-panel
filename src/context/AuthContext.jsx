@@ -157,6 +157,8 @@ function describeError(code) {
       return "You must be on the staff team to access this panel.";
     case "blacklisted":
       return "Your access to this panel has been revoked.";
+    case "suspended":
+      return "Your Staff Panel access is paused while you are suspended or under investigation.";
     case "token_exchange_failed":
     case "identify_failed":
     case "member_lookup_failed":

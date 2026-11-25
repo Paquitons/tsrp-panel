@@ -19,6 +19,7 @@ import SectionHeader from "../components/primitives/SectionHeader";
 import PageShell from "../components/primitives/PageShell";
 import { useApiQuery } from "../hooks/useApiQuery";
 import DisciplinePreview, { DisciplineCounts, DisciplineKindPicker, issueLabel, useDisciplineStanding } from "../components/DisciplinePreview";
+import SuspensionsCard from "../components/SuspensionsCard";
 
 // One entry per person, warnings and strikes kept apart: [discordId, { warnings, strikes }].
 // Somebody on strikes sorts above somebody who only has warnings.
@@ -61,11 +62,13 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   const activeLOAsQuery = useApiQuery(["loa", "active"], canAccess && "/loa/active", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const loaHistoryQuery = useApiQuery(["loa", "history"], canAccess && "/loa/history", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const fastPassTrialsQuery = useApiQuery(["fastpass-trials", "active"], canAccess && "/fastpass-trials/active", { refetchInterval: HR_POLL_MS, select: d => d.trials });
+  const pendingExemptionsQuery = useApiQuery(["quota-exemptions", "pending"], canAccess && "/quota-exemptions/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
   const pendingPromotionsQuery = useApiQuery(["rank-changes", "pending"], canAccess && canReviewBigActions && "/rank-changes/pending", { refetchInterval: HR_POLL_MS, select: d => d.requests });
 
   const activeStrikes = strikesQuery.data?.strikes ?? [];
   const activeWarnings = strikesQuery.data?.warnings ?? [];
   const pendingLOAs = pendingLOAsQuery.data ?? [];
+  const pendingExemptions = pendingExemptionsQuery.data ?? [];
   const activeLOAs = activeLOAsQuery.data ?? [];
   const loaHistory = loaHistoryQuery.data ?? [];
   const fastPassTrials = fastPassTrialsQuery.data ?? [];
@@ -254,6 +257,15 @@ export default function HrPanel({ embedded = false, view = "all" }) {
     }
   }
 
+  async function reviewExemption(id, status) {
+    try {
+      await apiFetch(`/quota-exemptions/${id}`, { method: "PATCH", body: { status } });
+      await pendingExemptionsQuery.refetch();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
   async function reviewLOA(requestId, status) {
     try {
       await apiFetch(`/loa/${requestId}`, { method: "PATCH", body: { status } });
@@ -334,11 +346,12 @@ export default function HrPanel({ embedded = false, view = "all" }) {
   }
 
   const groupedDiscipline = groupDiscipline(activeWarnings, activeStrikes);
-  const pendingCount = pendingPromotions.length + pendingLOAs.length;
+  const pendingCount = pendingPromotions.length + pendingLOAs.length + pendingExemptions.length;
   const actionTabs = [
     { value: "strike", label: "Warn / Strike" },
     ...(canReviewBigActions ? [{ value: "rank", label: "Promote / Demote" }] : []),
     ...(canReviewBigActions ? [{ value: "terminate", label: "Terminate" }] : []),
+    ...(canReviewBigActions ? [{ value: "suspend", label: "Suspend" }] : []),
     ...(canProcessResignations ? [{ value: "resign", label: "Resignation" }] : []),
     ...(embedded ? [] : [
       { value: "automod", label: "Automod Offenses" },
@@ -408,6 +421,39 @@ export default function HrPanel({ embedded = false, view = "all" }) {
             )}
           </div>
         )}
+
+        <div className="card">
+          <SectionHeader title="Pending Quota Exemptions" count={pendingExemptions.length} countLabel="waiting" />
+          {pendingExemptions.length === 0 ? (
+            <p className="muted">No pending requests.</p>
+          ) : (
+            <div className="loa-list">
+              {pendingExemptions.map(r => (
+                <div className="loa-card" key={r.id}>
+                  <div className="loa-card-top loa-card-top-stack">
+                    <span className="log-card-issuer-row" style={{ marginBottom: 0 }}>
+                      <DiscordIdentity
+                        variant="row"
+                        nickname={r.requester_nickname}
+                        username={r.requester_username}
+                        discordId={r.discord_id}
+                        avatarHash={r.requester_avatar_hash}
+                        size={22}
+                        showId={false}
+                      />
+                    </span>
+                    <span className="muted">One week, from approval</span>
+                  </div>
+                  <div className="muted" style={{ marginBottom: 8 }}>{r.reason}</div>
+                  <div className="button-row">
+                    <button className="btn-green small" onClick={() => reviewExemption(r.id, "approved")}>Approve</button>
+                    <button className="btn-red small" onClick={() => reviewExemption(r.id, "denied")}>Deny</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="card">
           <SectionHeader title="Pending LOA Requests" count={pendingLOAs.length} countLabel="waiting" />
@@ -542,6 +588,8 @@ export default function HrPanel({ embedded = false, view = "all" }) {
             </form>
           </>
         )}
+
+        {actionTab === "suspend" && canReviewBigActions && <SuspensionsCard bare />}
 
         {actionTab === "terminate" && canReviewBigActions && (
           <>

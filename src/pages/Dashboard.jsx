@@ -12,6 +12,7 @@ import CustomSelect from "../components/CustomSelect";
 import PortalDropdown from "../components/PortalDropdown";
 import ShiftHistoryModal from "../components/ShiftHistoryModal";
 import LOAModal from "../components/LOAModal";
+import QuotaExemptModal from "../components/QuotaExemptModal";
 import ActivityModal from "../components/ActivityModal";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ShiftLeaderboardModal from "../components/ShiftLeaderboardModal";
@@ -95,6 +96,7 @@ export default function Dashboard() {
   const [resettingLeaderboard, setResettingLeaderboard] = useState(false);
   const [forceEndingId, setForceEndingId] = useState(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [quotaExemptOpen, setQuotaExemptOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
 
   useEffect(() => {
@@ -618,6 +620,7 @@ export default function Dashboard() {
         <div className="quick-actions">
           <button className="quick-action" onClick={() => setLookupModalOpen(true)}><SearchIcon />Player Lookup</button>
           <button className="quick-action" onClick={() => setLoaModalOpen(true)}><CalendarIcon />Manage LOA</button>
+          <button className="quick-action" onClick={() => setQuotaExemptOpen(true)}><CalendarIcon />Quota Exemption</button>
           <button className="quick-action" onClick={() => setLeaderboardModalOpen(true)}><TrophyIcon />Leaderboard</button>
           <button className="quick-action" onClick={() => setHistoryModalOpen(true)}><HistoryIcon />Shift History</button>
           {canRunCommands && (
@@ -824,6 +827,7 @@ export default function Dashboard() {
 
       {/* ---------- LOA modal ---------- */}
       {loaModalOpen && <LOAModal onClose={() => setLoaModalOpen(false)} />}
+      {quotaExemptOpen && <QuotaExemptModal onClose={() => setQuotaExemptOpen(false)} />}
 
       {/* ---------- Request Staff modal (IA+) ---------- */}
       {staffRequestModalOpen && (

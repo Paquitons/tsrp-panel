@@ -14,11 +14,13 @@ const FILTERS = [
   { value: "not_met", label: "Did Not Meet Quota" },
   { value: "zero", label: "0 Hours" },
   { value: "on_loa", label: "On LOA" },
+  { value: "exempt", label: "Quota Exempt" },
 ];
 
 function matchesFilter(member, filter) {
   if (filter === "met") return member.metQuota;
-  if (filter === "not_met") return !member.metQuota;
+  if (filter === "not_met") return !member.metQuota && !member.quotaExempt;
+  if (filter === "exempt") return member.quotaExempt;
   if (filter === "zero") return member.totalSeconds === 0;
   if (filter === "on_loa") return member.onLoa;
   return true;
@@ -35,6 +37,10 @@ export default function HrQuotas() {
 
   const filtered = data.staff.filter(m => matchesFilter(m, filter));
   const metCount = data.staff.filter(m => m.metQuota).length;
+  // Quota Exempt staff who are short are neither met nor missed.
+  const exemptShortCount = data.staff.filter(m => m.quotaExempt && !m.metQuota).length;
+  const notMetCount = data.staff.length - metCount - exemptShortCount;
+  const exemptCount = data.staff.filter(m => m.quotaExempt).length;
 
   return (
     <>
@@ -45,7 +51,8 @@ export default function HrQuotas() {
       <div className="card-grid" style={{ marginTop: 8 }}>
         <div className="stat-tile"><div className="muted">Staff</div><div className="verification-identity-name">{data.staff.length}</div></div>
         <div className="stat-tile"><div className="muted">Met Quota</div><div className="verification-identity-name loa-status-approved">{metCount}</div></div>
-        <div className="stat-tile"><div className="muted">Did Not Meet Quota</div><div className="verification-identity-name loa-status-denied">{data.staff.length - metCount}</div></div>
+        <div className="stat-tile"><div className="muted">Did Not Meet Quota</div><div className="verification-identity-name loa-status-denied">{notMetCount}</div></div>
+        {exemptCount > 0 && <div className="stat-tile"><div className="muted">Quota Exempt</div><div className="verification-identity-name">{exemptCount}</div></div>}
       </div>
 
       <div style={{ marginTop: 16 }}>
@@ -70,9 +77,13 @@ export default function HrQuotas() {
                 />
                 <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                   {member.onLoa && <span className="badge loa-status-pending">On LOA</span>}
-                  <span className={`badge ${member.metQuota ? "loa-status-approved" : "loa-status-denied"}`}>
-                    {member.metQuota ? "Met Quota" : "Did Not Meet Quota"}
-                  </span>
+                  {member.quotaExempt && !member.metQuota
+                    ? <span className="badge">Quota Exempt</span>
+                    : (
+                      <span className={`badge ${member.metQuota ? "loa-status-approved" : "loa-status-denied"}`}>
+                        {member.metQuota ? "Met Quota" : "Did Not Meet Quota"}
+                      </span>
+                    )}
                 </div>
               </div>
               <div className="log-card-field">
