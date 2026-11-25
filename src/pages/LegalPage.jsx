@@ -11,7 +11,7 @@ import { usePublicBase } from "../hooks/usePublicBase";
 // WORDING last changed, which a build date or a file timestamp would
 // get wrong every time the site is redeployed for an unrelated reason.
 // ==================================================================
-export const LAST_UPDATED = "9 September 2026";
+export const LAST_UPDATED = "25 November 2026";
 
 export default function LegalPage({ title, intro, trail, children }) {
   const base = usePublicBase();
