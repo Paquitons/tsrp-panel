@@ -9,9 +9,10 @@ export default function Changelog({ standalone = false }) {
       {standalone && <PublicNav />}
       <div className="page-header">
         <h1>Changelog</h1>
-        <p className="muted">Everything shipped on TSRP, most recent first.</p>
+        <p className="muted">Everything shipped on GSRP, most recent first.</p>
       </div>
 
+      {CHANGELOGS.length === 0 && <p className="muted">No updates yet.</p>}
       <div className="changelog-grid">
         {CHANGELOGS.map((entry, i) => (
           <Link to={`/changelog/${entry.slug}`} className="changelog-card" key={entry.slug}>

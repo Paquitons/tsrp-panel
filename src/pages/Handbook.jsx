@@ -150,7 +150,7 @@ export default function Handbook() {
       <article className="hb-doc">
         <header className="hb-masthead">
           <div className="hb-masthead-rule" aria-hidden="true" />
-          <p className="hb-org">Texas State Roleplay</p>
+          <p className="hb-org">Georgia State Roleplay</p>
           <h1 className="hb-title">Staff Handbook</h1>
           <p className="hb-standfirst">
             How the staff team operates: what your rank lets you do, how every system works, and
@@ -211,7 +211,7 @@ export default function Handbook() {
         <footer className="hb-footer">
           <div className="hb-footer-rule" aria-hidden="true" />
           <p className="hb-footer-lead">
-            <strong>This handbook is the single source of truth for how TSRP operates.</strong>{" "}
+            <strong>This handbook is the single source of truth for how GSRP operates.</strong>{" "}
             Where it disagrees with something you were told, this wins; where it disagrees with what
             the system actually does, tell management so one of the two gets fixed.
           </p>
@@ -222,7 +222,7 @@ export default function Handbook() {
           <div className="hb-footer-actions">
             <Link className="hb-return" to="/">Return to Dashboard</Link>
           </div>
-          <p className="hb-colophon">Texas State Roleplay · Staff Handbook · Internal document</p>
+          <p className="hb-colophon">Georgia State Roleplay · Staff Handbook · Internal document</p>
         </footer>
       </article>
     </div>

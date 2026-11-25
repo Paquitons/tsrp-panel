@@ -16,7 +16,7 @@ const shortcutHint =
     ? "⌘K"
     : "Ctrl K";
 
-const LOGO_URL = "https://raw.githubusercontent.com/Paquitons/FF-Studios/refs/heads/main/tsrp.png";
+const LOGO_URL = "/images/gsrp-logo.png";
 
 // The sidebar, grouped. Three bands rather than one flat list, because
 // these are three different reasons to be here: the work everybody does,
@@ -78,7 +78,7 @@ export default function Nav() {
   return (
     <>
       <header className="mobile-topbar">
-        <span className="mobile-topbar-title">TSRP Panel</span>
+        <span className="mobile-topbar-title">GSRP Panel</span>
         <button
           className="mobile-menu-btn"
           onClick={() => setOpen(o => !o)}
@@ -94,7 +94,7 @@ export default function Nav() {
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <div className="sidebar-brand">
           <img src={LOGO_URL} alt="" className="sidebar-brand-mark" />
-          <span className="sidebar-brand-text">TSRP Panel</span>
+          <span className="sidebar-brand-text">GSRP Panel</span>
         </div>
 
         {/* The palette's visible way in. Most people will never guess a

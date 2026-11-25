@@ -50,7 +50,7 @@ export default function Roster() {
       <div className="board-header">
         <h1>Staff Roster</h1>
         <p className="muted">
-          {staff ? `${staff.length} staff member${staff.length === 1 ? "" : "s"} across ${tiers.length} departments.` : "Everyone currently on the Texas State RP staff team."}
+          {staff ? `${staff.length} staff member${staff.length === 1 ? "" : "s"} across ${tiers.length} departments.` : "Everyone currently on the Georgia State Roleplay staff team."}
         </p>
       </div>
 

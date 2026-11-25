@@ -63,9 +63,9 @@ export default function Home() {
 
       <section className="home-hero">
         <ServerState online={!!status?.online} />
-        <h1>Texas State RP</h1>
+        <h1>Georgia State Roleplay</h1>
         <p className="home-hero-sub">
-          The official website for Texas State Roleplay | Track who's on
+          The official website for Georgia State Roleplay | Track who's on
           duty and catch up on the latest server
           updates.
         </p>
@@ -93,6 +93,7 @@ export default function Home() {
           <h2>Latest Updates</h2>
           <Link to="/changelog" className="home-section-link">View all</Link>
         </div>
+        {recentUpdates.length === 0 && <p className="muted">No updates yet.</p>}
         <div className="home-updates-grid">
           {recentUpdates.map((entry, i) => (
             <Link to={`/changelog/${entry.slug}`} className="home-update-card" key={entry.slug}>
@@ -109,7 +110,7 @@ export default function Home() {
       </section>
 
       <footer className="home-footer">
-        <span>Texas State RP</span>
+        <span>Georgia State Roleplay</span>
         <Link to="/changelog" className="muted">Changelog</Link>
       </footer>
     </div>
