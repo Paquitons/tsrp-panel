@@ -138,7 +138,7 @@ export default function Verification({ embedded = false }) {
   const Wrapper = embedded ? Fragment : PageShell;
   const wrapperProps = embedded ? {} : {
     title: "Account Verification",
-    subtitle: "Manually link, change, or unlink a Discord member's Roblox account for people Bloxlink cannot verify.",
+    subtitle: "Manually link, change, or unlink a Discord member's Roblox account when they can't verify themselves.",
   };
 
   return (
