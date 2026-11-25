@@ -25,8 +25,8 @@
 // ============================================================
 
 export const HANDBOOK_CODES = [
-  { label: "ER:LC server", value: "TexStRP" },
-  { label: "Discord", value: "tsrp7" },
+  { label: "ER:LC server", value: "GeogStRP" },
+  { label: "Discord", value: "GBTquafPUU" },
 ];
 
 export const HANDBOOK_GROUPS = [
