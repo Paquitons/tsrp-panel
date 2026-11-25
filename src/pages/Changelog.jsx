@@ -12,6 +12,7 @@ export default function Changelog({ standalone = false }) {
         <p className="muted">Everything shipped on GSRP, most recent first.</p>
       </div>
 
+      {CHANGELOGS.length === 0 && <p className="muted">No updates yet.</p>}
       <div className="changelog-grid">
         {CHANGELOGS.map((entry, i) => (
           <Link to={`/changelog/${entry.slug}`} className="changelog-card" key={entry.slug}>

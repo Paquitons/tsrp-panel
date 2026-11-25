@@ -93,6 +93,7 @@ export default function Home() {
           <h2>Latest Updates</h2>
           <Link to="/changelog" className="home-section-link">View all</Link>
         </div>
+        {recentUpdates.length === 0 && <p className="muted">No updates yet.</p>}
         <div className="home-updates-grid">
           {recentUpdates.map((entry, i) => (
             <Link to={`/changelog/${entry.slug}`} className="home-update-card" key={entry.slug}>
